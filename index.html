@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedVault — Global Health Encyclopedia</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<!-- ===================================================================
+     FIREBASE SDK (compat build — simplest drop-in for email/password auth)
+     =================================================================== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+  // =====================================================================
+  // FIREBASE CONFIG — paste the rest of your config values from the
+  // Firebase Console (Project Settings → General → Your apps → SDK setup).
+  // apiKey is filled in with the key you provided; everything else is a
+  // placeholder until you paste your real project's values.
+  // =====================================================================
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCl5bHJoZaaX8N4TUPnbu-NrHDIvuBQHIU",
+    authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",       // e.g. "medvault-xxxxx.firebaseapp.com"
+    projectId: "PASTE_YOUR_PROJECT_ID_HERE",         // e.g. "medvault-xxxxx"
+    storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE", // e.g. "medvault-xxxxx.appspot.com"
+    messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
+    appId: "PASTE_YOUR_APP_ID_HERE"
+  };
+</script>
 <style>
   :root {
     --bg: #050810;
@@ -838,25 +859,432 @@
     .detail-name { font-size:1.4rem; }
     .main-content-wrap, .page-content-wrap { padding:0 1rem 5rem; }
   }
+/* =====================================================================
+   AUTH SCREENS
+   ===================================================================== */
+#auth-root{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:1.5rem;overflow-y:auto;}
+#auth-root.hidden{display:none;}
+.auth-bg-glow{position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 20%, rgba(0,210,180,0.10) 0%, transparent 60%),radial-gradient(ellipse 50% 40% at 80% 90%, rgba(167,139,250,0.08) 0%, transparent 60%);pointer-events:none;z-index:0;}
+.auth-card{position:relative;z-index:1;width:100%;max-width:440px;background:rgba(11,15,26,0.85);border:1px solid var(--border);border-radius:1.25rem;backdrop-filter:blur(24px);padding:2.5rem 2.25rem;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:fadeUp 0.5s forwards;}
+.auth-logo{font-size:1.4rem;font-weight:800;text-align:center;margin-bottom:0.25rem;}
+.auth-logo span{color:var(--accent);}
+.auth-tagline{text-align:center;color:var(--muted);font-size:0.8rem;margin-bottom:2rem;font-family:'DM Mono',monospace;}
+.auth-title{font-size:1.6rem;font-weight:800;margin-bottom:0.4rem;}
+.auth-subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:1.75rem;line-height:1.5;}
+.auth-field{margin-bottom:1.1rem;position:relative;}
+.auth-field label{display:block;font-size:0.72rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+.auth-field input{width:100%;padding:0.85rem 1rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.6rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.9rem;outline:none;transition:border-color .2s,box-shadow .2s;}
+.auth-field input:focus{border-color:rgba(0,210,180,0.45);box-shadow:0 0 0 3px rgba(0,210,180,0.08);}
+.auth-field.err input{border-color:var(--accent2);}
+.auth-field-error{color:var(--accent2);font-size:0.72rem;margin-top:0.35rem;display:none;}
+.auth-field.err .auth-field-error{display:block;}
+.pw-toggle{position:absolute;right:0.9rem;top:2.35rem;cursor:pointer;color:var(--muted);}
+.pw-toggle:hover{color:var(--text);}
+.pw-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;}
+.auth-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;font-size:0.8rem;}
+.auth-checkbox{display:flex;align-items:center;gap:0.5rem;color:var(--muted);cursor:pointer;user-select:none;}
+.auth-checkbox input{accent-color:var(--accent);width:15px;height:15px;}
+.auth-link{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:600;}
+.auth-link:hover{text-decoration:underline;}
+.btn-auth{width:100%;padding:0.9rem;border:none;border-radius:0.6rem;background:linear-gradient(135deg,var(--accent),#00a894);color:#04120f;font-weight:800;font-size:0.9rem;letter-spacing:0.02em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.6rem;transition:transform .15s,box-shadow .15s;}
+.btn-auth:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,210,180,0.25);}
+.btn-auth:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-auth-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.auth-spinner{width:16px;height:16px;border:2px solid rgba(4,18,15,0.3);border-top-color:#04120f;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+.btn-auth.loading .auth-spinner{display:inline-block;}
+.btn-auth.loading .btn-auth-label{opacity:0.7;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.auth-switch{text-align:center;margin-top:1.5rem;font-size:0.83rem;color:var(--muted);}
+.auth-divider{display:flex;align-items:center;gap:0.75rem;margin:1.5rem 0;color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.pw-strength{display:flex;gap:4px;margin-top:0.5rem;}
+.pw-strength-seg{height:4px;flex:1;border-radius:2px;background:rgba(255,255,255,0.08);transition:background .2s;}
+.pw-strength-label{font-size:0.7rem;margin-top:0.35rem;color:var(--muted);font-family:'DM Mono',monospace;}
+.auth-success-check{width:64px;height:64px;border-radius:50%;background:rgba(0,210,180,0.12);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;animation:popIn .4s forwards;}
+.auth-success-check svg{width:30px;height:30px;stroke:var(--accent);}
+@keyframes popIn{0%{transform:scale(0);}70%{transform:scale(1.15);}100%{transform:scale(1);}}
+
+/* Welcome screen */
+.welcome-hero{text-align:center;max-width:640px;position:relative;z-index:1;}
+.welcome-hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:800;letter-spacing:-0.03em;margin-bottom:1rem;}
+.welcome-hero h1 span{color:var(--accent);}
+.welcome-hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:480px;margin:0 auto 2.25rem;}
+.welcome-badges{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem;}
+.welcome-badge{background:var(--surface2);border:1px solid var(--border);padding:0.5rem 1rem;border-radius:2rem;font-size:0.75rem;color:var(--muted);font-family:'DM Mono',monospace;}
+.welcome-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.btn-welcome{padding:0.9rem 2.2rem;border-radius:0.6rem;font-weight:800;font-size:0.9rem;cursor:pointer;border:none;transition:transform .15s;}
+.btn-welcome:hover{transform:translateY(-2px);}
+.btn-welcome.primary{background:linear-gradient(135deg,var(--accent),#00a894);color:#04120f;}
+.btn-welcome.secondary{background:transparent;border:1px solid var(--border);color:var(--text);}
+
+/* =====================================================================
+   TOASTS
+   ===================================================================== */
+#toast-stack{position:fixed;top:75px;right:1.25rem;z-index:9000;display:flex;flex-direction:column;gap:0.6rem;max-width:340px;}
+.toast{background:rgba(11,15,26,0.95);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0.6rem;padding:0.85rem 1rem;backdrop-filter:blur(16px);box-shadow:0 8px 24px rgba(0,0,0,0.4);display:flex;gap:0.65rem;align-items:flex-start;animation:toastIn .35s forwards;font-size:0.83rem;}
+.toast.error{border-left-color:var(--accent2);}
+.toast.warn{border-left-color:var(--accent4);}
+.toast.xp{border-left-color:var(--accent3);}
+.toast-icon{flex-shrink:0;width:18px;height:18px;margin-top:1px;}
+.toast-icon svg{width:100%;height:100%;stroke:var(--accent);fill:none;}
+.toast.error .toast-icon svg{stroke:var(--accent2);}
+.toast.warn .toast-icon svg{stroke:var(--accent4);}
+.toast.xp .toast-icon svg{stroke:var(--accent3);}
+.toast-body strong{display:block;margin-bottom:0.15rem;}
+.toast-body span{color:var(--muted);}
+.toast.out{animation:toastOut .3s forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px);}}
+
+/* =====================================================================
+   MODALS
+   ===================================================================== */
+.mv-modal-overlay{position:fixed;inset:0;background:rgba(2,4,8,0.72);backdrop-filter:blur(6px);z-index:6000;display:flex;align-items:center;justify-content:center;padding:1.25rem;opacity:0;pointer-events:none;transition:opacity .25s;}
+.mv-modal-overlay.open{opacity:1;pointer-events:auto;}
+.mv-modal{background:var(--surface);border:1px solid var(--border);border-radius:1.1rem;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;padding:1.75rem;transform:translateY(16px) scale(0.98);transition:transform .25s;box-shadow:0 24px 60px rgba(0,0,0,0.5);}
+.mv-modal-overlay.open .mv-modal{transform:translateY(0) scale(1);}
+.mv-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.mv-modal-head h3{font-size:1.15rem;font-weight:800;}
+.mv-modal-close{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);}
+.mv-modal-close:hover{color:var(--text);}
+.mv-modal-close svg{width:15px;height:15px;stroke:currentColor;fill:none;}
+.mv-field{margin-bottom:1rem;}
+.mv-field label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);margin-bottom:0.4rem;}
+.mv-field input,.mv-field select,.mv-field textarea{width:100%;padding:0.7rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.87rem;outline:none;}
+.mv-field textarea{resize:vertical;min-height:64px;}
+.mv-field input:focus,.mv-field select:focus,.mv-field textarea:focus{border-color:rgba(0,210,180,0.4);}
+.mv-field-row{display:flex;gap:0.75rem;}
+.mv-field-row .mv-field{flex:1;}
+.day-picker{display:flex;gap:0.35rem;flex-wrap:wrap;}
+.day-chip{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.7rem;cursor:pointer;color:var(--muted);}
+.day-chip.active{background:var(--accent);color:#04120f;border-color:var(--accent);font-weight:700;}
+.mv-btn-row{display:flex;gap:0.75rem;margin-top:0.5rem;}
+.mv-btn{flex:1;padding:0.75rem;border-radius:0.55rem;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;}
+.mv-btn.primary{background:linear-gradient(135deg,var(--accent),#00a894);color:#04120f;}
+.mv-btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.mv-btn.danger{background:rgba(255,107,107,0.12);color:var(--accent2);border:1px solid rgba(255,107,107,0.3);}
+
+/* =====================================================================
+   APP SHELL / DASHBOARD
+   ===================================================================== */
+#app-root.hidden{display:none;}
+.user-menu-wrap{position:relative;display:flex;align-items:center;gap:0.9rem;}
+.notif-bell{position:relative;width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);}
+.notif-bell svg{width:16px;height:16px;stroke:currentColor;fill:none;}
+.notif-bell:hover{color:var(--accent);}
+.notif-dot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--accent2);display:none;}
+.notif-dot.show{display:block;}
+.avatar-btn{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;color:#04120f;cursor:pointer;border:none;}
+.user-dropdown{position:absolute;top:44px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:0.75rem;min-width:190px;padding:0.5rem;box-shadow:0 12px 30px rgba(0,0,0,0.4);display:none;z-index:2000;}
+.user-dropdown.open{display:block;}
+.user-dropdown a{display:block;padding:0.55rem 0.7rem;border-radius:0.4rem;color:var(--text);text-decoration:none;font-size:0.82rem;cursor:pointer;}
+.user-dropdown a:hover{background:var(--surface2);color:var(--accent);}
+.nav-links a.lib-trigger::after{content:' ▾';font-size:0.6rem;}
+.lib-dropdown{position:absolute;top:44px;background:var(--surface);border:1px solid var(--border);border-radius:0.75rem;padding:0.5rem;display:none;min-width:180px;box-shadow:0 12px 30px rgba(0,0,0,0.4);}
+.lib-dropdown.open{display:block;}
+.lib-dropdown a{display:block;padding:0.5rem 0.7rem;border-radius:0.4rem;font-size:0.78rem;text-transform:none;letter-spacing:0;color:var(--text);}
+.lib-dropdown a:hover{background:var(--surface2);color:var(--accent);}
+
+.dash-wrap{padding:85px 2rem 3rem;max-width:1320px;margin:0 auto;position:relative;z-index:1;}
+.dash-greeting{margin-bottom:1.75rem;}
+.dash-greeting h1{font-size:1.8rem;font-weight:800;}
+.dash-greeting p{color:var(--muted);font-size:0.85rem;margin-top:0.3rem;}
+.dash-topgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+.dash-stat-card{background:rgba(17,24,39,0.6);border:1px solid var(--border);border-radius:1rem;padding:1.1rem 1.25rem;backdrop-filter:blur(10px);}
+.dash-stat-card .lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-family:'DM Mono',monospace;}
+.dash-stat-card .val{font-size:1.7rem;font-weight:800;margin-top:0.3rem;}
+.dash-stat-card .sub{font-size:0.72rem;color:var(--accent);margin-top:0.2rem;}
+.widget-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;}
+.widget-card{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1.1rem;padding:1.3rem;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:transform .2s,border-color .2s;}
+.widget-card:hover{border-color:rgba(0,210,180,0.3);}
+.widget-card.span2{grid-column:span 2;}
+.widget-card.span3{grid-column:span 3;}
+.widget-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.widget-head h3{font-size:0.95rem;font-weight:800;display:flex;align-items:center;gap:0.5rem;}
+.widget-head h3 svg{width:17px;height:17px;stroke:var(--accent);fill:none;}
+.widget-add{width:26px;height:26px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;}
+.widget-add:hover{background:rgba(0,210,180,0.12);}
+.empty-state{text-align:center;padding:1.75rem 0.5rem;color:var(--muted);font-size:0.8rem;}
+.empty-state svg{width:32px;height:32px;stroke:var(--muted);fill:none;margin-bottom:0.6rem;opacity:0.5;}
+
+.med-item{display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.75rem;background:var(--surface2);border-radius:0.6rem;margin-bottom:0.55rem;border:1px solid transparent;}
+.med-item.taken{opacity:0.55;border-color:rgba(0,210,180,0.2);}
+.med-info{display:flex;flex-direction:column;}
+.med-info b{font-size:0.85rem;}
+.med-info span{font-size:0.72rem;color:var(--muted);font-family:'DM Mono',monospace;}
+.med-actions{display:flex;gap:0.4rem;align-items:center;}
+.med-check{width:26px;height:26px;border-radius:50%;border:2px solid var(--accent);background:transparent;cursor:pointer;color:var(--accent);display:flex;align-items:center;justify-content:center;}
+.med-check.done{background:var(--accent);color:#04120f;}
+.med-check svg{width:13px;height:13px;stroke:currentColor;fill:none;}
+.icon-btn{width:24px;height:24px;border-radius:0.35rem;background:transparent;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.icon-btn:hover{color:var(--accent2);}
+.icon-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;}
+
+.ring-wrap{display:flex;flex-direction:column;align-items:center;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:10;}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
+.ring-center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;inset:0;}
+.ring-center b{font-size:1.3rem;}
+.ring-center span{font-size:0.65rem;color:var(--muted);}
+.ring-holder{position:relative;width:130px;height:130px;margin:0 auto;}
+.water-controls{display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;}
+.water-btn{padding:0.45rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;color:var(--text);cursor:pointer;font-size:0.78rem;font-weight:600;}
+.water-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.mini-stat-row{display:flex;justify-content:space-between;text-align:center;margin-top:1rem;}
+.mini-stat{flex:1;}
+.mini-stat b{display:block;font-size:1.1rem;}
+.mini-stat span{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+
+.pain-slider{width:100%;accent-color:var(--accent);margin:0.75rem 0;}
+.pain-emoji{font-size:2.2rem;text-align:center;display:block;}
+.pain-scale-label{text-align:center;font-size:0.8rem;font-weight:700;}
+
+.chart-svg-wrap{width:100%;overflow-x:auto;}
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:110px;padding-top:0.5rem;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.bar-fill{width:100%;max-width:22px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--accent),rgba(0,210,180,0.3));min-height:3px;transition:height .5s;}
+.bar-label{font-size:0.6rem;color:var(--muted);margin-top:0.3rem;font-family:'DM Mono',monospace;}
+
+.xp-bar-track{width:100%;height:10px;background:var(--surface2);border-radius:1rem;overflow:hidden;margin:0.6rem 0;}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));border-radius:1rem;transition:width .6s;}
+.level-badge{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent3),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;color:#04120f;flex-shrink:0;}
+.streak-flame{display:flex;align-items:center;gap:0.5rem;font-size:1.6rem;font-weight:800;color:var(--accent4);}
+.streak-flame span{font-size:0.75rem;color:var(--muted);font-weight:600;}
+
+.achv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.85rem;}
+.achv-card{background:var(--surface2);border:1px solid var(--border);border-radius:0.85rem;padding:1rem;text-align:center;position:relative;}
+.achv-card.locked{opacity:0.35;filter:grayscale(1);}
+.achv-icon{font-size:1.8rem;margin-bottom:0.5rem;}
+.achv-card b{display:block;font-size:0.8rem;margin-bottom:0.2rem;}
+.achv-card p{font-size:0.68rem;color:var(--muted);line-height:1.4;}
+
+.goal-item{background:var(--surface2);border-radius:0.7rem;padding:0.85rem;margin-bottom:0.6rem;}
+.goal-item .gtop{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.5rem;}
+.goal-progress-track{height:7px;background:rgba(255,255,255,0.06);border-radius:1rem;overflow:hidden;}
+.goal-progress-fill{height:100%;background:var(--accent);border-radius:1rem;transition:width .5s;}
+
+.reminder-banner{background:linear-gradient(135deg,rgba(0,210,180,0.14),rgba(167,139,250,0.08));border:1px solid rgba(0,210,180,0.35);border-radius:0.9rem;padding:0.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;animation:fadeUp .4s forwards;}
+.reminder-banner b{font-size:0.85rem;}
+.reminder-banner span{font-size:0.72rem;color:var(--muted);display:block;margin-top:0.15rem;}
+.reminder-actions{display:flex;gap:0.5rem;flex-shrink:0;}
+.reminder-actions button{padding:0.4rem 0.85rem;border-radius:0.4rem;font-size:0.72rem;font-weight:700;cursor:pointer;border:none;}
+.reminder-actions .take{background:var(--accent);color:#04120f;}
+.reminder-actions .snooze{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+
+.dash-nav-links a{cursor:pointer;}
+.section-page-head{padding:85px 2rem 1rem;max-width:1320px;margin:0 auto;}
+.section-page-head h2{font-size:1.7rem;font-weight:800;}
+.section-page-head p{color:var(--muted);font-size:0.85rem;margin-top:0.3rem;}
+.section-page-body{padding:0 2rem 3rem;max-width:1320px;margin:0 auto;}
+
+.settings-block{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;margin-bottom:1.25rem;}
+.settings-block h4{font-size:0.95rem;font-weight:800;margin-bottom:1rem;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 0;border-bottom:1px solid var(--border);font-size:0.85rem;}
+.settings-row:last-child{border-bottom:none;}
+.toggle-sw{width:42px;height:24px;background:var(--surface2);border-radius:2rem;border:1px solid var(--border);position:relative;cursor:pointer;}
+.toggle-sw.on{background:var(--accent);}
+.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;}
+.toggle-sw.on::after{left:20px;}
+
+.skeleton{background:linear-gradient(90deg,var(--surface2) 25%,rgba(255,255,255,0.04) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:0.6rem;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+@media (max-width:1000px){
+  .dash-topgrid{grid-template-columns:repeat(2,1fr);}
+  .widget-grid{grid-template-columns:repeat(2,1fr);}
+  .widget-card.span2,.widget-card.span3{grid-column:span 2;}
+}
+@media (max-width:640px){
+  .dash-topgrid{grid-template-columns:1fr 1fr;}
+  .widget-grid{grid-template-columns:1fr;}
+  .widget-card.span2,.widget-card.span3{grid-column:span 1;}
+  .dash-wrap,.section-page-head,.section-page-body{padding-left:1rem;padding-right:1rem;}
+  .auth-card{padding:1.75rem 1.4rem;}
+  #toast-stack{left:1rem;right:1rem;max-width:none;}
+}
 </style>
 </head>
 <body>
 
+<!-- =====================================================================
+     TOASTS + MODAL ROOT (available everywhere)
+     ===================================================================== -->
+<div id="toast-stack"></div>
+<div id="modal-root"></div>
+
+<!-- =====================================================================
+     AUTH — Welcome / Login / Sign Up (shown until authenticated)
+     ===================================================================== -->
+<div id="auth-root">
+  <div class="auth-bg-glow"></div>
+
+  <!-- WELCOME -->
+  <div id="auth-welcome" class="welcome-hero">
+    <div class="auth-logo" style="font-size:1.5rem;margin-bottom:1rem;"><span>Med</span>Vault</div>
+    <h1>Your health, <span>fully in view</span></h1>
+    <p>Medication schedules, symptom tracking, and a 700+ condition encyclopedia — all in one premium, private health platform.</p>
+    <div class="welcome-badges">
+      <div class="welcome-badge">💊 Medication Reminders</div>
+      <div class="welcome-badge">📊 Health Tracking</div>
+      <div class="welcome-badge">🏆 Achievements</div>
+      <div class="welcome-badge">📚 700+ Conditions</div>
+    </div>
+    <div class="welcome-actions">
+      <button class="btn-welcome primary" onclick="authShow('login')">Log In</button>
+      <button class="btn-welcome secondary" onclick="authShow('signup')">Create Account</button>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="auth-login" class="auth-card" style="display:none;">
+    <div class="auth-logo"><span>Med</span>Vault</div>
+    <div class="auth-tagline">GLOBAL HEALTH PLATFORM</div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-subtitle">Log in to access your medications, health trackers, and progress.</div>
+    <form id="login-form" onsubmit="return false;">
+      <div class="auth-field" id="login-email-field">
+        <label>Email</label>
+        <input type="email" id="login-email" autocomplete="email" placeholder="you@example.com">
+        <div class="auth-field-error">Please enter a valid email address.</div>
+      </div>
+      <div class="auth-field" id="login-pw-field">
+        <label>Password</label>
+        <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+        <div class="pw-toggle" onclick="togglePw('login-password', this)">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="auth-field-error">Please enter your password.</div>
+      </div>
+      <div class="auth-row">
+        <label class="auth-checkbox"><input type="checkbox" id="remember-me" checked> Remember me</label>
+        <span class="auth-link" onclick="authShow('forgot')">Forgot password?</span>
+      </div>
+      <button class="btn-auth" id="login-btn" onclick="handleLogin()">
+        <span class="auth-spinner"></span><span class="btn-auth-label">Log In</span>
+      </button>
+    </form>
+    <div class="auth-switch">New to MedVault? <span class="auth-link" onclick="authShow('signup')">Create an account</span></div>
+    <div class="auth-switch" style="margin-top:0.5rem;"><span class="auth-link" onclick="authShow('welcome')">← Back</span></div>
+  </div>
+
+  <!-- SIGN UP -->
+  <div id="auth-signup" class="auth-card" style="display:none;">
+    <div class="auth-logo"><span>Med</span>Vault</div>
+    <div class="auth-tagline">GLOBAL HEALTH PLATFORM</div>
+    <div class="auth-title">Create your account</div>
+    <div class="auth-subtitle">Start tracking your health in minutes.</div>
+    <form id="signup-form" onsubmit="return false;">
+      <div class="auth-field" id="signup-name-field">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" autocomplete="name" placeholder="Jane Doe">
+        <div class="auth-field-error">Please enter your full name.</div>
+      </div>
+      <div class="auth-field" id="signup-email-field">
+        <label>Email</label>
+        <input type="email" id="signup-email" autocomplete="email" placeholder="you@example.com">
+        <div class="auth-field-error">Please enter a valid email address.</div>
+      </div>
+      <div class="auth-field" id="signup-pw-field">
+        <label>Password</label>
+        <input type="password" id="signup-password" autocomplete="new-password" placeholder="••••••••" oninput="updatePwStrength()">
+        <div class="pw-toggle" onclick="togglePw('signup-password', this)">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="pw-strength" id="pw-strength-bars">
+          <div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div>
+        </div>
+        <div class="pw-strength-label" id="pw-strength-label">Password strength</div>
+        <div class="auth-field-error">Password must be at least 8 characters.</div>
+      </div>
+      <div class="auth-field" id="signup-confirm-field">
+        <label>Confirm Password</label>
+        <input type="password" id="signup-confirm" autocomplete="new-password" placeholder="••••••••">
+        <div class="pw-toggle" onclick="togglePw('signup-confirm', this)">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div class="auth-field-error">Passwords do not match.</div>
+      </div>
+      <div class="auth-row" style="margin-bottom:1rem;">
+        <label class="auth-checkbox" id="terms-check-wrap"><input type="checkbox" id="terms-check"> I agree to the Terms of Service &amp; Privacy Policy</label>
+      </div>
+      <button class="btn-auth" id="signup-btn" onclick="handleSignup()">
+        <span class="auth-spinner"></span><span class="btn-auth-label">Create Account</span>
+      </button>
+    </form>
+    <div class="auth-switch">Already have an account? <span class="auth-link" onclick="authShow('login')">Log in</span></div>
+    <div class="auth-switch" style="margin-top:0.5rem;"><span class="auth-link" onclick="authShow('welcome')">← Back</span></div>
+  </div>
+
+  <!-- FORGOT PASSWORD -->
+  <div id="auth-forgot" class="auth-card" style="display:none;">
+    <div class="auth-logo"><span>Med</span>Vault</div>
+    <div class="auth-title">Reset your password</div>
+    <div class="auth-subtitle">Enter your email and we'll send you a reset link.</div>
+    <div class="auth-field" id="forgot-email-field">
+      <label>Email</label>
+      <input type="email" id="forgot-email" placeholder="you@example.com">
+      <div class="auth-field-error">Please enter a valid email address.</div>
+    </div>
+    <button class="btn-auth" id="forgot-btn" onclick="handleForgotPassword()">
+      <span class="auth-spinner"></span><span class="btn-auth-label">Send Reset Link</span>
+    </button>
+    <div class="auth-switch" style="margin-top:1rem;"><span class="auth-link" onclick="authShow('login')">← Back to login</span></div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="auth-success" class="auth-card" style="display:none;text-align:center;">
+    <div class="auth-success-check"><svg viewBox="0 0 24 24" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="auth-title" id="auth-success-title">Success!</div>
+    <div class="auth-subtitle" id="auth-success-sub">Redirecting you now…</div>
+  </div>
+</div>
+
+<!-- =====================================================================
+     APP ROOT — everything below requires authentication
+     ===================================================================== -->
+<div id="app-root" class="hidden">
+
 <!-- NAV -->
 <nav>
-  <div class="nav-logo" onclick="showPage('home')">
+  <div class="nav-logo" onclick="showPage('dashboard')">
     <span>Med</span>Vault
   </div>
-  <ul class="nav-links">
-    <li><a onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
-    <li><a onclick="showPage('viruses')" id="nav-viruses">Viruses</a></li>
-    <li><a onclick="showPage('bacteria')" id="nav-bacteria">Bacteria</a></li>
-    <li><a onclick="showPage('injuries')" id="nav-injuries">Injuries</a></li>
-    <li><a onclick="showPage('parasites')" id="nav-parasites">Parasites</a></li>
-    <li><a onclick="showPage('fungal')" id="nav-fungal">Fungal</a></li>
-    <li><a onclick="showPage('mental')" id="nav-mental">Mental Health</a></li>
+  <ul class="nav-links dash-nav-links">
+    <li><a onclick="showPage('dashboard')" class="active" id="nav-dashboard">Dashboard</a></li>
+    <li style="position:relative;">
+      <a class="lib-trigger" id="nav-home" onclick="toggleLibDropdown(event)">Library</a>
+      <div class="lib-dropdown" id="lib-dropdown">
+        <a onclick="showPage('home');closeLibDropdown();">All Conditions</a>
+        <a onclick="showPage('viruses');closeLibDropdown();">Viruses</a>
+        <a onclick="showPage('bacteria');closeLibDropdown();">Bacteria</a>
+        <a onclick="showPage('injuries');closeLibDropdown();">Injuries</a>
+        <a onclick="showPage('parasites');closeLibDropdown();">Parasites</a>
+        <a onclick="showPage('fungal');closeLibDropdown();">Fungal</a>
+        <a onclick="showPage('mental');closeLibDropdown();">Mental Health</a>
+      </div>
+    </li>
+    <li><a onclick="showPage('medications')" id="nav-medications">Medication</a></li>
+    <li><a onclick="showPage('tracking')" id="nav-tracking">Health Tracking</a></li>
+    <li><a onclick="showPage('reports')" id="nav-reports">Reports</a></li>
+    <li><a onclick="showPage('achievements')" id="nav-achievements">Achievements</a></li>
   </ul>
-  <div class="nav-count" id="entry-count">Loading…</div>
+  <div class="user-menu-wrap">
+    <div class="nav-count" id="entry-count">Loading…</div>
+    <div class="notif-bell" onclick="showPage('settings')" title="Notifications">
+      <svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-dot" id="notif-dot"></span>
+    </div>
+    <div style="position:relative;">
+      <button class="avatar-btn" id="avatar-btn" onclick="toggleUserDropdown(event)">?</button>
+      <div class="user-dropdown" id="user-dropdown">
+        <a onclick="showPage('profile');closeUserDropdown();">Profile</a>
+        <a onclick="showPage('settings');closeUserDropdown();">Settings</a>
+        <a onclick="handleLogout()">Log Out</a>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <!-- ======== HOME PAGE ======== -->
@@ -1012,6 +1440,234 @@
   </div>
 </div>
 
+<!-- ======== HOME DASHBOARD ======== -->
+<div id="page-dashboard" class="page-section">
+  <div class="dash-wrap">
+    <div class="dash-greeting">
+      <h1 id="dash-greeting-text">Welcome back</h1>
+      <p id="dash-date-text"></p>
+    </div>
+
+    <div id="reminder-banners"></div>
+
+    <div class="dash-topgrid">
+      <div class="dash-stat-card">
+        <div class="lbl">Level</div>
+        <div class="val" id="dash-level">1</div>
+        <div class="sub" id="dash-xp-sub">0 / 100 XP</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="lbl">Daily Streak</div>
+        <div class="val" id="dash-streak">0</div>
+        <div class="sub">days in a row</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="lbl">Meds Taken Today</div>
+        <div class="val" id="dash-meds-today">0/0</div>
+        <div class="sub">stay on schedule</div>
+      </div>
+      <div class="dash-stat-card">
+        <div class="lbl">Achievements</div>
+        <div class="val" id="dash-achv-count">0</div>
+        <div class="sub">unlocked</div>
+      </div>
+    </div>
+
+    <div class="widget-grid">
+      <!-- Medication widget -->
+      <div class="widget-card span2">
+        <div class="widget-head">
+          <h3><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="11" width="18" height="6" rx="3"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Today's Medications</h3>
+          <button class="widget-add" onclick="openMedModal()">+</button>
+        </div>
+        <div id="dash-med-list"></div>
+      </div>
+
+      <!-- Water widget -->
+      <div class="widget-card">
+        <div class="widget-head"><h3><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13z"/></svg>Water Intake</h3></div>
+        <div class="ring-wrap">
+          <div class="ring-holder">
+            <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
+              <circle class="ring-bg" cx="65" cy="65" r="55"></circle>
+              <circle class="ring-fill" id="water-ring" cx="65" cy="65" r="55" stroke-dasharray="345" stroke-dashoffset="345"></circle>
+            </svg>
+            <div class="ring-center"><b id="water-pct">0%</b><span id="water-amt">0 / 8 glasses</span></div>
+          </div>
+          <div class="water-controls">
+            <button class="water-btn" onclick="logWater(-1)">− Glass</button>
+            <button class="water-btn" onclick="logWater(1)">+ Glass</button>
+            <button class="water-btn" onclick="openWaterGoalModal()">Goal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sleep widget -->
+      <div class="widget-card">
+        <div class="widget-head">
+          <h3><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>Sleep</h3>
+          <button class="widget-add" onclick="openSleepModal()">+</button>
+        </div>
+        <div class="mini-stat-row">
+          <div class="mini-stat"><b id="sleep-last">–</b><span>Last Night</span></div>
+          <div class="mini-stat"><b id="sleep-week">–</b><span>Weekly Avg</span></div>
+          <div class="mini-stat"><b id="sleep-month">–</b><span>Monthly Avg</span></div>
+        </div>
+        <div class="chart-svg-wrap"><div class="bar-chart" id="sleep-chart"></div></div>
+      </div>
+
+      <!-- Weight widget -->
+      <div class="widget-card">
+        <div class="widget-head">
+          <h3><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>Weight</h3>
+          <button class="widget-add" onclick="openWeightModal()">+</button>
+        </div>
+        <div class="mini-stat-row">
+          <div class="mini-stat"><b id="weight-current">–</b><span>Current</span></div>
+          <div class="mini-stat"><b id="weight-week">–</b><span>7-Day Δ</span></div>
+          <div class="mini-stat"><b id="weight-month">–</b><span>30-Day Δ</span></div>
+        </div>
+        <div class="chart-svg-wrap"><div class="bar-chart" id="weight-chart"></div></div>
+      </div>
+
+      <!-- Pain widget -->
+      <div class="widget-card">
+        <div class="widget-head">
+          <h3><svg viewBox="0 0 24 24" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>Pain Level</h3>
+          <button class="widget-add" onclick="openPainModal()">+</button>
+        </div>
+        <div id="pain-summary" class="empty-state">Log your pain to see trends here.</div>
+        <div class="chart-svg-wrap"><div class="bar-chart" id="pain-chart"></div></div>
+      </div>
+
+      <!-- XP / Level widget -->
+      <div class="widget-card">
+        <div class="widget-head"><h3><svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.2 21 12 17.27 5.8 21 7 14.14l-5-4.87 7.1-1.01z"/></svg>Progress</h3></div>
+        <div style="display:flex;align-items:center;gap:0.9rem;">
+          <div class="level-badge" id="xp-level-badge">1</div>
+          <div style="flex:1;">
+            <div style="font-size:0.8rem;font-weight:700;" id="xp-level-text">Level 1</div>
+            <div class="xp-bar-track"><div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div></div>
+            <div style="font-size:0.68rem;color:var(--muted);" id="xp-next-text">0 / 100 XP to next level</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly goals widget -->
+      <div class="widget-card span2">
+        <div class="widget-head">
+          <h3><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Weekly Goals</h3>
+          <button class="widget-add" onclick="openGoalModal()">+</button>
+        </div>
+        <div id="goal-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== MEDICATIONS PAGE ======== -->
+<div id="page-medications" class="page-section">
+  <div class="section-page-head">
+    <h2>Medication <em>Schedule</em></h2>
+    <p>Manage every medication, dose, and reminder in one place.</p>
+    <button class="btn-welcome primary" style="margin-top:1rem;padding:0.7rem 1.4rem;font-size:0.8rem;" onclick="openMedModal()">+ Add Medication</button>
+  </div>
+  <div class="section-page-body">
+    <div id="med-full-list"></div>
+  </div>
+</div>
+
+<!-- ======== HEALTH TRACKING PAGE ======== -->
+<div id="page-tracking" class="page-section">
+  <div class="section-page-head">
+    <h2>Health <em>Tracking</em></h2>
+    <p>Water, sleep, weight, and pain — all your health metrics, tracked over time.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-grid" id="tracking-widget-grid"></div>
+  </div>
+</div>
+
+<!-- ======== REPORTS PAGE ======== -->
+<div id="page-reports" class="page-section">
+  <div class="section-page-head">
+    <h2>Monthly <em>Report</em></h2>
+    <p>An automatically generated summary of your health &amp; consistency this month.</p>
+  </div>
+  <div class="section-page-body" id="reports-body"></div>
+</div>
+
+<!-- ======== ACHIEVEMENTS PAGE ======== -->
+<div id="page-achievements" class="page-section">
+  <div class="section-page-head">
+    <h2>Achievements &amp; <em>Goals</em></h2>
+    <p>Your milestones, streaks, and custom goals.</p>
+    <button class="btn-welcome secondary" style="margin-top:1rem;padding:0.7rem 1.4rem;font-size:0.8rem;" onclick="openAchvModal()">+ Custom Achievement</button>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-card" style="margin-bottom:1.5rem;">
+      <div class="widget-head"><h3>Progress</h3></div>
+      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <div class="streak-flame">🔥 <span id="achv-daily-streak">0</span><span>daily streak</span></div>
+        <div class="streak-flame">💊 <span id="achv-med-streak">0</span><span>med streak</span></div>
+      </div>
+    </div>
+    <div class="achv-grid" id="achv-grid"></div>
+  </div>
+</div>
+
+<!-- ======== PROFILE PAGE ======== -->
+<div id="page-profile" class="page-section">
+  <div class="section-page-head">
+    <h2>Your <em>Profile</em></h2>
+    <p>Account details and health summary.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="settings-block">
+      <h4>Account</h4>
+      <div class="settings-row"><span>Name</span><b id="profile-name">–</b></div>
+      <div class="settings-row"><span>Email</span><b id="profile-email">–</b></div>
+      <div class="settings-row"><span>Member Since</span><b id="profile-since">–</b></div>
+    </div>
+    <div class="settings-block">
+      <h4>Lifetime Stats</h4>
+      <div class="settings-row"><span>Total XP Earned</span><b id="profile-xp">0</b></div>
+      <div class="settings-row"><span>Longest Daily Streak</span><b id="profile-longest-streak">0</b></div>
+      <div class="settings-row"><span>Achievements Unlocked</span><b id="profile-achv">0</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SETTINGS PAGE ======== -->
+<div id="page-settings" class="page-section">
+  <div class="section-page-head">
+    <h2>Settings</h2>
+    <p>Notifications and preferences.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="settings-block">
+      <h4>Notifications</h4>
+      <div class="settings-row">
+        <span>Browser medication reminders</span>
+        <div class="toggle-sw" id="notif-toggle" onclick="toggleNotifications()"></div>
+      </div>
+      <div class="settings-row">
+        <span>In-app reminder banners</span>
+        <div class="toggle-sw on" id="banner-toggle" onclick="toggleSetting('banner-toggle','bannersEnabled')"></div>
+      </div>
+    </div>
+    <div class="settings-block">
+      <h4>Data</h4>
+      <div class="settings-row"><span>Storage</span><b>Local (this device)</b></div>
+      <div class="settings-row"><span>Export my data</span><span class="auth-link" onclick="exportUserData()">Download JSON</span></div>
+    </div>
+    <div class="settings-block">
+      <h4>Account</h4>
+      <div class="settings-row"><span>Log out of MedVault</span><span class="auth-link" style="color:var(--accent2);" onclick="handleLogout()">Log Out</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- DETAIL OVERLAY -->
 <div id="detail-overlay">
   <div id="detail-panel">
@@ -1031,6 +1687,8 @@
     &copy; 2026 MedVault. All rights reserved.
   </div>
 </footer>
+
+</div><!-- /#app-root -->
 
 <script>
 // =====================================================================
@@ -1438,6 +2096,15 @@ function showPage(page) {
   if (page === 'fungal')    populateSubGrid('fungal-grid',   d => d.cat === 'fungal',   'fungal-count');
   if (page === 'mental')    populateSubGrid('mental-grid',   d => ['mental','prion'].includes(d.cat), 'mental-count');
 
+  // Populate app pages
+  if (page === 'dashboard')    renderDashboard();
+  if (page === 'medications')  renderMedFullList();
+  if (page === 'tracking')     renderTrackingPage();
+  if (page === 'reports')      renderMonthlyReport();
+  if (page === 'achievements') renderAchievementsPage();
+  if (page === 'profile')      renderProfilePage();
+  if (page === 'settings')     renderSettingsPage();
+
   window.scrollTo({ top:0, behavior:'smooth' });
 }
 
@@ -1459,9 +2126,990 @@ function populateSubGrid(gridId, filterFn, countId) {
 }
 
 // =====================================================================
+// TOASTS
+// =====================================================================
+function toast(type, title, msg, ms) {
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  const icons = {
+    success: '<svg viewBox="0 0 24 24" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg viewBox="0 0 24 24" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>',
+    xp: '<svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.2 21 12 17.27 5.8 21 7 14.14l-5-4.87 7.1-1.01z"/></svg>',
+  };
+  el.innerHTML = `<div class="toast-icon">${icons[type] || icons.success}</div><div class="toast-body"><strong>${title}</strong>${msg ? `<span>${msg}</span>` : ''}</div>`;
+  stack.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, ms || 3400);
+}
+
+// =====================================================================
+// MODALS
+// =====================================================================
+function openModal(innerHtml) {
+  closeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'mv-modal-overlay';
+  overlay.id = 'active-modal';
+  overlay.innerHTML = `<div class="mv-modal">${innerHtml}</div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.getElementById('modal-root').appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+function closeModal() {
+  const m = document.getElementById('active-modal');
+  if (m) { m.classList.remove('open'); setTimeout(() => m.remove(), 250); }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// =====================================================================
+// FIREBASE AUTH (falls back to a local auth emulator if config is
+// still using placeholder values, so the app works immediately)
+// =====================================================================
+let usingFirebase = false;
+let currentUser = null;
+let authPersistLocal = true;
+
+try {
+  const configReady = FIREBASE_CONFIG.authDomain && !FIREBASE_CONFIG.authDomain.includes('PASTE_YOUR');
+  if (configReady && window.firebase) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    usingFirebase = true;
+  }
+} catch (e) { usingFirebase = false; }
+
+// ---- Local auth emulator (used only when Firebase config isn't filled in) ----
+const LocalAuth = {
+  users() { try { return JSON.parse(localStorage.getItem('mv_local_users') || '{}'); } catch (e) { return {}; } },
+  saveUsers(u) { localStorage.setItem('mv_local_users', JSON.stringify(u)); },
+  hash(pw) { let h = 0; for (let i = 0; i < pw.length; i++) { h = ((h << 5) - h) + pw.charCodeAt(i); h |= 0; } return String(h); },
+  signup(name, email, password) {
+    const users = this.users();
+    if (users[email]) throw { code: 'auth/email-already-in-use' };
+    const uidVal = 'local_' + Date.now().toString(36);
+    users[email] = { uid: uidVal, name, email, pwHash: this.hash(password), createdAt: Date.now() };
+    this.saveUsers(users);
+    return users[email];
+  },
+  login(email, password) {
+    const users = this.users();
+    const u = users[email];
+    if (!u) throw { code: 'auth/user-not-found' };
+    if (u.pwHash !== this.hash(password)) throw { code: 'auth/wrong-password' };
+    return u;
+  },
+  setSession(u, remember) {
+    const store = remember ? localStorage : sessionStorage;
+    store.setItem('mv_local_session', JSON.stringify({ uid: u.uid, name: u.name, email: u.email, createdAt: u.createdAt }));
+  },
+  getSession() {
+    try {
+      return JSON.parse(localStorage.getItem('mv_local_session') || sessionStorage.getItem('mv_local_session') || 'null');
+    } catch (e) { return null; }
+  },
+  clearSession() { localStorage.removeItem('mv_local_session'); sessionStorage.removeItem('mv_local_session'); }
+};
+
+function authFieldError(fieldId, msg) {
+  const f = document.getElementById(fieldId);
+  f.classList.add('err');
+  if (msg) f.querySelector('.auth-field-error').textContent = msg;
+}
+function authFieldClear(fieldId) { document.getElementById(fieldId).classList.remove('err'); }
+function setBtnLoading(btnId, loading) { document.getElementById(btnId).classList.toggle('loading', loading); document.getElementById(btnId).disabled = loading; }
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function togglePw(id, el) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  el.style.color = inp.type === 'text' ? 'var(--accent)' : '';
+}
+function updatePwStrength() {
+  const pw = document.getElementById('signup-password').value;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const segs = document.querySelectorAll('#pw-strength-bars .pw-strength-seg');
+  const colors = ['#ff6b6b', '#ff6b6b', '#fbbf24', '#00d2b4', '#00d2b4'];
+  const labels = ['Very weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  segs.forEach((s, i) => s.style.background = i < score ? colors[score] : 'rgba(255,255,255,0.08)');
+  document.getElementById('pw-strength-label').textContent = pw ? labels[score] : 'Password strength';
+}
+
+function authShow(which) {
+  ['welcome', 'login', 'signup', 'forgot', 'success'].forEach(s => {
+    document.getElementById('auth-' + s).style.display = 'none';
+  });
+  const el = document.getElementById('auth-' + which);
+  if (el) el.style.display = which === 'welcome' ? 'block' : 'block';
+}
+
+function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value;
+  authFieldClear('login-email-field'); authFieldClear('login-pw-field');
+  let ok = true;
+  if (!isValidEmail(email)) { authFieldError('login-email-field'); ok = false; }
+  if (!pw) { authFieldError('login-pw-field'); ok = false; }
+  if (!ok) return;
+  const remember = document.getElementById('remember-me').checked;
+  setBtnLoading('login-btn', true);
+
+  const finish = (err, profile) => {
+    setBtnLoading('login-btn', false);
+    if (err) {
+      toast('error', 'Login failed', friendlyAuthError(err));
+      return;
+    }
+    onAuthSuccess(profile, remember, false);
+  };
+
+  if (usingFirebase) {
+    firebase.auth().setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION)
+      .then(() => firebase.auth().signInWithEmailAndPassword(email, pw))
+      .then(cred => finish(null, { uid: cred.user.uid, name: cred.user.displayName || email.split('@')[0], email }))
+      .catch(err => finish(err));
+  } else {
+    setTimeout(() => {
+      try {
+        const u = LocalAuth.login(email, pw);
+        LocalAuth.setSession(u, remember);
+        finish(null, u);
+      } catch (err) { finish(err); }
+    }, 550);
+  }
+}
+
+function handleSignup() {
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw = document.getElementById('signup-password').value;
+  const confirm = document.getElementById('signup-confirm').value;
+  ['signup-name-field', 'signup-email-field', 'signup-pw-field', 'signup-confirm-field'].forEach(authFieldClear);
+  let ok = true;
+  if (!name) { authFieldError('signup-name-field'); ok = false; }
+  if (!isValidEmail(email)) { authFieldError('signup-email-field'); ok = false; }
+  if (pw.length < 8) { authFieldError('signup-pw-field'); ok = false; }
+  if (pw !== confirm) { authFieldError('signup-confirm-field'); ok = false; }
+  if (!document.getElementById('terms-check').checked) { toast('warn', 'Please accept the Terms', 'You must agree to the Terms of Service to continue.'); ok = false; }
+  if (!ok) return;
+  setBtnLoading('signup-btn', true);
+
+  const finish = (err, profile) => {
+    setBtnLoading('signup-btn', false);
+    if (err) { toast('error', 'Sign up failed', friendlyAuthError(err)); return; }
+    onAuthSuccess(profile, true, true);
+  };
+
+  if (usingFirebase) {
+    firebase.auth().createUserWithEmailAndPassword(email, pw)
+      .then(cred => cred.user.updateProfile({ displayName: name }).then(() => finish(null, { uid: cred.user.uid, name, email })))
+      .catch(err => finish(err));
+  } else {
+    setTimeout(() => {
+      try {
+        const u = LocalAuth.signup(name, email, pw);
+        LocalAuth.setSession(u, true);
+        finish(null, u);
+      } catch (err) { finish(err); }
+    }, 650);
+  }
+}
+
+function handleForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  authFieldClear('forgot-email-field');
+  if (!isValidEmail(email)) { authFieldError('forgot-email-field'); return; }
+  setBtnLoading('forgot-btn', true);
+  const finish = () => {
+    setBtnLoading('forgot-btn', false);
+    authShow('success');
+    document.getElementById('auth-success-title').textContent = 'Check your inbox';
+    document.getElementById('auth-success-sub').textContent = usingFirebase
+      ? `We've sent a password reset link to ${email}.`
+      : `In demo mode (no Firebase configured yet) resets aren't sent by email — connect Firebase to enable this.`;
+    setTimeout(() => authShow('login'), 2600);
+  };
+  if (usingFirebase) {
+    firebase.auth().sendPasswordResetEmail(email).then(finish).catch(() => finish());
+  } else {
+    setTimeout(finish, 500);
+  }
+}
+
+function friendlyAuthError(err) {
+  const map = {
+    'auth/user-not-found': 'No account found with that email.',
+    'auth/wrong-password': 'Incorrect password. Please try again.',
+    'auth/email-already-in-use': 'An account with that email already exists.',
+    'auth/invalid-email': 'That email address looks invalid.',
+    'auth/weak-password': 'Please choose a stronger password.',
+  };
+  return map[err && err.code] || 'Something went wrong. Please try again.';
+}
+
+function onAuthSuccess(profile, remember, isSignup) {
+  authShow('success');
+  document.getElementById('auth-success-title').textContent = isSignup ? 'Account created!' : 'Welcome back!';
+  document.getElementById('auth-success-sub').textContent = 'Taking you to your dashboard…';
+  setTimeout(() => {
+    currentUser = profile;
+    initUserState();
+    document.getElementById('auth-root').classList.add('hidden');
+    document.getElementById('app-root').classList.remove('hidden');
+    document.getElementById('avatar-btn').textContent = (profile.name || profile.email || '?').charAt(0).toUpperCase();
+    countStats();
+    showPage('dashboard');
+    recordDailyLogin();
+    if (isSignup) unlockAchievement('first_login');
+    toast('success', isSignup ? 'Welcome to MedVault!' : 'Logged in', `Good to see you, ${profile.name || ''}.`);
+  }, 900);
+}
+
+function handleLogout() {
+  closeUserDropdown();
+  const doLogout = () => {
+    if (usingFirebase) firebase.auth().signOut();
+    LocalAuth.clearSession();
+    currentUser = null;
+    document.getElementById('app-root').classList.add('hidden');
+    document.getElementById('auth-root').classList.remove('hidden');
+    authShow('welcome');
+    closeModal();
+    toast('success', 'Logged out', 'See you soon!');
+  };
+  openModal(`
+    <div class="mv-modal-head"><h3>Log out?</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.25rem;">You'll need to log back in to access your dashboard, medications, and health data.</p>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn danger" onclick="(${doLogout.toString()})()">Log Out</button></div>
+  `);
+}
+
+function toggleUserDropdown(e) { e.stopPropagation(); document.getElementById('user-dropdown').classList.toggle('open'); }
+function closeUserDropdown() { document.getElementById('user-dropdown').classList.remove('open'); }
+function toggleLibDropdown(e) { e.stopPropagation(); document.getElementById('lib-dropdown').classList.toggle('open'); }
+function closeLibDropdown() { document.getElementById('lib-dropdown').classList.remove('open'); }
+document.addEventListener('click', () => { closeUserDropdown(); closeLibDropdown(); });
+
+// Restore session on load
+function tryRestoreSession() {
+  if (usingFirebase) {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user && !currentUser) {
+        onAuthSuccess({ uid: user.uid, name: user.displayName || user.email.split('@')[0], email: user.email }, true, false);
+      }
+    });
+  } else {
+    const s = LocalAuth.getSession();
+    if (s) onAuthSuccess(s, true, false);
+  }
+}
+
+// =====================================================================
+// PER-USER STORAGE
+// =====================================================================
+function skey(name) { return 'mv_' + (currentUser ? currentUser.uid : 'guest') + '_' + name; }
+function loadState() {
+  try {
+    const raw = localStorage.getItem(skey('state'));
+    return raw ? JSON.parse(raw) : defaultState();
+  } catch (e) { return defaultState(); }
+}
+function saveState() { localStorage.setItem(skey('state'), JSON.stringify(STATE)); }
+function defaultState() {
+  return {
+    profile: { createdAt: Date.now() },
+    meds: [], medLog: {},           // medLog[date] = { medId: [times taken] }
+    waterGoal: 8, waterLog: {},     // waterLog[date] = count
+    sleep: [], weight: [], pain: [],
+    xp: 0, level: 1,
+    dailyStreak: 0, longestStreak: 0, lastLoginDate: null,
+    medStreak: 0, lastMedStreakDate: null,
+    goals: defaultGoals(),
+    unlocked: [], customAchievements: [],
+    settings: { notifications: false, banners: true },
+    bannersDismissed: {}
+  };
+}
+function defaultGoals() {
+  return [
+    { id: 'g_water', title: 'Drink your water goal every day', type: 'water', custom: false },
+    { id: 'g_meds', title: 'Take all medications every day', type: 'medication', custom: false },
+    { id: 'g_sleep', title: 'Sleep at least 8 hours', type: 'sleep', custom: false },
+    { id: 'g_pain', title: 'Log your pain level daily', type: 'pain', custom: false },
+  ];
+}
+let STATE = defaultState();
+function initUserState() { STATE = loadState(); }
+function todayStr() { return new Date().toISOString().slice(0, 10); }
+function daysAgoStr(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }
+
+// =====================================================================
+// GAMIFICATION — XP / LEVELS
+// =====================================================================
+function xpForLevel(level) { return level * 100; }
+function addXP(amount, reason) {
+  STATE.xp += amount;
+  let leveled = false;
+  while (STATE.xp >= xpForLevel(STATE.level)) {
+    STATE.xp -= xpForLevel(STATE.level);
+    STATE.level++;
+    leveled = true;
+  }
+  saveState();
+  toast('xp', `+${amount} XP`, reason || '', 2200);
+  if (leveled) toast('success', `Level Up! Level ${STATE.level}`, 'Keep up the great work.', 3200);
+  checkAchievements();
+  if (document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
+}
+
+function recordDailyLogin() {
+  const today = todayStr();
+  if (STATE.lastLoginDate === today) return;
+  const yesterday = daysAgoStr(1);
+  if (STATE.lastLoginDate === yesterday) STATE.dailyStreak++;
+  else STATE.dailyStreak = 1;
+  STATE.longestStreak = Math.max(STATE.longestStreak || 0, STATE.dailyStreak);
+  STATE.lastLoginDate = today;
+  saveState();
+  addXP(10, 'Daily login');
+  if (STATE.dailyStreak === 7) unlockAchievement('week_streak');
+  if (STATE.dailyStreak === 30) unlockAchievement('month_streak');
+}
+
+function bumpMedStreakIfComplete(date) {
+  const meds = STATE.meds.filter(m => medActiveOnDate(m, date));
+  if (!meds.length) return;
+  const log = (STATE.medLog[date] || {});
+  const allTaken = meds.every(m => (log[m.id] || []).length >= m.times.length);
+  if (!allTaken) return;
+  const yesterday = new Date(date); yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0, 10);
+  if (STATE.lastMedStreakDate === yStr) STATE.medStreak++;
+  else if (STATE.lastMedStreakDate !== date) STATE.medStreak = 1;
+  STATE.lastMedStreakDate = date;
+  saveState();
+  if (STATE.medStreak === 7) unlockAchievement('med_hero');
+}
+
+// ---- Achievements ----
+const BUILT_IN_ACHIEVEMENTS = [
+  { id: 'first_login', icon: '🎉', title: 'First Login', desc: 'Joined MedVault' },
+  { id: 'first_med', icon: '💊', title: 'First Medication Added', desc: 'Added your first medication' },
+  { id: 'week_streak', icon: '🔥', title: 'First Week Streak', desc: '7-day login streak' },
+  { id: 'month_streak', icon: '🏅', title: 'One Month Streak', desc: '30-day login streak' },
+  { id: 'hydration_master', icon: '💧', title: 'Hydration Master', desc: 'Hit your water goal 7 times' },
+  { id: 'med_hero', icon: '🛡️', title: 'Medication Hero', desc: '7-day medication streak' },
+  { id: 'sleep_champion', icon: '😴', title: 'Sleep Champion', desc: 'Logged sleep 7 times' },
+  { id: 'weight_tracker', icon: '⚖️', title: 'Weight Tracker', desc: 'Logged your weight 5 times' },
+  { id: 'consistency_king', icon: '👑', title: 'Consistency King/Queen', desc: '14-day login streak' },
+  { id: 'goal_crusher', icon: '🎯', title: 'Goal Crusher', desc: 'Completed a weekly goal' },
+];
+function allAchievements() { return BUILT_IN_ACHIEVEMENTS.concat(STATE.customAchievements || []); }
+function unlockAchievement(id) {
+  if (STATE.unlocked.includes(id)) return;
+  STATE.unlocked.push(id);
+  saveState();
+  const a = allAchievements().find(x => x.id === id);
+  toast('success', 'Achievement Unlocked!', a ? `${a.icon} ${a.title}` : '', 3800);
+}
+function checkAchievements() {
+  const waterWins = Object.keys(STATE.waterLog).filter(d => (STATE.waterLog[d] || 0) >= (STATE.waterGoal || 8)).length;
+  if (waterWins >= 7) unlockAchievement('hydration_master');
+  if (STATE.sleep.length >= 7) unlockAchievement('sleep_champion');
+  if (STATE.weight.length >= 5) unlockAchievement('weight_tracker');
+  if ((STATE.dailyStreak || 0) >= 14) unlockAchievement('consistency_king');
+  if ((STATE.meds || []).length >= 1) unlockAchievement('first_med');
+}
+
+// =====================================================================
+// MEDICATIONS
+// =====================================================================
+function medActiveOnDate(med, dateStr) {
+  const day = new Date(dateStr + 'T00:00:00').getDay();
+  return med.days.includes(day);
+}
+function openMedModal(medId) {
+  const med = medId ? STATE.meds.find(m => m.id === medId) : null;
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  openModal(`
+    <div class="mv-modal-head"><h3>${med ? 'Edit' : 'Add'} Medication</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field"><label>Medication Name</label><input id="mf-name" value="${med ? med.name : ''}" placeholder="e.g. Metformin"></div>
+    <div class="mv-field-row">
+      <div class="mv-field"><label>Dosage</label><input id="mf-dosage" value="${med ? med.dosage : ''}" placeholder="e.g. 500mg"></div>
+      <div class="mv-field"><label>Reminder Time</label><input type="time" id="mf-time" value="${med && med.times[0] ? med.times[0] : '08:00'}"></div>
+    </div>
+    <div class="mv-field"><label>Additional Reminder Times (optional)</label><input id="mf-times2" value="${med && med.times.length > 1 ? med.times.slice(1).join(', ') : ''}" placeholder="e.g. 14:00, 20:00"></div>
+    <div class="mv-field"><label>Days of the Week</label>
+      <div class="day-picker" id="mf-days">
+        ${dayNames.map((d, i) => `<div class="day-chip ${(!med || med.days.includes(i)) ? 'active' : ''}" data-day="${i}" onclick="this.classList.toggle('active')">${d}</div>`).join('')}
+      </div>
+    </div>
+    <div class="mv-field"><label>Notes</label><textarea id="mf-notes" placeholder="e.g. take with food">${med ? (med.notes || '') : ''}</textarea></div>
+    <div class="mv-btn-row">
+      ${med ? `<button class="mv-btn danger" onclick="deleteMed('${med.id}')">Delete</button>` : ''}
+      <button class="mv-btn primary" onclick="saveMed(${med ? `'${med.id}'` : 'null'})">${med ? 'Save Changes' : 'Add Medication'}</button>
+    </div>
+  `);
+}
+function saveMed(medId) {
+  const name = document.getElementById('mf-name').value.trim();
+  const dosage = document.getElementById('mf-dosage').value.trim();
+  const time1 = document.getElementById('mf-time').value;
+  const times2 = document.getElementById('mf-times2').value.split(',').map(s => s.trim()).filter(Boolean);
+  const notes = document.getElementById('mf-notes').value.trim();
+  const days = Array.from(document.querySelectorAll('#mf-days .day-chip.active')).map(el => parseInt(el.dataset.day));
+  if (!name) { toast('warn', 'Name required', 'Please enter a medication name.'); return; }
+  if (!days.length) { toast('warn', 'Pick at least one day', 'Select which days this medication applies to.'); return; }
+  const times = [time1].concat(times2).filter(Boolean);
+  if (medId) {
+    const med = STATE.meds.find(m => m.id === medId);
+    Object.assign(med, { name, dosage, notes, times, days });
+    toast('success', 'Medication updated', name);
+  } else {
+    STATE.meds.push({ id: 'med_' + Date.now().toString(36), name, dosage, notes, times, days });
+    toast('success', 'Medication added', name);
+    unlockAchievement('first_med');
+    addXP(5, 'Added a medication');
+  }
+  saveState();
+  closeModal();
+  renderDashboard(); renderMedFullList(); renderTrackingPage();
+}
+function deleteMed(medId) {
+  STATE.meds = STATE.meds.filter(m => m.id !== medId);
+  saveState(); closeModal();
+  toast('success', 'Medication removed');
+  renderDashboard(); renderMedFullList();
+}
+function toggleMedTaken(medId, time) {
+  const date = todayStr();
+  STATE.medLog[date] = STATE.medLog[date] || {};
+  const arr = STATE.medLog[date][medId] = STATE.medLog[date][medId] || [];
+  const idx = arr.indexOf(time);
+  if (idx >= 0) { arr.splice(idx, 1); }
+  else { arr.push(time); addXP(8, 'Medication taken'); }
+  saveState();
+  bumpMedStreakIfComplete(date);
+  renderDashboard(); renderMedFullList();
+}
+function renderDashboard() {
+  if (!currentUser) return;
+  document.getElementById('dash-greeting-text').textContent = `Welcome back, ${(currentUser.name || currentUser.email || '').split(' ')[0]}`;
+  document.getElementById('dash-date-text').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  document.getElementById('dash-level').textContent = STATE.level;
+  document.getElementById('dash-xp-sub').textContent = `${STATE.xp} / ${xpForLevel(STATE.level)} XP`;
+  document.getElementById('dash-streak').textContent = STATE.dailyStreak || 0;
+  document.getElementById('dash-achv-count').textContent = (STATE.unlocked || []).length;
+
+  const today = todayStr();
+  const todaysMeds = STATE.meds.filter(m => medActiveOnDate(m, today));
+  const takenCount = todaysMeds.reduce((sum, m) => sum + Math.min((STATE.medLog[today] && STATE.medLog[today][m.id] || []).length, m.times.length), 0);
+  const totalCount = todaysMeds.reduce((sum, m) => sum + m.times.length, 0);
+  document.getElementById('dash-meds-today').textContent = `${takenCount}/${totalCount}`;
+
+  renderMedList('dash-med-list', todaysMeds, true);
+  renderWaterRing();
+  renderSleepWidget();
+  renderWeightWidget();
+  renderPainWidget();
+  renderXPWidget();
+  renderGoals();
+  renderReminderBanners();
+}
+function renderMedList(containerId, meds, dashboardStyle) {
+  const el = document.getElementById(containerId);
+  if (!meds.length) { el.innerHTML = `<div class="empty-state"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="11" width="18" height="6" rx="3"/></svg>No medications scheduled today.<br>Tap + to add one.</div>`; return; }
+  const today = todayStr();
+  el.innerHTML = meds.map(m => {
+    const takenTimes = (STATE.medLog[today] && STATE.medLog[today][m.id]) || [];
+    return m.times.map(t => {
+      const done = takenTimes.includes(t);
+      return `<div class="med-item ${done ? 'taken' : ''}">
+        <div class="med-info"><b>${m.name}</b><span>${m.dosage || ''} · ${t}${m.notes ? ' · ' + m.notes : ''}</span></div>
+        <div class="med-actions">
+          <button class="med-check ${done ? 'done' : ''}" onclick="toggleMedTaken('${m.id}','${t}')"><svg viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
+          ${dashboardStyle ? '' : `<button class="icon-btn" onclick="openMedModal('${m.id}')"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>`}
+        </div>
+      </div>`;
+    }).join('');
+  }).join('');
+}
+function renderMedFullList() {
+  renderMedList('med-full-list', STATE.meds, false);
+}
+
+// =====================================================================
+// WATER TRACKER
+// =====================================================================
+function logWater(delta) {
+  const today = todayStr();
+  const cur = STATE.waterLog[today] || 0;
+  const next = Math.max(0, cur + delta);
+  STATE.waterLog[today] = next;
+  saveState();
+  if (delta > 0) addXP(3, 'Logged water');
+  if (next >= (STATE.waterGoal || 8) && cur < (STATE.waterGoal || 8)) toast('success', 'Water goal reached! 💧', 'Great hydration today.');
+  checkAchievements();
+  renderWaterRing();
+}
+function openWaterGoalModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>Daily Water Goal</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field"><label>Glasses per day</label><input type="number" id="wf-goal" min="1" max="30" value="${STATE.waterGoal || 8}"></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveWaterGoal()">Save</button></div>
+  `);
+}
+function saveWaterGoal() {
+  const v = parseInt(document.getElementById('wf-goal').value) || 8;
+  STATE.waterGoal = v; saveState(); closeModal();
+  toast('success', 'Water goal updated', `${v} glasses / day`);
+  renderWaterRing();
+}
+function renderWaterRing() {
+  const today = todayStr();
+  const cur = STATE.waterLog[today] || 0;
+  const goal = STATE.waterGoal || 8;
+  const pct = Math.min(100, Math.round((cur / goal) * 100));
+  const circ = 345;
+  const ringEl = document.getElementById('water-ring');
+  if (ringEl) ringEl.style.strokeDashoffset = circ - (circ * pct / 100);
+  const pctEl = document.getElementById('water-pct'); if (pctEl) pctEl.textContent = pct + '%';
+  const amtEl = document.getElementById('water-amt'); if (amtEl) amtEl.textContent = `${cur} / ${goal} glasses`;
+}
+
+// =====================================================================
+// SLEEP TRACKER
+// =====================================================================
+function openSleepModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>Log Sleep</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field-row">
+      <div class="mv-field"><label>Bedtime</label><input type="time" id="sf-bed" value="23:00"></div>
+      <div class="mv-field"><label>Wake Time</label><input type="time" id="sf-wake" value="07:00"></div>
+    </div>
+    <div class="mv-field"><label>Hours Slept</label><input type="number" id="sf-hours" min="0" max="24" step="0.5" value="8"></div>
+    <div class="mv-field"><label>Sleep Quality</label>
+      <select id="sf-quality"><option value="great">😴 Great</option><option value="good" selected>🙂 Good</option><option value="fair">😐 Fair</option><option value="poor">😩 Poor</option></select>
+    </div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveSleep()">Save</button></div>
+  `);
+}
+function saveSleep() {
+  const hours = parseFloat(document.getElementById('sf-hours').value) || 0;
+  const quality = document.getElementById('sf-quality').value;
+  const bedtime = document.getElementById('sf-bed').value;
+  const wake = document.getElementById('sf-wake').value;
+  STATE.sleep.unshift({ date: todayStr(), hours, quality, bedtime, wake });
+  saveState(); closeModal();
+  toast('success', 'Sleep logged', `${hours}h — ${quality}`);
+  addXP(6, 'Logged sleep');
+  checkAchievements();
+  renderSleepWidget();
+}
+function renderSleepWidget() {
+  const last = STATE.sleep[0];
+  document.getElementById('sleep-last').textContent = last ? last.hours + 'h' : '–';
+  const weekEntries = STATE.sleep.filter(s => s.date >= daysAgoStr(7));
+  const monthEntries = STATE.sleep.filter(s => s.date >= daysAgoStr(30));
+  document.getElementById('sleep-week').textContent = weekEntries.length ? (weekEntries.reduce((a, b) => a + b.hours, 0) / weekEntries.length).toFixed(1) + 'h' : '–';
+  document.getElementById('sleep-month').textContent = monthEntries.length ? (monthEntries.reduce((a, b) => a + b.hours, 0) / monthEntries.length).toFixed(1) + 'h' : '–';
+  renderBarChart('sleep-chart', STATE.sleep.slice(0, 7).reverse().map(s => ({ label: s.date.slice(5), value: s.hours })), 12);
+}
+
+// =====================================================================
+// WEIGHT TRACKER
+// =====================================================================
+function openWeightModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>Log Weight</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field"><label>Weight (kg)</label><input type="number" id="wtf-val" min="0" step="0.1" placeholder="e.g. 70.5"></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveWeight()">Save</button></div>
+  `);
+}
+function saveWeight() {
+  const v = parseFloat(document.getElementById('wtf-val').value);
+  if (!v) { toast('warn', 'Enter a weight value'); return; }
+  STATE.weight.unshift({ date: todayStr(), weight: v });
+  saveState(); closeModal();
+  toast('success', 'Weight logged', `${v} kg`);
+  addXP(6, 'Logged weight');
+  checkAchievements();
+  renderWeightWidget();
+}
+function renderWeightWidget() {
+  const cur = STATE.weight[0];
+  document.getElementById('weight-current').textContent = cur ? cur.weight + ' kg' : '–';
+  const weekAgo = STATE.weight.find(w => w.date <= daysAgoStr(7));
+  const monthAgo = STATE.weight.find(w => w.date <= daysAgoStr(30));
+  document.getElementById('weight-week').textContent = cur && weekAgo ? (cur.weight - weekAgo.weight >= 0 ? '+' : '') + (cur.weight - weekAgo.weight).toFixed(1) : '–';
+  document.getElementById('weight-month').textContent = cur && monthAgo ? (cur.weight - monthAgo.weight >= 0 ? '+' : '') + (cur.weight - monthAgo.weight).toFixed(1) : '–';
+  renderBarChart('weight-chart', STATE.weight.slice(0, 7).reverse().map(w => ({ label: w.date.slice(5), value: w.weight })), null);
+}
+
+// =====================================================================
+// PAIN TRACKER
+// =====================================================================
+function openPainModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>Log Pain Level</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <span class="pain-emoji" id="pf-emoji">🙂</span>
+    <div class="pain-scale-label" id="pf-label">2 / 10</div>
+    <input type="range" min="1" max="10" value="2" class="pain-slider" id="pf-slider" oninput="updatePainPreview()">
+    <div class="mv-field"><label>Notes</label><textarea id="pf-notes" placeholder="What were you doing? Where's the pain?"></textarea></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="savePain()">Save</button></div>
+  `);
+  updatePainPreview();
+}
+function updatePainPreview() {
+  const v = parseInt(document.getElementById('pf-slider').value);
+  const emojis = ['😄', '🙂', '🙂', '😐', '😐', '😕', '😣', '😣', '😖', '😭'];
+  const colors = ['#00d2b4', '#00d2b4', '#a3e635', '#fbbf24', '#fbbf24', '#fb923c', '#ff6b6b', '#ff6b6b', '#dc2626', '#991b1b'];
+  document.getElementById('pf-emoji').textContent = emojis[v - 1];
+  const lbl = document.getElementById('pf-label');
+  lbl.textContent = v + ' / 10';
+  lbl.style.color = colors[v - 1];
+}
+function savePain() {
+  const level = parseInt(document.getElementById('pf-slider').value);
+  const notes = document.getElementById('pf-notes').value.trim();
+  STATE.pain.unshift({ date: todayStr(), level, notes });
+  saveState(); closeModal();
+  toast('success', 'Pain level logged', `${level}/10`);
+  addXP(5, 'Logged pain level');
+  renderPainWidget();
+}
+function renderPainWidget() {
+  const el = document.getElementById('pain-summary');
+  if (!STATE.pain.length) { el.className = 'empty-state'; el.textContent = 'Log your pain to see trends here.'; }
+  else {
+    const last = STATE.pain[0];
+    el.className = '';
+    el.innerHTML = `<div style="font-size:0.8rem;">Latest: <b>${last.level}/10</b> on ${last.date}</div>`;
+  }
+  renderBarChart('pain-chart', STATE.pain.slice(0, 7).reverse().map(p => ({ label: p.date.slice(5), value: p.level })), 10);
+}
+
+// =====================================================================
+// SIMPLE BAR CHART RENDERER (no external chart library needed)
+// =====================================================================
+function renderBarChart(containerId, points, maxOverride) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!points.length) { el.innerHTML = `<div class="empty-state" style="padding:1rem 0;">No data yet</div>`; return; }
+  const max = maxOverride || Math.max(...points.map(p => p.value), 1);
+  el.innerHTML = points.map(p => `
+    <div class="bar-col">
+      <div class="bar-fill" style="height:${Math.max(4, (p.value / max) * 100)}%" title="${p.value}"></div>
+      <div class="bar-label">${p.label}</div>
+    </div>
+  `).join('');
+}
+
+// =====================================================================
+// XP WIDGET
+// =====================================================================
+function renderXPWidget() {
+  const need = xpForLevel(STATE.level);
+  document.getElementById('xp-level-badge').textContent = STATE.level;
+  document.getElementById('xp-level-text').textContent = `Level ${STATE.level}`;
+  document.getElementById('xp-bar-fill').style.width = Math.min(100, (STATE.xp / need) * 100) + '%';
+  document.getElementById('xp-next-text').textContent = `${STATE.xp} / ${need} XP to next level`;
+}
+
+// =====================================================================
+// WEEKLY GOALS
+// =====================================================================
+function computeGoalProgress(goal) {
+  let hit = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = daysAgoStr(i);
+    if (goal.type === 'water') { if ((STATE.waterLog[d] || 0) >= (STATE.waterGoal || 8)) hit++; }
+    else if (goal.type === 'sleep') { const s = STATE.sleep.find(x => x.date === d); if (s && s.hours >= 8) hit++; }
+    else if (goal.type === 'pain') { if (STATE.pain.some(x => x.date === d)) hit++; }
+    else if (goal.type === 'medication') {
+      const meds = STATE.meds.filter(m => medActiveOnDate(m, d));
+      if (meds.length) {
+        const log = STATE.medLog[d] || {};
+        if (meds.every(m => (log[m.id] || []).length >= m.times.length)) hit++;
+      }
+    } else if (goal.type === 'custom') {
+      if ((goal.doneDates || []).includes(d)) hit++;
+    }
+  }
+  return hit;
+}
+function renderGoals() {
+  const el = document.getElementById('goal-list');
+  if (!el) return;
+  if (!STATE.goals.length) { el.innerHTML = `<div class="empty-state">No goals yet. Tap + to create one.</div>`; return; }
+  el.innerHTML = STATE.goals.map(g => {
+    const progress = computeGoalProgress(g);
+    const pct = Math.min(100, Math.round((progress / 7) * 100));
+    if (pct === 100 && !(g.completedWeeks || []).includes(currentWeekKey())) {
+      g.completedWeeks = g.completedWeeks || [];
+      g.completedWeeks.push(currentWeekKey());
+      unlockAchievement('goal_crusher');
+    }
+    return `<div class="goal-item">
+      <div class="gtop"><span>${g.title}</span><span>${progress}/7 days</span></div>
+      <div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
+      ${g.type === 'custom' ? `<button class="mv-btn ghost" style="margin-top:0.6rem;padding:0.4rem;font-size:0.72rem;" onclick="markCustomGoalToday('${g.id}')">Mark today done</button>` : ''}
+    </div>`;
+  }).join('');
+  saveState();
+}
+function currentWeekKey() { const d = new Date(); const onejan = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + '-w' + Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7); }
+function markCustomGoalToday(id) {
+  const g = STATE.goals.find(x => x.id === id);
+  g.doneDates = g.doneDates || [];
+  const t = todayStr();
+  if (!g.doneDates.includes(t)) { g.doneDates.push(t); addXP(4, 'Progressed a goal'); }
+  saveState(); renderGoals();
+}
+function openGoalModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>New Custom Goal</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field"><label>Goal Description</label><input id="gf-title" placeholder="e.g. Stretch for 10 minutes"></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveGoal()">Create Goal</button></div>
+  `);
+}
+function saveGoal() {
+  const title = document.getElementById('gf-title').value.trim();
+  if (!title) { toast('warn', 'Enter a goal description'); return; }
+  STATE.goals.push({ id: 'goal_' + Date.now().toString(36), title, type: 'custom', custom: true, doneDates: [] });
+  saveState(); closeModal();
+  toast('success', 'Goal created', title);
+  renderGoals();
+}
+
+// =====================================================================
+// CUSTOM ACHIEVEMENTS
+// =====================================================================
+function openAchvModal() {
+  openModal(`
+    <div class="mv-modal-head"><h3>Custom Achievement</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field"><label>Emoji</label><input id="af-icon" placeholder="🏆" maxlength="2"></div>
+    <div class="mv-field"><label>Title</label><input id="af-title" placeholder="e.g. Marathon Trained"></div>
+    <div class="mv-field"><label>Description</label><input id="af-desc" placeholder="e.g. Completed 12 weeks of training"></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveCustomAchv()">Create &amp; Unlock</button></div>
+  `);
+}
+function saveCustomAchv() {
+  const icon = document.getElementById('af-icon').value.trim() || '🏆';
+  const title = document.getElementById('af-title').value.trim();
+  const desc = document.getElementById('af-desc').value.trim();
+  if (!title) { toast('warn', 'Enter a title'); return; }
+  const id = 'custom_' + Date.now().toString(36);
+  STATE.customAchievements.push({ id, icon, title, desc });
+  saveState(); closeModal();
+  unlockAchievement(id);
+  renderAchievementsPage();
+}
+function renderAchievementsPage() {
+  document.getElementById('achv-daily-streak').textContent = STATE.dailyStreak || 0;
+  document.getElementById('achv-med-streak').textContent = STATE.medStreak || 0;
+  const grid = document.getElementById('achv-grid');
+  grid.innerHTML = allAchievements().map(a => {
+    const unlocked = STATE.unlocked.includes(a.id);
+    return `<div class="achv-card ${unlocked ? '' : 'locked'}"><div class="achv-icon">${a.icon}</div><b>${a.title}</b><p>${a.desc}</p></div>`;
+  }).join('');
+}
+
+// =====================================================================
+// REMINDERS
+// =====================================================================
+function timeNow() { const d = new Date(); return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0'); }
+function requestNotifPermission() {
+  if (!('Notification' in window)) { toast('warn', 'Notifications unsupported', 'Your browser doesn\'t support notifications — in-app banners will still work.'); return; }
+  openModal(`
+    <div class="mv-modal-head"><h3>Turn on medication reminders?</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.25rem;">MedVault can send you a browser notification when it's time to take a medication, on top of the in-app reminder banners. You can change this anytime in Settings.</p>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Not now</button><button class="mv-btn primary" onclick="grantNotifPermission()">Enable Reminders</button></div>
+  `);
+}
+function grantNotifPermission() {
+  closeModal();
+  Notification.requestPermission().then(perm => {
+    STATE.settings.notifications = perm === 'granted';
+    saveState();
+    renderSettingsPage();
+    toast(perm === 'granted' ? 'success' : 'warn', perm === 'granted' ? 'Reminders enabled' : 'Permission not granted', perm === 'granted' ? 'You\'ll get a notification when meds are due.' : 'In-app banners will still remind you.');
+  });
+}
+function toggleNotifications() {
+  if (!STATE.settings.notifications) requestNotifPermission();
+  else { STATE.settings.notifications = false; saveState(); renderSettingsPage(); }
+}
+function toggleSetting(elId, key) {
+  STATE.settings.banners = !STATE.settings.banners;
+  saveState();
+  document.getElementById(elId).classList.toggle('on', STATE.settings.banners);
+}
+function checkReminders() {
+  if (!currentUser) return;
+  const now = timeNow();
+  const today = todayStr();
+  const dueMeds = [];
+  STATE.meds.forEach(m => {
+    if (!medActiveOnDate(m, today)) return;
+    const takenTimes = (STATE.medLog[today] && STATE.medLog[today][m.id]) || [];
+    m.times.forEach(t => {
+      if (t <= now && !takenTimes.includes(t) && !(STATE.bannersDismissed[today] || []).includes(m.id + t)) {
+        dueMeds.push({ med: m, time: t });
+      }
+    });
+  });
+  document.getElementById('notif-dot').classList.toggle('show', dueMeds.length > 0);
+  if (STATE.settings.banners) renderReminderBanners(dueMeds);
+  if (STATE.settings.notifications && 'Notification' in window && Notification.permission === 'granted') {
+    dueMeds.forEach(({ med, time }) => {
+      const key = med.id + time + today;
+      if (!window._notified) window._notified = {};
+      if (!window._notified[key]) { window._notified[key] = true; new Notification('MedVault Reminder', { body: `Time to take ${med.name} (${med.dosage || ''})` }); }
+    });
+  }
+}
+function renderReminderBanners(dueMeds) {
+  const el = document.getElementById('reminder-banners');
+  if (!el) return;
+  if (!dueMeds) {
+    const now = timeNow(); const today = todayStr();
+    dueMeds = [];
+    STATE.meds.forEach(m => {
+      if (!medActiveOnDate(m, today)) return;
+      const takenTimes = (STATE.medLog[today] && STATE.medLog[today][m.id]) || [];
+      m.times.forEach(t => { if (t <= now && !takenTimes.includes(t) && !(STATE.bannersDismissed[today] || []).includes(m.id + t)) dueMeds.push({ med: m, time: t }); });
+    });
+  }
+  if (!STATE.settings.banners || !dueMeds.length) { el.innerHTML = ''; return; }
+  el.innerHTML = dueMeds.map(({ med, time }) => `
+    <div class="reminder-banner">
+      <div><b>💊 ${med.name} is due</b><span>${med.dosage || ''} · scheduled for ${time}</span></div>
+      <div class="reminder-actions">
+        <button class="take" onclick="toggleMedTaken('${med.id}','${time}')">Mark Taken</button>
+        <button class="snooze" onclick="dismissBanner('${med.id}','${time}')">Dismiss</button>
+      </div>
+    </div>`).join('');
+}
+function dismissBanner(medId, time) {
+  const today = todayStr();
+  STATE.bannersDismissed[today] = STATE.bannersDismissed[today] || [];
+  STATE.bannersDismissed[today].push(medId + time);
+  saveState(); renderReminderBanners();
+}
+
+// =====================================================================
+// TRACKING PAGE (aggregated widgets, standalone page)
+// =====================================================================
+function renderTrackingPage() {
+  const grid = document.getElementById('tracking-widget-grid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="widget-card">
+      <div class="widget-head"><h3>Water Intake</h3></div>
+      <div class="ring-wrap"><div class="ring-holder">
+        <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130"><circle class="ring-bg" cx="65" cy="65" r="55"></circle><circle class="ring-fill" id="water-ring" cx="65" cy="65" r="55" stroke-dasharray="345" stroke-dashoffset="345"></circle></svg>
+        <div class="ring-center"><b id="water-pct">0%</b><span id="water-amt"></span></div></div>
+        <div class="water-controls"><button class="water-btn" onclick="logWater(-1)">− Glass</button><button class="water-btn" onclick="logWater(1)">+ Glass</button></div>
+      </div>
+    </div>
+    <div class="widget-card"><div class="widget-head"><h3>Sleep</h3><button class="widget-add" onclick="openSleepModal()">+</button></div>
+      <div class="mini-stat-row"><div class="mini-stat"><b id="sleep-last">–</b><span>Last Night</span></div><div class="mini-stat"><b id="sleep-week">–</b><span>Weekly</span></div><div class="mini-stat"><b id="sleep-month">–</b><span>Monthly</span></div></div>
+      <div class="chart-svg-wrap"><div class="bar-chart" id="sleep-chart"></div></div>
+    </div>
+    <div class="widget-card"><div class="widget-head"><h3>Weight</h3><button class="widget-add" onclick="openWeightModal()">+</button></div>
+      <div class="mini-stat-row"><div class="mini-stat"><b id="weight-current">–</b><span>Current</span></div><div class="mini-stat"><b id="weight-week">–</b><span>7-Day</span></div><div class="mini-stat"><b id="weight-month">–</b><span>30-Day</span></div></div>
+      <div class="chart-svg-wrap"><div class="bar-chart" id="weight-chart"></div></div>
+    </div>
+    <div class="widget-card"><div class="widget-head"><h3>Pain Level</h3><button class="widget-add" onclick="openPainModal()">+</button></div>
+      <div id="pain-summary" class="empty-state">Log your pain to see trends here.</div>
+      <div class="chart-svg-wrap"><div class="bar-chart" id="pain-chart"></div></div>
+    </div>`;
+  renderWaterRing(); renderSleepWidget(); renderWeightWidget(); renderPainWidget();
+}
+
+// =====================================================================
+// MONTHLY REPORT
+// =====================================================================
+function renderMonthlyReport() {
+  const el = document.getElementById('reports-body');
+  if (!el) return;
+  const monthStart = daysAgoStr(30);
+  const medDays = [...new Set(Object.keys(STATE.medLog).filter(d => d >= monthStart))].length;
+  const activeDaysWithMeds = (() => {
+    let total = 0, adhered = 0;
+    for (let i = 0; i < 30; i++) {
+      const d = daysAgoStr(i);
+      const meds = STATE.meds.filter(m => medActiveOnDate(m, d));
+      if (!meds.length) continue;
+      total++;
+      const log = STATE.medLog[d] || {};
+      if (meds.every(m => (log[m.id] || []).length >= m.times.length)) adhered++;
+    }
+    return total ? Math.round((adhered / total) * 100) : null;
+  })();
+  const waterEntries = Object.keys(STATE.waterLog).filter(d => d >= monthStart);
+  const avgWater = waterEntries.length ? (waterEntries.reduce((s, d) => s + STATE.waterLog[d], 0) / waterEntries.length).toFixed(1) : '–';
+  const sleepEntries = STATE.sleep.filter(s => s.date >= monthStart);
+  const avgSleep = sleepEntries.length ? (sleepEntries.reduce((s, x) => s + x.hours, 0) / sleepEntries.length).toFixed(1) : '–';
+  const weightEntries = STATE.weight.filter(w => w.date >= monthStart);
+  const weightChange = weightEntries.length >= 2 ? (weightEntries[0].weight - weightEntries[weightEntries.length - 1].weight).toFixed(1) : null;
+  const painEntries = STATE.pain.filter(p => p.date >= monthStart);
+  const avgPain = painEntries.length ? (painEntries.reduce((s, p) => s + p.level, 0) / painEntries.length).toFixed(1) : '–';
+  const goalsCompleted = STATE.goals.reduce((sum, g) => sum + ((g.completedWeeks || []).length), 0);
+  const achvThisPeriod = (STATE.unlocked || []).length;
+
+  el.innerHTML = `
+    <div class="dash-topgrid" style="margin-bottom:1.5rem;">
+      <div class="dash-stat-card"><div class="lbl">Med Adherence</div><div class="val">${activeDaysWithMeds !== null ? activeDaysWithMeds + '%' : '–'}</div><div class="sub">last 30 days</div></div>
+      <div class="dash-stat-card"><div class="lbl">Avg Water</div><div class="val">${avgWater}</div><div class="sub">glasses / day</div></div>
+      <div class="dash-stat-card"><div class="lbl">Avg Sleep</div><div class="val">${avgSleep}h</div><div class="sub">per night</div></div>
+      <div class="dash-stat-card"><div class="lbl">Weight Change</div><div class="val">${weightChange !== null ? (weightChange >= 0 ? '+' : '') + weightChange + ' kg' : '–'}</div><div class="sub">this month</div></div>
+    </div>
+    <div class="widget-grid">
+      <div class="widget-card"><div class="widget-head"><h3>Pain Trend</h3></div><div class="chart-svg-wrap"><div class="bar-chart" id="report-pain-chart"></div></div><p style="margin-top:0.5rem;font-size:0.75rem;color:var(--muted);">Average this month: ${avgPain}/10</p></div>
+      <div class="widget-card"><div class="widget-head"><h3>Sleep Trend</h3></div><div class="chart-svg-wrap"><div class="bar-chart" id="report-sleep-chart"></div></div></div>
+      <div class="widget-card"><div class="widget-head"><h3>Goals &amp; Achievements</h3></div>
+        <div class="mini-stat-row"><div class="mini-stat"><b>${goalsCompleted}</b><span>Goals Hit</span></div><div class="mini-stat"><b>${achvThisPeriod}</b><span>Achievements</span></div><div class="mini-stat"><b>${STATE.longestStreak || 0}</b><span>Longest Streak</span></div></div>
+      </div>
+    </div>`;
+  renderBarChart('report-pain-chart', painEntries.slice(0, 14).reverse().map(p => ({ label: p.date.slice(5), value: p.level })), 10);
+  renderBarChart('report-sleep-chart', sleepEntries.slice(0, 14).reverse().map(s => ({ label: s.date.slice(5), value: s.hours })), 12);
+}
+
+// =====================================================================
+// PROFILE / SETTINGS
+// =====================================================================
+function renderProfilePage() {
+  document.getElementById('profile-name').textContent = currentUser.name || '–';
+  document.getElementById('profile-email').textContent = currentUser.email || '–';
+  document.getElementById('profile-since').textContent = new Date(STATE.profile.createdAt || Date.now()).toLocaleDateString();
+  document.getElementById('profile-xp').textContent = STATE.xp + (STATE.level - 1) * 100;
+  document.getElementById('profile-longest-streak').textContent = STATE.longestStreak || 0;
+  document.getElementById('profile-achv').textContent = (STATE.unlocked || []).length;
+}
+function renderSettingsPage() {
+  document.getElementById('notif-toggle').classList.toggle('on', !!STATE.settings.notifications);
+  document.getElementById('banner-toggle').classList.toggle('on', STATE.settings.banners !== false);
+}
+function exportUserData() {
+  const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'medvault-data.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('success', 'Data exported', 'Your JSON file has started downloading.');
+}
+
+// =====================================================================
 // START
 // =====================================================================
 init();
+tryRestoreSession();
+setInterval(checkReminders, 30000);
 </script>
 </body>
 </html>
