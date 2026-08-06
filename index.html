@@ -952,6 +952,26 @@
 .mv-field{margin-bottom:1rem;}
 .mv-field label{display:block;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);margin-bottom:0.4rem;}
 .mv-field input,.mv-field select,.mv-field textarea{width:100%;padding:0.7rem 0.85rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.87rem;outline:none;}
+/* ===================================================================
+   THEMED SELECT / DROPDOWN — fixes raw white browser <select> style
+   showing up on Leaderboard sort + Journal mood filter (and any other
+   bare <select> in the app). Custom SVG chevron replaces the native
+   arrow so it matches the dark glass theme instead of the OS default.
+   =================================================================== */
+select{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-color:var(--surface2);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0.75rem center;background-size:16px;
+  border:1px solid var(--border);border-radius:0.55rem;
+  color:var(--text);font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:600;
+  padding:0.6rem 2.2rem 0.6rem 0.9rem;
+  cursor:pointer;outline:none;
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+select:hover{border-color:var(--accent);}
+select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
+select option{background:var(--surface2);color:var(--text);}
 .mv-field textarea{resize:vertical;min-height:64px;}
 .mv-field input:focus,.mv-field select:focus,.mv-field textarea:focus{border-color:rgba(0,210,180,0.4);}
 .mv-field-row{display:flex;gap:0.75rem;}
@@ -2644,9 +2664,24 @@ function tryRestoreSession() {
 // =====================================================================
 function skey(name) { return 'mv_' + (currentUser ? currentUser.uid : 'guest') + '_' + name; }
 function loadState() {
+  // =====================================================================
+  // BUGFIX: previously returned the raw saved object as-is. Any account
+  // saved before a newer field existed (e.g. an early save made before
+  // "sleep"/"weight"/"pain" arrays were added) would come back missing
+  // those keys entirely. Downstream code like checkAchievements() then
+  // called `.length` on `undefined` and threw — which silently aborted
+  // logWater()/renderWaterRing() mid-function, so the water ring and %
+  // never visually updated even though the click WAS saved (you'd only
+  // see the correct value after a full page reload). Shallow-merging
+  // onto a fresh defaultState() guarantees every expected key always
+  // exists, so a partial/legacy save can never crash a render again.
+  // =====================================================================
   try {
     const raw = localStorage.getItem(skey('state'));
-    return raw ? JSON.parse(raw) : defaultState();
+    const base = defaultState();
+    if (!raw) return base;
+    const saved = JSON.parse(raw);
+    return Object.assign(base, saved);
   } catch (e) { return defaultState(); }
 }
 function saveState() { localStorage.setItem(skey('state'), JSON.stringify(STATE)); }
@@ -2758,12 +2793,18 @@ function unlockAchievement(id) {
   toast('success', 'Achievement Unlocked!', a ? `${a.icon} ${a.title}` : '', 3800);
 }
 function checkAchievements() {
-  const waterWins = Object.keys(STATE.waterLog).filter(d => (STATE.waterLog[d] || 0) >= (STATE.waterGoal || 8)).length;
-  if (waterWins >= 7) unlockAchievement('hydration_master');
-  if (STATE.sleep.length >= 7) unlockAchievement('sleep_champion');
-  if (STATE.weight.length >= 5) unlockAchievement('weight_tracker');
-  if ((STATE.dailyStreak || 0) >= 14) unlockAchievement('consistency_king');
-  if ((STATE.meds || []).length >= 1) unlockAchievement('first_med');
+  // Defensive fallbacks (belt-and-braces alongside the loadState() merge
+  // fix above) — a thrown error here used to silently cancel whatever
+  // render call came right after it (e.g. renderWaterRing()).
+  try {
+    const waterLog = STATE.waterLog || {};
+    const waterWins = Object.keys(waterLog).filter(d => (waterLog[d] || 0) >= (STATE.waterGoal || 8)).length;
+    if (waterWins >= 7) unlockAchievement('hydration_master');
+    if ((STATE.sleep || []).length >= 7) unlockAchievement('sleep_champion');
+    if ((STATE.weight || []).length >= 5) unlockAchievement('weight_tracker');
+    if ((STATE.dailyStreak || 0) >= 14) unlockAchievement('consistency_king');
+    if ((STATE.meds || []).length >= 1) unlockAchievement('first_med');
+  } catch (e) { console.error('checkAchievements failed:', e); }
 }
 
 // =====================================================================
@@ -2908,8 +2949,12 @@ function logWater(delta) {
   saveState();
   if (delta > 0) addXP(3, 'Logged water');
   if (next >= (STATE.waterGoal || 8) && cur < (STATE.waterGoal || 8)) toast('success', 'Water goal reached! 💧', 'Great hydration today.');
-  checkAchievements();
+  // Render FIRST, achievements check SECOND: the ring/% must always
+  // reflect the click immediately, even in the unlikely event something
+  // in achievement-checking throws (it's now wrapped in try/catch too,
+  // but ordering it after the render is a second layer of safety).
   renderWaterRing();
+  checkAchievements();
 }
 function openWaterGoalModal() {
   openModal(`
