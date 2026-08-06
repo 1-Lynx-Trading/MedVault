@@ -10,6 +10,7 @@
      =================================================================== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
   // =====================================================================
   // FIREBASE CONFIG — paste the rest of your config values from the
@@ -18,12 +19,12 @@
   // placeholder until you paste your real project's values.
   // =====================================================================
   const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCl5bHJoZaaX8N4TUPnbu-NrHDIvuBQHIU",
-    authDomain: "PASTE_YOUR_AUTH_DOMAIN_HERE",       // e.g. "medvault-xxxxx.firebaseapp.com"
-    projectId: "PASTE_YOUR_PROJECT_ID_HERE",         // e.g. "medvault-xxxxx"
-    storageBucket: "PASTE_YOUR_STORAGE_BUCKET_HERE", // e.g. "medvault-xxxxx.appspot.com"
-    messagingSenderId: "PASTE_YOUR_SENDER_ID_HERE",
-    appId: "PASTE_YOUR_APP_ID_HERE"
+    apiKey: "AIzaSyD2q8J1BQLw-dU_uJDiqLT2zSATfOsgTY4",
+    authDomain: "medvault-lynx.firebaseapp.com",       // e.g. "medvault-xxxxx.firebaseapp.com"
+    projectId: "medvault-lynx",         // e.g. "medvault-xxxxx"
+    storageBucket: "medvault-lynx.firebasestorage.app", // e.g. "medvault-xxxxx.appspot.com"
+    messagingSenderId: "859496590460",
+    appId: "1:859496590460:web:cdf9fff55a44a9976bedf9"
   };
 </script>
 <style>
@@ -1091,6 +1092,68 @@
 .skeleton{background:linear-gradient(90deg,var(--surface2) 25%,rgba(255,255,255,0.04) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:0.6rem;}
 @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
+/* ==================== JOURNAL ==================== */
+.journal-toolbar{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center;}
+.journal-search{flex:1;min-width:180px;padding:0.7rem 0.9rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.85rem;outline:none;}
+.journal-search:focus{border-color:rgba(0,210,180,0.4);}
+#journal-mood-filter{padding:0.7rem 0.9rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;color:var(--text);font-family:'Syne',sans-serif;font-size:0.82rem;outline:none;}
+.journal-view-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;overflow:hidden;}
+.journal-view-toggle button{padding:0.7rem 1rem;background:transparent;border:none;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;}
+.journal-view-toggle button.active{background:var(--accent);color:#04120f;}
+.journal-entry-card{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1.15rem 1.3rem;margin-bottom:0.9rem;display:flex;gap:1rem;align-items:flex-start;transition:border-color .2s;}
+.journal-entry-card:hover{border-color:rgba(0,210,180,0.3);}
+.journal-mood-badge{font-size:1.6rem;line-height:1;flex-shrink:0;}
+.journal-entry-body{flex:1;min-width:0;}
+.journal-entry-head{display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.35rem;flex-wrap:wrap;}
+.journal-entry-date{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--accent);}
+.journal-entry-actions{display:flex;gap:0.5rem;}
+.journal-entry-actions button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.72rem;font-weight:700;}
+.journal-entry-actions button:hover{color:var(--text);}
+.journal-entry-notes{font-size:0.85rem;color:var(--text);line-height:1.5;white-space:pre-wrap;word-break:break-word;}
+.journal-tag-row{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:0.5rem;}
+.journal-tag{font-size:0.68rem;background:rgba(0,210,180,0.1);border:1px solid rgba(0,210,180,0.25);color:var(--accent);padding:0.15rem 0.55rem;border-radius:2rem;}
+.journal-energy-pips{display:flex;gap:2px;margin-top:0.4rem;}
+.journal-energy-pips span{width:14px;height:5px;border-radius:2px;background:var(--surface2);}
+.journal-energy-pips span.filled{background:var(--accent3);}
+.journal-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.4rem;margin-top:0.75rem;}
+.journal-cal-cell{aspect-ratio:1;border-radius:0.5rem;background:var(--surface2);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.7rem;color:var(--muted);cursor:default;position:relative;}
+.journal-cal-cell.has-entry{cursor:pointer;border-color:rgba(0,210,180,0.3);}
+.journal-cal-cell.has-entry:hover{border-color:var(--accent);}
+.journal-cal-cell .dnum{font-family:'DM Mono',monospace;}
+.journal-cal-cell .dmood{font-size:1rem;margin-top:2px;}
+.journal-cal-cell.empty{visibility:hidden;}
+.mood-picker{display:flex;gap:0.5rem;}
+.mood-picker button{flex:1;padding:0.65rem 0;background:var(--surface2);border:1px solid var(--border);border-radius:0.6rem;font-size:1.35rem;cursor:pointer;transition:transform .15s,border-color .15s;}
+.mood-picker button.sel{border-color:var(--accent);background:rgba(0,210,180,0.12);transform:scale(1.08);}
+.energy-picker{display:flex;gap:0.4rem;}
+.energy-picker button{flex:1;padding:0.5rem 0;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);cursor:pointer;}
+.energy-picker button.sel{border-color:var(--accent3);color:var(--accent3);background:rgba(167,139,250,0.1);}
+.symptom-chip-input{display:flex;flex-wrap:wrap;gap:0.4rem;padding:0.55rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;}
+.symptom-chip{display:flex;align-items:center;gap:0.35rem;background:rgba(0,210,180,0.12);border:1px solid rgba(0,210,180,0.3);color:var(--accent);font-size:0.72rem;padding:0.2rem 0.5rem;border-radius:2rem;}
+.symptom-chip b{cursor:pointer;font-size:0.8rem;}
+.symptom-chip-input input{flex:1;min-width:100px;background:none;border:none;outline:none;color:var(--text);font-family:'Syne',sans-serif;font-size:0.82rem;}
+.draft-badge{font-size:0.68rem;color:var(--accent4);font-family:'DM Mono',monospace;}
+
+/* ==================== LEADERBOARD ==================== */
+.lb-row{display:grid;grid-template-columns:2.2rem 2.6rem 1fr auto auto auto;align-items:center;gap:0.9rem;padding:0.85rem 0.5rem;border-bottom:1px solid var(--border);}
+.lb-row:last-child{border-bottom:none;}
+.lb-row.me{background:rgba(0,210,180,0.07);border-radius:0.6rem;}
+.lb-rank{font-family:'DM Mono',monospace;font-weight:700;color:var(--muted);text-align:center;}
+.lb-rank.top1{color:var(--accent4);}
+.lb-rank.top2{color:#cbd5e1;}
+.lb-rank.top3{color:#d29b6a;}
+.lb-avatar{width:2.6rem;height:2.6rem;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent3));display:flex;align-items:center;justify-content:center;font-weight:800;color:#04120f;font-size:0.95rem;}
+.lb-name{font-weight:700;font-size:0.88rem;}
+.lb-name span{display:block;font-weight:400;font-size:0.7rem;color:var(--muted);margin-top:0.1rem;}
+.lb-stat{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--text);text-align:right;min-width:3.5rem;}
+.lb-stat span{display:block;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+
+/* ==================== EXPORT CENTRE ==================== */
+.export-desc{font-size:0.8rem;color:var(--muted);margin:0.5rem 0 1rem;line-height:1.5;}
+.export-btn-row{display:flex;gap:0.6rem;flex-wrap:wrap;}
+.export-btn-row .mv-btn{flex:1;min-width:80px;padding:0.6rem;font-size:0.78rem;}
+.export-btn-row .mv-btn[disabled]{opacity:0.4;cursor:not-allowed;}
+
 @media (max-width:1000px){
   .dash-topgrid{grid-template-columns:repeat(2,1fr);}
   .widget-grid{grid-template-columns:repeat(2,1fr);}
@@ -1267,8 +1330,10 @@
     </li>
     <li><a onclick="showPage('medications')" id="nav-medications">Medication</a></li>
     <li><a onclick="showPage('tracking')" id="nav-tracking">Health Tracking</a></li>
+    <li><a onclick="showPage('journal')" id="nav-journal">Journal</a></li>
     <li><a onclick="showPage('reports')" id="nav-reports">Reports</a></li>
     <li><a onclick="showPage('achievements')" id="nav-achievements">Achievements</a></li>
+    <li><a onclick="showPage('leaderboard')" id="nav-leaderboard">Leaderboard</a></li>
   </ul>
   <div class="user-menu-wrap">
     <div class="nav-count" id="entry-count">Loading…</div>
@@ -1280,6 +1345,7 @@
       <button class="avatar-btn" id="avatar-btn" onclick="toggleUserDropdown(event)">?</button>
       <div class="user-dropdown" id="user-dropdown">
         <a onclick="showPage('profile');closeUserDropdown();">Profile</a>
+        <a onclick="showPage('export');closeUserDropdown();">Export Centre</a>
         <a onclick="showPage('settings');closeUserDropdown();">Settings</a>
         <a onclick="handleLogout()">Log Out</a>
       </div>
@@ -1616,6 +1682,72 @@
   </div>
 </div>
 
+<!-- ======== HEALTH JOURNAL PAGE ======== -->
+<div id="page-journal" class="page-section">
+  <div class="section-page-head">
+    <h2>Health <em>Journal</em></h2>
+    <p>Log your mood, symptoms, and reflections. Gemini can spot patterns for you.</p>
+    <button class="btn-welcome secondary" style="margin-top:1rem;padding:0.7rem 1.4rem;font-size:0.8rem;" onclick="openJournalModal()">+ New Entry</button>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-card" style="margin-bottom:1.5rem;">
+      <div class="widget-head"><h3>AI Insights</h3><button class="widget-add" onclick="runJournalAiAnalysis()" title="Analyse with Gemini">✨</button></div>
+      <div id="journal-ai-insights">
+        <div class="empty-state">Log a few entries, then tap ✨ to see AI-detected patterns (mood trends, recurring symptoms, energy dips).</div>
+      </div>
+    </div>
+    <div class="journal-toolbar">
+      <input id="journal-search" class="journal-search" placeholder="Search entries…" oninput="renderJournalList()">
+      <select id="journal-mood-filter" onchange="renderJournalList()">
+        <option value="">All moods</option>
+        <option value="5">😄 Great</option>
+        <option value="4">🙂 Good</option>
+        <option value="3">😐 Okay</option>
+        <option value="2">🙁 Low</option>
+        <option value="1">😣 Rough</option>
+      </select>
+      <div class="journal-view-toggle">
+        <button id="jv-timeline" class="active" onclick="setJournalView('timeline')">Timeline</button>
+        <button id="jv-calendar" onclick="setJournalView('calendar')">Calendar</button>
+      </div>
+    </div>
+    <div id="journal-calendar-wrap" style="display:none;margin-bottom:1.25rem;">
+      <div class="widget-card">
+        <div class="widget-head">
+          <h3 id="journal-cal-label">–</h3>
+          <div style="display:flex;gap:0.4rem;">
+            <button class="widget-add" onclick="shiftJournalCal(-1)">‹</button>
+            <button class="widget-add" onclick="shiftJournalCal(1)">›</button>
+          </div>
+        </div>
+        <div class="journal-cal-grid" id="journal-cal-grid"></div>
+      </div>
+    </div>
+    <div id="journal-list"></div>
+  </div>
+</div>
+
+<!-- ======== LEADERBOARD PAGE ======== -->
+<div id="page-leaderboard" class="page-section">
+  <div class="section-page-head">
+    <h2>Global <em>Leaderboard</em></h2>
+    <p id="leaderboard-sub">See how your health streaks stack up.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="journal-toolbar" style="margin-bottom:1.25rem;">
+      <select id="lb-sort" onchange="renderLeaderboardList()">
+        <option value="xp">Sort by Total XP</option>
+        <option value="level">Sort by Level</option>
+        <option value="streak">Sort by Streak</option>
+        <option value="achv">Sort by Achievements</option>
+      </select>
+    </div>
+    <div class="widget-card">
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ======== PROFILE PAGE ======== -->
 <div id="page-profile" class="page-section">
   <div class="section-page-head">
@@ -1634,6 +1766,94 @@
       <div class="settings-row"><span>Total XP Earned</span><b id="profile-xp">0</b></div>
       <div class="settings-row"><span>Longest Daily Streak</span><b id="profile-longest-streak">0</b></div>
       <div class="settings-row"><span>Achievements Unlocked</span><b id="profile-achv">0</b></div>
+    </div>
+    <div class="settings-block">
+      <h4>Health Profile <span style="font-weight:400;color:var(--muted);font-size:0.72rem;">— private, visible only to you</span></h4>
+      <div class="settings-row"><span>Blood Type</span><b id="hp-bloodType">–</b></div>
+      <div class="settings-row"><span>Height</span><b id="hp-heightCm">–</b></div>
+      <div class="settings-row"><span>Weight</span><b id="hp-weightKg">–</b></div>
+      <div class="settings-row"><span>Allergies</span><b id="hp-allergies">–</b></div>
+      <div class="settings-row"><span>Medical Conditions</span><b id="hp-conditions">–</b></div>
+      <div class="settings-row"><span>Current Medications</span><b id="hp-medicationsFreeText">–</b></div>
+      <div class="settings-row"><span>Emergency Contact</span><b id="hp-emergency">–</b></div>
+      <div class="settings-row"><span>Preferred Doctor</span><b id="hp-preferredDoctor">–</b></div>
+      <div class="settings-row"><span>Preferred Pharmacy</span><b id="hp-preferredPharmacy">–</b></div>
+      <div class="settings-row"><span>Notes</span><b id="hp-notes">–</b></div>
+      <button class="mv-btn primary" style="margin-top:1rem;" onclick="openHealthProfileModal()">Edit Health Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======== EXPORT CENTRE PAGE ======== -->
+<div id="page-export" class="page-section">
+  <div class="section-page-head">
+    <h2>Export <em>Centre</em></h2>
+    <p>Download your MedVault data as PDF, CSV, or JSON.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-grid" id="export-grid">
+      <div class="widget-card">
+        <div class="widget-head"><h3>Health Tracking</h3></div>
+        <p class="export-desc">Water, sleep, weight &amp; pain logs.</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" onclick="exportCsv('tracking')">CSV</button>
+          <button class="mv-btn ghost" onclick="exportJson('tracking')">JSON</button>
+          <button class="mv-btn primary" onclick="exportPdf('tracking')">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Health Journal</h3></div>
+        <p class="export-desc">Mood, symptoms &amp; reflections.</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" onclick="exportCsv('journal')">CSV</button>
+          <button class="mv-btn ghost" onclick="exportJson('journal')">JSON</button>
+          <button class="mv-btn primary" onclick="exportPdf('journal')">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Medications</h3></div>
+        <p class="export-desc">Medication list &amp; adherence log.</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" onclick="exportCsv('meds')">CSV</button>
+          <button class="mv-btn ghost" onclick="exportJson('meds')">JSON</button>
+          <button class="mv-btn primary" onclick="exportPdf('meds')">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Documents</h3></div>
+        <p class="export-desc">Vault document metadata (Smart Document Vault, coming next phase).</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" disabled title="Coming in the Smart Document Vault phase">CSV</button>
+          <button class="mv-btn ghost" disabled title="Coming in the Smart Document Vault phase">JSON</button>
+          <button class="mv-btn primary" disabled title="Coming in the Smart Document Vault phase">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Appointments</h3></div>
+        <p class="export-desc">Calendar events (Calendar page, coming next phase).</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" disabled title="Coming in the Calendar phase">CSV</button>
+          <button class="mv-btn ghost" disabled title="Coming in the Calendar phase">JSON</button>
+          <button class="mv-btn primary" disabled title="Coming in the Calendar phase">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Analytics</h3></div>
+        <p class="export-desc">Health score &amp; trend history (Analytics page, coming next phase).</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" disabled title="Coming in the Analytics phase">CSV</button>
+          <button class="mv-btn ghost" disabled title="Coming in the Analytics phase">JSON</button>
+          <button class="mv-btn primary" disabled title="Coming in the Analytics phase">PDF</button>
+        </div>
+      </div>
+      <div class="widget-card span2">
+        <div class="widget-head"><h3>Entire Profile</h3></div>
+        <p class="export-desc">Everything MedVault knows about you — health profile, tracking, journal, medications, goals &amp; achievements — in one file.</p>
+        <div class="export-btn-row">
+          <button class="mv-btn ghost" onclick="exportJson('all')">Full JSON Backup</button>
+          <button class="mv-btn primary" onclick="exportPdf('all')">Full PDF Report</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2104,6 +2324,9 @@ function showPage(page) {
   if (page === 'achievements') renderAchievementsPage();
   if (page === 'profile')      renderProfilePage();
   if (page === 'settings')     renderSettingsPage();
+  if (page === 'journal')      renderJournalPage();
+  if (page === 'leaderboard')  renderLeaderboardPage();
+  if (page === 'export')       renderExportPage();
 
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -2167,6 +2390,8 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 // still using placeholder values, so the app works immediately)
 // =====================================================================
 let usingFirebase = false;
+let usingFirestore = false; // true once Firestore is confirmed reachable (needs a real projectId)
+let db = null;              // Firestore handle — used for the global Leaderboard collection
 let currentUser = null;
 let authPersistLocal = true;
 
@@ -2175,8 +2400,15 @@ try {
   if (configReady && window.firebase) {
     firebase.initializeApp(FIREBASE_CONFIG);
     usingFirebase = true;
+    // Firestore powers the cross-device Leaderboard (localStorage alone can't be "global").
+    // It degrades gracefully to a device-local leaderboard simulation if projectId is still a placeholder.
+    const projectReady = FIREBASE_CONFIG.projectId && !FIREBASE_CONFIG.projectId.includes('PASTE_YOUR');
+    if (projectReady) {
+      db = firebase.firestore();
+      usingFirestore = true;
+    }
   }
-} catch (e) { usingFirebase = false; }
+} catch (e) { usingFirebase = false; usingFirestore = false; }
 
 // ---- Local auth emulator (used only when Firebase config isn't filled in) ----
 const LocalAuth = {
@@ -2362,6 +2594,7 @@ function onAuthSuccess(profile, remember, isSignup) {
     countStats();
     showPage('dashboard');
     recordDailyLogin();
+    syncLeaderboardEntry();
     if (isSignup) unlockAchievement('first_login');
     toast('success', isSignup ? 'Welcome to MedVault!' : 'Logged in', `Good to see you, ${profile.name || ''}.`);
   }, 900);
@@ -2429,7 +2662,16 @@ function defaultState() {
     goals: defaultGoals(),
     unlocked: [], customAchievements: [],
     settings: { notifications: false, banners: true },
-    bannersDismissed: {}
+    bannersDismissed: {},
+    // ---- Health Journal ----
+    journal: [], // { id, date, time, mood(1-5), energy(1-5), symptoms:[], notes, updatedAt }
+    journalDraft: null,
+    // ---- Expanded Health Profile ----
+    healthProfile: {
+      allergies: '', conditions: '', medicationsFreeText: '', bloodType: '',
+      heightCm: '', weightKg: '', emergencyName: '', emergencyPhone: '',
+      preferredDoctor: '', preferredPharmacy: '', notes: ''
+    }
   };
 }
 function defaultGoals() {
@@ -2461,6 +2703,7 @@ function addXP(amount, reason) {
   toast('xp', `+${amount} XP`, reason || '', 2200);
   if (leveled) toast('success', `Level Up! Level ${STATE.level}`, 'Keep up the great work.', 3200);
   checkAchievements();
+  syncLeaderboardEntry();
   if (document.getElementById('page-dashboard').classList.contains('active')) renderDashboard();
 }
 
@@ -3090,6 +3333,7 @@ function renderProfilePage() {
   document.getElementById('profile-xp').textContent = STATE.xp + (STATE.level - 1) * 100;
   document.getElementById('profile-longest-streak').textContent = STATE.longestStreak || 0;
   document.getElementById('profile-achv').textContent = (STATE.unlocked || []).length;
+  renderHealthProfileSummary();
 }
 function renderSettingsPage() {
   document.getElementById('notif-toggle').classList.toggle('on', !!STATE.settings.notifications);
@@ -3102,6 +3346,458 @@ function exportUserData() {
   a.href = url; a.download = 'medvault-data.json'; a.click();
   URL.revokeObjectURL(url);
   toast('success', 'Data exported', 'Your JSON file has started downloading.');
+}
+
+// =====================================================================
+// EXPANDED HEALTH PROFILE (private — this device / this Firebase user only)
+// =====================================================================
+function hp() { STATE.healthProfile = STATE.healthProfile || defaultState().healthProfile; return STATE.healthProfile; }
+function renderHealthProfileSummary() {
+  const p = hp();
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val && String(val).trim() ? val : '–'; };
+  set('hp-bloodType', p.bloodType);
+  set('hp-heightCm', p.heightCm ? p.heightCm + ' cm' : '');
+  set('hp-weightKg', p.weightKg ? p.weightKg + ' kg' : '');
+  set('hp-allergies', p.allergies);
+  set('hp-conditions', p.conditions);
+  set('hp-medicationsFreeText', p.medicationsFreeText);
+  set('hp-emergency', (p.emergencyName || p.emergencyPhone) ? `${p.emergencyName || ''} ${p.emergencyPhone ? '(' + p.emergencyPhone + ')' : ''}`.trim() : '');
+  set('hp-preferredDoctor', p.preferredDoctor);
+  set('hp-preferredPharmacy', p.preferredPharmacy);
+  set('hp-notes', p.notes);
+}
+function openHealthProfileModal() {
+  const p = hp();
+  openModal(`
+    <div class="mv-modal-head"><h3>Edit Health Profile</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <div class="mv-field-row">
+      <div class="mv-field"><label>Blood Type</label>
+        <select id="hpf-bloodType">
+          ${['','A+','A-','B+','B-','AB+','AB-','O+','O-'].map(v => `<option value="${v}" ${p.bloodType===v?'selected':''}>${v || 'Unknown'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mv-field"><label>Height (cm)</label><input type="number" id="hpf-heightCm" value="${p.heightCm||''}" placeholder="e.g. 172"></div>
+    </div>
+    <div class="mv-field"><label>Weight (kg)</label><input type="number" id="hpf-weightKg" value="${p.weightKg||''}" placeholder="e.g. 68"></div>
+    <div class="mv-field"><label>Allergies</label><textarea id="hpf-allergies" placeholder="e.g. Penicillin, peanuts">${p.allergies||''}</textarea></div>
+    <div class="mv-field"><label>Medical Conditions</label><textarea id="hpf-conditions" placeholder="e.g. Type 2 diabetes, asthma">${p.conditions||''}</textarea></div>
+    <div class="mv-field"><label>Current Medications (free text)</label><textarea id="hpf-medicationsFreeText" placeholder="Anything not already tracked on the Medications page">${p.medicationsFreeText||''}</textarea></div>
+    <div class="mv-field-row">
+      <div class="mv-field"><label>Emergency Contact Name</label><input id="hpf-emergencyName" value="${p.emergencyName||''}" placeholder="e.g. Jane Doe"></div>
+      <div class="mv-field"><label>Emergency Contact Phone</label><input id="hpf-emergencyPhone" value="${p.emergencyPhone||''}" placeholder="e.g. +61 4xx xxx xxx"></div>
+    </div>
+    <div class="mv-field-row">
+      <div class="mv-field"><label>Preferred Doctor</label><input id="hpf-preferredDoctor" value="${p.preferredDoctor||''}" placeholder="e.g. Dr. Smith, City Clinic"></div>
+      <div class="mv-field"><label>Preferred Pharmacy</label><input id="hpf-preferredPharmacy" value="${p.preferredPharmacy||''}" placeholder="e.g. Chemist Warehouse, Main St"></div>
+    </div>
+    <div class="mv-field"><label>Notes</label><textarea id="hpf-notes" placeholder="Anything else worth noting">${p.notes||''}</textarea></div>
+    <div class="mv-btn-row"><button class="mv-btn ghost" onclick="closeModal()">Cancel</button><button class="mv-btn primary" onclick="saveHealthProfile()">Save</button></div>
+  `);
+}
+function saveHealthProfile() {
+  const p = hp();
+  const g = id => document.getElementById(id).value.trim();
+  p.bloodType = g('hpf-bloodType');
+  p.heightCm = g('hpf-heightCm');
+  p.weightKg = g('hpf-weightKg');
+  p.allergies = g('hpf-allergies');
+  p.conditions = g('hpf-conditions');
+  p.medicationsFreeText = g('hpf-medicationsFreeText');
+  p.emergencyName = g('hpf-emergencyName');
+  p.emergencyPhone = g('hpf-emergencyPhone');
+  p.preferredDoctor = g('hpf-preferredDoctor');
+  p.preferredPharmacy = g('hpf-preferredPharmacy');
+  p.notes = g('hpf-notes');
+  saveState();
+  syncHealthProfileToFirestore();
+  closeModal();
+  renderHealthProfileSummary();
+  toast('success', 'Health profile updated');
+}
+// Best-effort cloud sync of the private health profile — only runs if Firestore is configured
+// (usingFirestore). Falls back silently to localStorage-only otherwise (offline fallback pattern
+// used throughout MedVault). See FIREBASE_CONFIG at top of file for setup instructions.
+function syncHealthProfileToFirestore() {
+  if (!usingFirestore || !currentUser) return;
+  db.collection('users').doc(currentUser.uid).set({ healthProfile: hp() }, { merge: true }).catch(() => {});
+}
+
+// =====================================================================
+// HEALTH JOURNAL
+// =====================================================================
+let journalView = 'timeline';
+let journalCalMonth = new Date();
+const MOOD_EMOJI = { 5: '😄', 4: '🙂', 3: '😐', 2: '🙁', 1: '😣' };
+const MOOD_LABEL = { 5: 'Great', 4: 'Good', 3: 'Okay', 2: 'Low', 1: 'Rough' };
+
+function openJournalModal(entryId) {
+  const entry = entryId ? STATE.journal.find(e => e.id === entryId) : (STATE.journalDraft || null);
+  const mood = entry ? entry.mood : 3;
+  const energy = entry ? entry.energy : 3;
+  const symptoms = entry ? (entry.symptoms || []) : [];
+  openModal(`
+    <div class="mv-modal-head"><h3>${entryId ? 'Edit Entry' : 'New Journal Entry'}</h3><div class="mv-modal-close" onclick="discardJournalDraft()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
+    <input type="hidden" id="jf-id" value="${entryId || ''}">
+    <div class="mv-field"><label>Mood</label>
+      <div class="mood-picker" id="jf-mood-picker">
+        ${[5,4,3,2,1].map(m => `<button type="button" class="${m==mood?'sel':''}" data-mood="${m}" onclick="pickJournalMood(${m})" title="${MOOD_LABEL[m]}">${MOOD_EMOJI[m]}</button>`).join('')}
+      </div>
+    </div>
+    <div class="mv-field"><label>Energy Level</label>
+      <div class="energy-picker" id="jf-energy-picker">
+        ${[1,2,3,4,5].map(e => `<button type="button" class="${e==energy?'sel':''}" data-energy="${e}" onclick="pickJournalEnergy(${e})">${e}</button>`).join('')}
+      </div>
+    </div>
+    <div class="mv-field"><label>Symptoms (press Enter to add)</label>
+      <div class="symptom-chip-input" id="jf-symptom-wrap">
+        ${symptoms.map(s => `<span class="symptom-chip">${escapeHtml(s)}<b onclick="removeJournalSymptomChip(this)">&times;</b></span>`).join('')}
+        <input id="jf-symptom-input" placeholder="e.g. headache" onkeydown="if(event.key==='Enter'){event.preventDefault();addJournalSymptomChip(this.value);this.value='';}">
+      </div>
+    </div>
+    <div class="mv-field"><label>Notes &amp; Reflections</label><textarea id="jf-notes" placeholder="How are you feeling today?" oninput="autosaveJournalDraft()" style="min-height:110px;">${entry ? escapeHtml(entry.notes || '') : ''}</textarea></div>
+    <div class="mv-btn-row">
+      ${entryId ? `<button class="mv-btn danger" onclick="deleteJournalEntry('${entryId}')">Delete</button>` : ''}
+      <button class="mv-btn primary" onclick="saveJournalEntry()">${entryId ? 'Save Changes' : 'Add Entry'}</button>
+    </div>
+    <p style="margin-top:0.75rem;font-size:0.68rem;color:var(--muted);">Entries autosave as a draft while you type, so you won't lose your notes if you close this window.</p>
+  `);
+  window._journalMood = mood;
+  window._journalEnergy = energy;
+}
+function pickJournalMood(m) {
+  window._journalMood = m;
+  document.querySelectorAll('#jf-mood-picker button').forEach(b => b.classList.toggle('sel', +b.dataset.mood === m));
+  autosaveJournalDraft();
+}
+function pickJournalEnergy(e) {
+  window._journalEnergy = e;
+  document.querySelectorAll('#jf-energy-picker button').forEach(b => b.classList.toggle('sel', +b.dataset.energy === e));
+  autosaveJournalDraft();
+}
+function addJournalSymptomChip(val) {
+  val = (val || '').trim();
+  if (!val) return;
+  const wrap = document.getElementById('jf-symptom-wrap');
+  const input = document.getElementById('jf-symptom-input');
+  const chip = document.createElement('span');
+  chip.className = 'symptom-chip';
+  chip.innerHTML = `${escapeHtml(val)}<b onclick="removeJournalSymptomChip(this)">&times;</b>`;
+  wrap.insertBefore(chip, input);
+  autosaveJournalDraft();
+}
+function removeJournalSymptomChip(el) { el.parentElement.remove(); autosaveJournalDraft(); }
+function currentJournalSymptoms() {
+  return [...document.querySelectorAll('#jf-symptom-wrap .symptom-chip')].map(c => c.firstChild.textContent.trim());
+}
+function autosaveJournalDraft() {
+  const idEl = document.getElementById('jf-id');
+  if (!idEl || idEl.value) return; // only autosave drafts of *new* entries, not edits
+  STATE.journalDraft = {
+    mood: window._journalMood || 3,
+    energy: window._journalEnergy || 3,
+    symptoms: currentJournalSymptoms(),
+    notes: document.getElementById('jf-notes') ? document.getElementById('jf-notes').value : ''
+  };
+  saveState();
+}
+function discardJournalDraft() { closeModal(); }
+function saveJournalEntry() {
+  const id = document.getElementById('jf-id').value;
+  const notes = document.getElementById('jf-notes').value.trim();
+  const symptoms = currentJournalSymptoms();
+  const mood = window._journalMood || 3;
+  const energy = window._journalEnergy || 3;
+  if (!notes && !symptoms.length) { toast('warn', 'Add a note or symptom first'); return; }
+  const now = new Date();
+  if (id) {
+    const e = STATE.journal.find(x => x.id === id);
+    if (e) { e.mood = mood; e.energy = energy; e.symptoms = symptoms; e.notes = notes; e.updatedAt = Date.now(); }
+    toast('success', 'Entry updated');
+  } else {
+    STATE.journal.unshift({ id: 'j_' + Date.now().toString(36), date: todayStr(), time: now.toTimeString().slice(0,5), mood, energy, symptoms, notes, updatedAt: Date.now() });
+    STATE.journalDraft = null;
+    addXP(8, 'Journal entry logged');
+  }
+  saveState();
+  syncJournalToFirestore();
+  closeModal();
+  renderJournalPage();
+}
+function deleteJournalEntry(id) {
+  STATE.journal = STATE.journal.filter(e => e.id !== id);
+  saveState();
+  syncJournalToFirestore();
+  closeModal();
+  renderJournalPage();
+  toast('success', 'Entry deleted');
+}
+function syncJournalToFirestore() {
+  if (!usingFirestore || !currentUser) return;
+  db.collection('users').doc(currentUser.uid).set({ journal: STATE.journal }, { merge: true }).catch(() => {});
+}
+function setJournalView(v) {
+  journalView = v;
+  document.getElementById('jv-timeline').classList.toggle('active', v === 'timeline');
+  document.getElementById('jv-calendar').classList.toggle('active', v === 'calendar');
+  document.getElementById('journal-calendar-wrap').style.display = v === 'calendar' ? '' : 'none';
+  document.getElementById('journal-list').style.display = v === 'timeline' ? '' : 'none';
+  if (v === 'calendar') renderJournalCalendar();
+}
+function shiftJournalCal(delta) {
+  journalCalMonth.setMonth(journalCalMonth.getMonth() + delta);
+  renderJournalCalendar();
+}
+function renderJournalCalendar() {
+  const y = journalCalMonth.getFullYear(), m = journalCalMonth.getMonth();
+  document.getElementById('journal-cal-label').textContent = journalCalMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const firstDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const byDate = {};
+  STATE.journal.forEach(e => { if (!byDate[e.date]) byDate[e.date] = e; });
+  let html = '';
+  for (let i = 0; i < firstDow; i++) html += `<div class="journal-cal-cell empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const e = byDate[dateStr];
+    html += `<div class="journal-cal-cell ${e ? 'has-entry' : ''}" ${e ? `onclick="openJournalModal('${e.id}')"` : ''}>
+      <span class="dnum">${d}</span>${e ? `<span class="dmood">${MOOD_EMOJI[e.mood]}</span>` : ''}
+    </div>`;
+  }
+  document.getElementById('journal-cal-grid').innerHTML = html;
+}
+function renderJournalPage() {
+  document.getElementById('journal-list').style.display = journalView === 'timeline' ? '' : 'none';
+  document.getElementById('journal-calendar-wrap').style.display = journalView === 'calendar' ? '' : 'none';
+  renderJournalList();
+  if (journalView === 'calendar') renderJournalCalendar();
+}
+function renderJournalList() {
+  const list = document.getElementById('journal-list');
+  const q = (document.getElementById('journal-search').value || '').toLowerCase();
+  const moodFilter = document.getElementById('journal-mood-filter').value;
+  let entries = STATE.journal.slice();
+  if (q) entries = entries.filter(e => (e.notes || '').toLowerCase().includes(q) || (e.symptoms || []).some(s => s.toLowerCase().includes(q)));
+  if (moodFilter) entries = entries.filter(e => String(e.mood) === moodFilter);
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state">
+      <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      No journal entries yet. Tap "+ New Entry" to start tracking how you feel.
+    </div>`;
+    return;
+  }
+  list.innerHTML = entries.map(e => `
+    <div class="journal-entry-card">
+      <div class="journal-mood-badge">${MOOD_EMOJI[e.mood] || '📝'}</div>
+      <div class="journal-entry-body">
+        <div class="journal-entry-head">
+          <span class="journal-entry-date">${e.date} · ${e.time || ''}</span>
+          <div class="journal-entry-actions">
+            <button onclick="openJournalModal('${e.id}')">Edit</button>
+            <button onclick="deleteJournalEntry('${e.id}')" style="color:var(--accent2);">Delete</button>
+          </div>
+        </div>
+        ${e.notes ? `<div class="journal-entry-notes">${escapeHtml(e.notes)}</div>` : ''}
+        ${(e.symptoms||[]).length ? `<div class="journal-tag-row">${e.symptoms.map(s => `<span class="journal-tag">${escapeHtml(s)}</span>`).join('')}</div>` : ''}
+        <div class="journal-energy-pips" title="Energy: ${e.energy}/5">${[1,2,3,4,5].map(i => `<span class="${i<=e.energy?'filled':''}"></span>`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// AI symptom-journal pattern analysis (Gemini) — reuses the shared callAI() module below.
+async function runJournalAiAnalysis() {
+  const el = document.getElementById('journal-ai-insights');
+  if (STATE.journal.length < 2) { toast('warn', 'Log a few more entries first', 'AI insights work best with at least 3-5 entries.'); return; }
+  el.innerHTML = `<div class="empty-state">Analysing your last ${Math.min(STATE.journal.length, 30)} entries…</div>`;
+  const recent = STATE.journal.slice(0, 30).map(e => `${e.date}: mood ${e.mood}/5, energy ${e.energy}/5, symptoms: [${(e.symptoms||[]).join(', ')}], notes: "${(e.notes||'').slice(0,200)}"`).join('\n');
+  const prompt = `You are a cautious wellness pattern-spotter, not a doctor. Given these health journal entries (most recent first), identify: 1) frequently mentioned symptoms, 2) any mood or energy trend, 3) possible recurring issues worth mentioning to a doctor. Keep it to 4-6 short bullet points. End with one line reminding the user this is not medical advice.\n\nEntries:\n${recent}`;
+  try {
+    const result = await callAI(prompt);
+    el.innerHTML = `<div class="ai-result">${escapeHtml(result).replace(/\n/g,'<br>')}</div>
+      <p style="margin-top:0.75rem;font-size:0.68rem;color:var(--muted);">⚠️ AI-generated, informational only — not a diagnosis or medical advice.</p>`;
+  } catch (err) {
+    el.innerHTML = `<div class="empty-state">Couldn't reach the AI service (${escapeHtml(err.message || 'unknown error')}). Check the Groq/Gemini API key in the AI module near the top of the script.</div>`;
+  }
+}
+
+// =====================================================================
+// GLOBAL LEADERBOARD
+// =====================================================================
+function myLeaderboardEntry() {
+  return {
+    uid: currentUser.uid,
+    name: currentUser.name || (currentUser.email || 'Anonymous').split('@')[0],
+    level: STATE.level,
+    totalXp: STATE.xp + (STATE.level - 1) * 100,
+    streak: STATE.longestStreak || 0,
+    achv: (STATE.unlocked || []).length,
+    updatedAt: Date.now()
+  };
+}
+// Pushes this user's stats to the shared leaderboard. Called after login and whenever
+// XP/streaks/achievements change. Uses Firestore when configured (true global leaderboard);
+// otherwise falls back to a device-local simulated leaderboard so the page still works.
+function syncLeaderboardEntry() {
+  if (!currentUser) return;
+  const entry = myLeaderboardEntry();
+  if (usingFirestore) {
+    db.collection('leaderboard').doc(currentUser.uid).set(entry).catch(() => {});
+  } else {
+    let local = {};
+    try { local = JSON.parse(localStorage.getItem('mv_local_leaderboard') || '{}'); } catch (e) {}
+    local[currentUser.uid] = entry;
+    localStorage.setItem('mv_local_leaderboard', JSON.stringify(local));
+  }
+}
+async function fetchLeaderboardEntries() {
+  if (usingFirestore) {
+    const snap = await db.collection('leaderboard').orderBy('totalXp', 'desc').limit(100).get();
+    return snap.docs.map(d => d.data());
+  }
+  let local = {};
+  try { local = JSON.parse(localStorage.getItem('mv_local_leaderboard') || '{}'); } catch (e) {}
+  return Object.values(local);
+}
+async function renderLeaderboardPage() {
+  syncLeaderboardEntry();
+  document.getElementById('leaderboard-sub').textContent = usingFirestore
+    ? 'Live, global — powered by Firestore.'
+    : 'Local preview mode — connect a real Firebase project ID for a true cross-device leaderboard.';
+  await renderLeaderboardList();
+}
+async function renderLeaderboardList() {
+  const el = document.getElementById('leaderboard-list');
+  el.innerHTML = `<div class="empty-state">Loading leaderboard…</div>`;
+  let entries;
+  try { entries = await fetchLeaderboardEntries(); } catch (e) { entries = []; }
+  if (!entries.length) entries = [myLeaderboardEntry()];
+  const sortKey = document.getElementById('lb-sort').value;
+  const keyFn = { xp: e => e.totalXp, level: e => e.level, streak: e => e.streak, achv: e => e.achv }[sortKey] || (e => e.totalXp);
+  entries.sort((a, b) => keyFn(b) - keyFn(a));
+  el.innerHTML = entries.map((e, i) => {
+    const rank = i + 1;
+    const rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+    const isMe = currentUser && e.uid === currentUser.uid;
+    return `<div class="lb-row ${isMe ? 'me' : ''}">
+      <div class="lb-rank ${rankCls}">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</div>
+      <div class="lb-avatar">${(e.name || '?').charAt(0).toUpperCase()}</div>
+      <div class="lb-name">${escapeHtml(e.name)}${isMe ? ' <span style="color:var(--accent);">(you)</span>' : ''}<span>Level ${e.level}</span></div>
+      <div class="lb-stat">${e.totalXp}<span>XP</span></div>
+      <div class="lb-stat">${e.streak}<span>Streak</span></div>
+      <div class="lb-stat">${e.achv}<span>Achv</span></div>
+    </div>`;
+  }).join('');
+}
+
+// =====================================================================
+// EXPORT CENTRE
+// =====================================================================
+function exportDatasetFor(kind) {
+  if (kind === 'tracking') return { water: STATE.waterLog, sleep: STATE.sleep, weight: STATE.weight, pain: STATE.pain };
+  if (kind === 'journal') return STATE.journal;
+  if (kind === 'meds') return { medications: STATE.meds, log: STATE.medLog };
+  if (kind === 'all') return STATE;
+  return {};
+}
+function exportJson(kind) {
+  const data = exportDatasetFor(kind);
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `medvault-${kind}.json`; a.click();
+  URL.revokeObjectURL(url);
+  toast('success', 'Exported', `medvault-${kind}.json is downloading.`);
+}
+function toCsvRows(kind) {
+  if (kind === 'journal') {
+    const rows = [['Date','Time','Mood','Energy','Symptoms','Notes']];
+    STATE.journal.forEach(e => rows.push([e.date, e.time||'', e.mood, e.energy, (e.symptoms||[]).join('; '), (e.notes||'').replace(/\n/g,' ')]));
+    return rows;
+  }
+  if (kind === 'meds') {
+    const rows = [['Medication','Dosage','Times','Days','Notes']];
+    STATE.meds.forEach(m => rows.push([m.name, m.dosage||'', (m.times||[]).join(' / '), (m.days||[]).join(' / '), m.notes||'']));
+    return rows;
+  }
+  if (kind === 'tracking') {
+    const rows = [['Type','Date','Value']];
+    Object.entries(STATE.waterLog||{}).forEach(([d,v]) => rows.push(['Water', d, v]));
+    (STATE.sleep||[]).forEach(s => rows.push(['Sleep', s.date, s.hours]));
+    (STATE.weight||[]).forEach(w => rows.push(['Weight', w.date, w.weight]));
+    (STATE.pain||[]).forEach(p => rows.push(['Pain', p.date, p.level]));
+    return rows;
+  }
+  return [['No data']];
+}
+function exportCsv(kind) {
+  const rows = toCsvRows(kind);
+  const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `medvault-${kind}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  toast('success', 'Exported', `medvault-${kind}.csv is downloading.`);
+}
+// Generates a branded, print-ready report and hands it to the browser's native
+// "Save as PDF" print target — keeps everything client-side, no PDF library needed.
+function exportPdf(kind) {
+  const titleMap = { tracking: 'Health Tracking Report', journal: 'Health Journal Report', meds: 'Medications Report', all: 'Full MedVault Report' };
+  const win = window.open('', '_blank');
+  if (!win) { toast('error', 'Popup blocked', 'Please allow popups to generate the PDF.'); return; }
+  let bodyHtml = '';
+  if (kind === 'journal') {
+    bodyHtml = STATE.journal.map(e => `<div class="entry"><h3>${e.date} ${e.time||''} — ${MOOD_LABEL[e.mood]||''} (Energy ${e.energy}/5)</h3><p>${escapeHtml(e.notes||'')}</p>${(e.symptoms||[]).length?`<p><em>Symptoms: ${(e.symptoms).join(', ')}</em></p>`:''}</div>`).join('') || '<p>No entries yet.</p>';
+  } else if (kind === 'meds') {
+    bodyHtml = `<table><tr><th>Medication</th><th>Dosage</th><th>Times</th><th>Notes</th></tr>${STATE.meds.map(m => `<tr><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.dosage||'')}</td><td>${(m.times||[]).join(', ')}</td><td>${escapeHtml(m.notes||'')}</td></tr>`).join('')}</table>`;
+  } else if (kind === 'tracking') {
+    bodyHtml = `<h3>Weight</h3><table><tr><th>Date</th><th>kg</th></tr>${(STATE.weight||[]).map(w=>`<tr><td>${w.date}</td><td>${w.weight}</td></tr>`).join('')}</table>
+      <h3>Sleep</h3><table><tr><th>Date</th><th>Hours</th></tr>${(STATE.sleep||[]).map(s=>`<tr><td>${s.date}</td><td>${s.hours}</td></tr>`).join('')}</table>
+      <h3>Pain</h3><table><tr><th>Date</th><th>Level</th></tr>${(STATE.pain||[]).map(p=>`<tr><td>${p.date}</td><td>${p.level}/10</td></tr>`).join('')}</table>`;
+  } else {
+    const p = hp();
+    bodyHtml = `<h3>Health Profile</h3><table>${Object.entries(p).map(([k,v])=>`<tr><td>${k}</td><td>${escapeHtml(String(v||''))}</td></tr>`).join('')}</table>
+      <h3>Lifetime Stats</h3><p>Level ${STATE.level} · ${STATE.xp + (STATE.level-1)*100} XP · Longest streak ${STATE.longestStreak||0} days · ${(STATE.unlocked||[]).length} achievements</p>`;
+  }
+  win.document.write(`<!DOCTYPE html><html><head><title>${titleMap[kind]}</title><style>
+    body{font-family:Arial,sans-serif;color:#111;padding:2rem;max-width:800px;margin:0 auto;}
+    h1{color:#00a894;} h3{margin-top:1.5rem;border-bottom:1px solid #ddd;padding-bottom:0.3rem;}
+    table{width:100%;border-collapse:collapse;margin-top:0.5rem;} td,th{border:1px solid #ddd;padding:6px 8px;font-size:0.85rem;text-align:left;}
+    .entry{margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid #eee;} .brand{color:#00a894;font-weight:800;}
+    .disclaimer{margin-top:2rem;font-size:0.7rem;color:#888;}
+  </style></head><body>
+    <h1><span class="brand">Med</span>Vault — ${titleMap[kind]}</h1>
+    <p style="color:#888;font-size:0.8rem;">Generated ${new Date().toLocaleString()} for ${escapeHtml(currentUser.name || currentUser.email || '')}</p>
+    ${bodyHtml}
+    <p class="disclaimer">This report is generated from self-reported data for personal reference only. It is not medical advice and does not replace consultation with a qualified healthcare provider.</p>
+    <script>window.onload=()=>window.print();<\/script>
+  </body></html>`);
+  win.document.close();
+  toast('success', 'Report ready', 'Use "Save as PDF" in the print dialog.');
+}
+function renderExportPage() { /* static grid — nothing dynamic to render yet */ }
+
+// =====================================================================
+// AI MODULE (Groq) — swap the key below, everything else routes through here
+// =====================================================================
+// SECURITY NOTE: this key lives in client-side code, so it is visible to anyone who views
+// source. For production, proxy this call through a small backend/serverless function instead
+// of calling Groq directly from the browser, and rotate this key if it's ever shipped publicly.
+const AI_CONFIG = {
+  provider: 'groq',
+  apiKey: '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', // <-- replace with your own Groq key
+  model: 'llama-3.3-70b-versatile',
+  endpoint: 'https://api.groq.com/openai/v1/chat/completions'
+};
+async function callAI(prompt) {
+  const res = await fetch(AI_CONFIG.endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${AI_CONFIG.apiKey}` },
+    body: JSON.stringify({ model: AI_CONFIG.model, messages: [{ role: 'user', content: prompt }], temperature: 0.4 })
+  });
+  if (!res.ok) throw new Error(`AI request failed (${res.status})`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || 'No response.';
 }
 
 // =====================================================================
