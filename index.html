@@ -2885,6 +2885,19 @@ function renderMedFullList() {
 }
 
 // =====================================================================
+// DUPLICATE-ID SAFE UPDATE HELPER
+// The Dashboard and the Health Tracking page each render their own copy
+// of the water/sleep/weight/pain widgets, and both copies reuse the same
+// element ids (e.g. "water-ring" appears twice in the document). Plain
+// document.getElementById() only ever finds the FIRST match, so the
+// second (often the one actually visible on screen) never updated. This
+// helper updates every element sharing that id, on both pages at once.
+// =====================================================================
+function setAllById(id, updater) {
+  document.querySelectorAll(`[id="${id}"]`).forEach(updater);
+}
+
+// =====================================================================
 // WATER TRACKER
 // =====================================================================
 function logWater(delta) {
@@ -2917,10 +2930,9 @@ function renderWaterRing() {
   const goal = STATE.waterGoal || 8;
   const pct = Math.min(100, Math.round((cur / goal) * 100));
   const circ = 345;
-  const ringEl = document.getElementById('water-ring');
-  if (ringEl) ringEl.style.strokeDashoffset = circ - (circ * pct / 100);
-  const pctEl = document.getElementById('water-pct'); if (pctEl) pctEl.textContent = pct + '%';
-  const amtEl = document.getElementById('water-amt'); if (amtEl) amtEl.textContent = `${cur} / ${goal} glasses`;
+  setAllById('water-ring', el => { el.style.strokeDashoffset = circ - (circ * pct / 100); });
+  setAllById('water-pct', el => { el.textContent = pct + '%'; });
+  setAllById('water-amt', el => { el.textContent = `${cur} / ${goal} glasses`; });
 }
 
 // =====================================================================
@@ -2954,11 +2966,11 @@ function saveSleep() {
 }
 function renderSleepWidget() {
   const last = STATE.sleep[0];
-  document.getElementById('sleep-last').textContent = last ? last.hours + 'h' : '–';
+  setAllById('sleep-last', el => { el.textContent = last ? last.hours + 'h' : '–'; });
   const weekEntries = STATE.sleep.filter(s => s.date >= daysAgoStr(7));
   const monthEntries = STATE.sleep.filter(s => s.date >= daysAgoStr(30));
-  document.getElementById('sleep-week').textContent = weekEntries.length ? (weekEntries.reduce((a, b) => a + b.hours, 0) / weekEntries.length).toFixed(1) + 'h' : '–';
-  document.getElementById('sleep-month').textContent = monthEntries.length ? (monthEntries.reduce((a, b) => a + b.hours, 0) / monthEntries.length).toFixed(1) + 'h' : '–';
+  setAllById('sleep-week', el => { el.textContent = weekEntries.length ? (weekEntries.reduce((a, b) => a + b.hours, 0) / weekEntries.length).toFixed(1) + 'h' : '–'; });
+  setAllById('sleep-month', el => { el.textContent = monthEntries.length ? (monthEntries.reduce((a, b) => a + b.hours, 0) / monthEntries.length).toFixed(1) + 'h' : '–'; });
   renderBarChart('sleep-chart', STATE.sleep.slice(0, 7).reverse().map(s => ({ label: s.date.slice(5), value: s.hours })), 12);
 }
 
@@ -2984,11 +2996,11 @@ function saveWeight() {
 }
 function renderWeightWidget() {
   const cur = STATE.weight[0];
-  document.getElementById('weight-current').textContent = cur ? cur.weight + ' kg' : '–';
+  setAllById('weight-current', el => { el.textContent = cur ? cur.weight + ' kg' : '–'; });
   const weekAgo = STATE.weight.find(w => w.date <= daysAgoStr(7));
   const monthAgo = STATE.weight.find(w => w.date <= daysAgoStr(30));
-  document.getElementById('weight-week').textContent = cur && weekAgo ? (cur.weight - weekAgo.weight >= 0 ? '+' : '') + (cur.weight - weekAgo.weight).toFixed(1) : '–';
-  document.getElementById('weight-month').textContent = cur && monthAgo ? (cur.weight - monthAgo.weight >= 0 ? '+' : '') + (cur.weight - monthAgo.weight).toFixed(1) : '–';
+  setAllById('weight-week', el => { el.textContent = cur && weekAgo ? (cur.weight - weekAgo.weight >= 0 ? '+' : '') + (cur.weight - weekAgo.weight).toFixed(1) : '–'; });
+  setAllById('weight-month', el => { el.textContent = cur && monthAgo ? (cur.weight - monthAgo.weight >= 0 ? '+' : '') + (cur.weight - monthAgo.weight).toFixed(1) : '–'; });
   renderBarChart('weight-chart', STATE.weight.slice(0, 7).reverse().map(w => ({ label: w.date.slice(5), value: w.weight })), null);
 }
 
@@ -3025,13 +3037,12 @@ function savePain() {
   renderPainWidget();
 }
 function renderPainWidget() {
-  const el = document.getElementById('pain-summary');
-  if (!STATE.pain.length) { el.className = 'empty-state'; el.textContent = 'Log your pain to see trends here.'; }
-  else {
-    const last = STATE.pain[0];
-    el.className = '';
-    el.innerHTML = `<div style="font-size:0.8rem;">Latest: <b>${last.level}/10</b> on ${last.date}</div>`;
-  }
+  const hasData = STATE.pain.length > 0;
+  const last = STATE.pain[0];
+  setAllById('pain-summary', el => {
+    if (!hasData) { el.className = 'empty-state'; el.textContent = 'Log your pain to see trends here.'; }
+    else { el.className = ''; el.innerHTML = `<div style="font-size:0.8rem;">Latest: <b>${last.level}/10</b> on ${last.date}</div>`; }
+  });
   renderBarChart('pain-chart', STATE.pain.slice(0, 7).reverse().map(p => ({ label: p.date.slice(5), value: p.level })), 10);
 }
 
@@ -3039,16 +3050,21 @@ function renderPainWidget() {
 // SIMPLE BAR CHART RENDERER (no external chart library needed)
 // =====================================================================
 function renderBarChart(containerId, points, maxOverride) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!points.length) { el.innerHTML = `<div class="empty-state" style="padding:1rem 0;">No data yet</div>`; return; }
-  const max = maxOverride || Math.max(...points.map(p => p.value), 1);
-  el.innerHTML = points.map(p => `
-    <div class="bar-col">
-      <div class="bar-fill" style="height:${Math.max(4, (p.value / max) * 100)}%" title="${p.value}"></div>
-      <div class="bar-label">${p.label}</div>
-    </div>
-  `).join('');
+  const els = document.querySelectorAll(`[id="${containerId}"]`);
+  if (!els.length) return;
+  let html;
+  if (!points.length) {
+    html = `<div class="empty-state" style="padding:1rem 0;">No data yet</div>`;
+  } else {
+    const max = maxOverride || Math.max(...points.map(p => p.value), 1);
+    html = points.map(p => `
+      <div class="bar-col">
+        <div class="bar-fill" style="height:${Math.max(4, (p.value / max) * 100)}%" title="${p.value}"></div>
+        <div class="bar-label">${p.label}</div>
+      </div>
+    `).join('');
+  }
+  els.forEach(el => { el.innerHTML = html; });
 }
 
 // =====================================================================
