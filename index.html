@@ -11,6 +11,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- Tesseract.js — in-browser OCR for the Smart Document Vault (no backend needed) -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
   // =====================================================================
   // FIREBASE CONFIG — paste the rest of your config values from the
@@ -1095,6 +1097,75 @@ select option{background:var(--surface2);color:var(--text);}
 .reminder-actions .snooze{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 
 .dash-nav-links a{cursor:pointer;}
+/* ==== Smart Document Vault ==== */
+.vault-dropzone{border:2px dashed var(--border);border-radius:1rem;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:0.5rem;}
+.vault-dropzone:hover,.vault-dropzone.dragover{border-color:var(--accent);background:rgba(0,210,180,0.05);}
+.vault-dropzone svg{width:34px;height:34px;stroke:var(--accent);fill:none;}
+.vault-dropzone strong{font-size:0.95rem;}
+.vault-dropzone span{font-size:0.75rem;color:var(--muted);}
+.vault-upload-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0;font-size:0.78rem;color:var(--muted);}
+.vault-upload-row .vbar{flex:1;height:6px;border-radius:4px;background:var(--surface2);overflow:hidden;}
+.vault-upload-row .vbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#00a894);transition:width .2s;}
+.vault-toolbar{display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.vault-toolbar input,.vault-toolbar select{background:var(--surface2);border:1px solid var(--border);border-radius:0.6rem;padding:0.65rem 0.9rem;color:var(--text);font-family:inherit;font-size:0.82rem;}
+.vault-toolbar input{flex:1;min-width:220px;}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;}
+.doc-card{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1.1rem;backdrop-filter:blur(12px);transition:transform .2s,border-color .2s;display:flex;flex-direction:column;gap:0.55rem;}
+.doc-card:hover{border-color:rgba(0,210,180,0.3);transform:translateY(-2px);}
+.doc-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;}
+.doc-icon{width:38px;height:38px;border-radius:0.6rem;display:flex;align-items:center;justify-content:center;background:rgba(0,210,180,0.12);flex-shrink:0;}
+.doc-icon svg{width:19px;height:19px;stroke:var(--accent);fill:none;}
+.doc-name{font-weight:700;font-size:0.85rem;word-break:break-word;}
+.doc-meta{font-size:0.7rem;color:var(--muted);}
+.doc-cat-badge{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0.25rem 0.55rem;border-radius:0.4rem;background:rgba(167,139,250,0.15);color:var(--accent3);align-self:flex-start;}
+.doc-actions{display:flex;gap:0.4rem;flex-wrap:wrap;margin-top:auto;}
+.doc-actions button{flex:1;min-width:70px;font-size:0.68rem;font-weight:700;padding:0.45rem 0.5rem;border-radius:0.5rem;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:border-color .15s;}
+.doc-actions button:hover{border-color:var(--accent);color:var(--accent);}
+.doc-expiry-tag{font-size:0.68rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:0.4rem;background:rgba(255,107,107,0.15);color:var(--accent2);}
+.vault-expiry-row{display:flex;align-items:center;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid var(--border);font-size:0.8rem;}
+.vault-expiry-row:last-child{border-bottom:none;}
+/* ==== Calendar ==== */
+.cal-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.cal-toolbar h3{font-size:1rem;font-weight:800;}
+.cal-nav-btn{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer;}
+.cal-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:0.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;text-align:center;margin-bottom:0.4rem;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-cell{min-height:74px;border-radius:0.6rem;background:var(--surface2);border:1px solid transparent;padding:0.35rem;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column;gap:2px;}
+.cal-cell:hover{border-color:var(--accent);}
+.cal-cell.other-month{opacity:0.35;}
+.cal-cell.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+.cal-cell.selected{background:rgba(0,210,180,0.1);}
+.cal-cell-num{font-size:0.72rem;font-weight:700;}
+.cal-dot-row{display:flex;flex-wrap:wrap;gap:2px;}
+.cal-dot{width:6px;height:6px;border-radius:50%;}
+.cal-event-item{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0;border-bottom:1px solid var(--border);}
+.cal-event-item:last-child{border-bottom:none;}
+.cal-event-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.cal-event-body{flex:1;}
+.cal-event-body strong{font-size:0.83rem;display:block;}
+.cal-event-body span{font-size:0.7rem;color:var(--muted);}
+.cal-event-actions{display:flex;gap:0.35rem;}
+.cal-event-actions button{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:0.7rem;}
+.cal-event-actions button:hover{color:var(--accent);border-color:var(--accent);}
+.cal-color-swatch{display:inline-block;width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.cal-color-swatch.selected{border-color:var(--text);}
+/* ==== Analytics ==== */
+.analytics-stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;}
+.an-stat{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1rem 1.1rem;backdrop-filter:blur(12px);}
+.an-stat .an-num{font-size:1.5rem;font-weight:800;color:var(--accent);}
+.an-stat .an-label{font-size:0.7rem;color:var(--muted);margin-top:0.2rem;}
+.an-ring-wrap{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.5rem;padding:0.5rem 0;}
+.goal-progress-row{margin-bottom:0.9rem;}
+.goal-progress-row .gp-top{display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:0.3rem;}
+.goal-progress-row .gp-bar{height:8px;border-radius:5px;background:var(--surface2);overflow:hidden;}
+.goal-progress-row .gp-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#00a894);}
+/* ==== AI Summary Cards / shared AI bits ==== */
+.ai-summary-grid{display:grid;gap:1rem;}
+.ai-summary-item{background:rgba(0,210,180,0.05);border:1px solid var(--border);border-radius:0.9rem;padding:1.1rem;}
+.ai-summary-text{font-size:0.85rem;line-height:1.65;color:var(--text);}
+.disclaimer-text{margin-top:0.75rem;font-size:0.68rem;color:var(--muted);font-style:italic;}
+.ai-explain-box{background:rgba(0,210,180,0.05);border:1px solid var(--border);border-radius:0.8rem;padding:1rem;font-size:0.83rem;line-height:1.6;margin-top:0.75rem;max-height:340px;overflow-y:auto;}
 .section-page-head{padding:85px 2rem 1rem;max-width:1320px;margin:0 auto;}
 .section-page-head h2{font-size:1.7rem;font-weight:800;}
 .section-page-head p{color:var(--muted);font-size:0.85rem;margin-top:0.3rem;}
@@ -1351,6 +1422,9 @@ select option{background:var(--surface2);color:var(--text);}
     <li><a onclick="showPage('medications')" id="nav-medications">Medication</a></li>
     <li><a onclick="showPage('tracking')" id="nav-tracking">Health Tracking</a></li>
     <li><a onclick="showPage('journal')" id="nav-journal">Journal</a></li>
+    <li><a onclick="showPage('vault')" id="nav-vault">Vault</a></li>
+    <li><a onclick="showPage('calendar')" id="nav-calendar">Calendar</a></li>
+    <li><a onclick="showPage('analytics')" id="nav-analytics">Analytics</a></li>
     <li><a onclick="showPage('reports')" id="nav-reports">Reports</a></li>
     <li><a onclick="showPage('achievements')" id="nav-achievements">Achievements</a></li>
     <li><a onclick="showPage('leaderboard')" id="nav-leaderboard">Leaderboard</a></li>
@@ -1744,6 +1818,117 @@ select option{background:var(--surface2);color:var(--text);}
       </div>
     </div>
     <div id="journal-list"></div>
+  </div>
+</div>
+
+<!-- ======== SMART DOCUMENT VAULT PAGE ======== -->
+<div id="page-vault" class="page-section">
+  <div class="section-page-head">
+    <h2>Smart Document <em>Vault</em></h2>
+    <p>Upload blood tests, imaging, prescriptions, and letters. AI reads, summarises, and files them for you.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-card" style="margin-bottom:1.5rem;">
+      <div id="vault-drop" class="vault-dropzone" onclick="document.getElementById('vault-file-input').click()">
+        <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <strong>Drag &amp; drop files here</strong>
+        <span>or click to browse — PDF, JPG, PNG supported</span>
+        <input type="file" id="vault-file-input" multiple accept=".pdf,image/*" style="display:none;" onchange="handleVaultFiles(this.files)">
+      </div>
+      <div id="vault-upload-progress"></div>
+    </div>
+
+    <div class="vault-toolbar">
+      <input type="text" id="vault-search" placeholder="Search documents (OCR text, name, category)…" oninput="renderVaultList()">
+      <select id="vault-cat-filter" onchange="renderVaultList()">
+        <option value="">All categories</option>
+        <option>Blood Tests</option><option>Imaging</option><option>Prescriptions</option>
+        <option>Vaccinations</option><option>Referrals</option><option>Specialist Letters</option>
+        <option>Insurance</option><option>Other</option>
+      </select>
+    </div>
+
+    <div class="widget-card" style="margin-bottom:1.5rem;" id="vault-expiry-card">
+      <div class="widget-head"><h3>⏰ Expiry Reminders</h3></div>
+      <div id="vault-expiry-list"></div>
+    </div>
+
+    <div class="vault-grid" id="vault-grid"></div>
+    <div class="empty-state" id="vault-empty" style="display:none;">
+      <svg viewBox="0 0 24 24" stroke-width="1.6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      No documents yet. Upload your first report above.
+    </div>
+  </div>
+</div>
+
+<!-- ======== CALENDAR PAGE ======== -->
+<div id="page-calendar" class="page-section">
+  <div class="section-page-head">
+    <h2>Health <em>Calendar</em></h2>
+    <p>Appointments, medication schedules, exercise, sleep routines, and reminders in one place.</p>
+    <button class="btn-welcome secondary" style="margin-top:1rem;padding:0.7rem 1.4rem;font-size:0.8rem;" onclick="openEventModal()">+ New Event</button>
+  </div>
+  <div class="section-page-body">
+    <div class="widget-card">
+      <div class="cal-toolbar">
+        <button class="cal-nav-btn" onclick="calShiftMonth(-1)">‹</button>
+        <h3 id="cal-month-label"></h3>
+        <button class="cal-nav-btn" onclick="calShiftMonth(1)">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="widget-card" style="margin-top:1.5rem;">
+      <div class="widget-head"><h3 id="cal-day-heading">Today's events</h3></div>
+      <div id="cal-day-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== ANALYTICS PAGE ======== -->
+<div id="page-analytics" class="page-section">
+  <div class="section-page-head">
+    <h2>Health <em>Analytics</em></h2>
+    <p>Trends and patterns across everything you've logged — animated, at a glance.</p>
+  </div>
+  <div class="section-page-body">
+    <div class="analytics-stat-row" id="analytics-stat-row"></div>
+    <div class="dash-wrap" style="margin-top:1.5rem;">
+      <div class="widget-card span2">
+        <div class="widget-head"><h3>Health score over time</h3></div>
+        <div class="bar-chart" id="an-healthscore-chart"></div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Medication adherence</h3></div>
+        <div id="an-adherence-ring"></div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Water intake trend</h3></div>
+        <div class="bar-chart" id="an-water-chart"></div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Sleep trend</h3></div>
+        <div class="bar-chart" id="an-sleep-chart"></div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Weight trend</h3></div>
+        <div class="bar-chart" id="an-weight-chart"></div>
+      </div>
+      <div class="widget-card">
+        <div class="widget-head"><h3>Pain trend</h3></div>
+        <div class="bar-chart" id="an-pain-chart"></div>
+      </div>
+      <div class="widget-card span2">
+        <div class="widget-head"><h3>Streak history</h3></div>
+        <div id="an-streak-history"></div>
+      </div>
+      <div class="widget-card span3">
+        <div class="widget-head"><h3>Goals &amp; achievement progress</h3></div>
+        <div id="an-goals-progress"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2347,6 +2532,9 @@ function showPage(page) {
   if (page === 'journal')      renderJournalPage();
   if (page === 'leaderboard')  renderLeaderboardPage();
   if (page === 'export')       renderExportPage();
+  if (page === 'vault')        renderVaultPage();
+  if (page === 'calendar')     renderCalendarPage();
+  if (page === 'analytics')    renderAnalyticsPage();
 
   window.scrollTo({ top:0, behavior:'smooth' });
 }
@@ -2701,6 +2889,14 @@ function defaultState() {
     // ---- Health Journal ----
     journal: [], // { id, date, time, mood(1-5), energy(1-5), symptoms:[], notes, updatedAt }
     journalDraft: null,
+    // ---- Smart Document Vault ----
+    // vault[]: { id, name, category, uploadedAt, sizeKB, dataUrl, ocrText, aiSummary,
+    //            expiryDate, expiryLabel, versions:[{ id, uploadedAt, dataUrl, ocrText }] }
+    vault: [],
+    // ---- Calendar ----
+    // events[]: { id, title, date('YYYY-MM-DD'), time, type, color, icon, notes,
+    //             notify, recurring:'none'|'daily'|'weekly'|'monthly', recurUntil }
+    events: [],
     // ---- Expanded Health Profile ----
     healthProfile: {
       allergies: '', conditions: '', medicationsFreeText: '', bloodType: '',
@@ -3266,7 +3462,13 @@ function checkReminders() {
       }
     });
   });
-  document.getElementById('notif-dot').classList.toggle('show', dueMeds.length > 0);
+  let extraDue = false;
+  try {
+    const todayEvents = expandRecurringEvents(today, today).filter(e => e.notify);
+    const expiringDocs = (STATE.vault || []).filter(d => d.expiryDate && d.expiryDate >= today && d.expiryDate <= addDaysStr(today, 3));
+    extraDue = todayEvents.length > 0 || expiringDocs.length > 0;
+  } catch (e) { /* calendar/vault not loaded yet — ignore */ }
+  document.getElementById('notif-dot').classList.toggle('show', dueMeds.length > 0 || extraDue);
   if (STATE.settings.banners) renderReminderBanners(dueMeds);
   if (STATE.settings.notifications && 'Notification' in window && Notification.permission === 'granted') {
     dueMeds.forEach(({ med, time }) => {
@@ -3379,9 +3581,67 @@ function renderMonthlyReport() {
       <div class="widget-card"><div class="widget-head"><h3>Goals &amp; Achievements</h3></div>
         <div class="mini-stat-row"><div class="mini-stat"><b>${goalsCompleted}</b><span>Goals Hit</span></div><div class="mini-stat"><b>${achvThisPeriod}</b><span>Achievements</span></div><div class="mini-stat"><b>${STATE.longestStreak || 0}</b><span>Longest Streak</span></div></div>
       </div>
+      <div class="widget-card span3" id="ai-summary-card">
+        <div class="widget-head"><h3>✨ AI Health Summary</h3></div>
+        <div class="vault-toolbar" style="margin-bottom:1rem;">
+          <button class="btn-welcome secondary" style="padding:0.55rem 1.1rem;font-size:0.75rem;" onclick="generateAiHealthSummary('week')">Weekly summary</button>
+          <button class="btn-welcome secondary" style="padding:0.55rem 1.1rem;font-size:0.75rem;" onclick="generateAiHealthSummary('month')">Monthly summary</button>
+          <button class="btn-welcome secondary" style="padding:0.55rem 1.1rem;font-size:0.75rem;" onclick="generateAiHealthSummary('overall')">Overall summary</button>
+        </div>
+        <div id="ai-summary-cards" class="ai-summary-grid"><div class="empty-state">Pick a period above to generate an AI-written summary of your progress.</div></div>
+      </div>
     </div>`;
   renderBarChart('report-pain-chart', painEntries.slice(0, 14).reverse().map(p => ({ label: p.date.slice(5), value: p.level })), 10);
   renderBarChart('report-sleep-chart', sleepEntries.slice(0, 14).reverse().map(s => ({ label: s.date.slice(5), value: s.hours })), 12);
+}
+
+// =====================================================================
+// AI HEALTH SUMMARIES (Groq) — weekly / monthly / overall
+// =====================================================================
+async function generateAiHealthSummary(period) {
+  const grid = document.getElementById('ai-summary-cards');
+  if (!grid) return;
+  const days = period === 'week' ? 7 : period === 'month' ? 30 : 3650;
+  const label = period === 'week' ? 'Last 7 Days' : period === 'month' ? 'Last 30 Days' : 'Overall';
+  grid.innerHTML = `<div class="empty-state">Analysing your health data…</div>`;
+  try {
+    const cutoff = daysAgoStr(days);
+    const water = Object.keys(STATE.waterLog).filter(d => d >= cutoff);
+    const avgWater = water.length ? (water.reduce((s, d) => s + STATE.waterLog[d], 0) / water.length).toFixed(1) : 'no data';
+    const sleep = STATE.sleep.filter(s => s.date >= cutoff);
+    const avgSleep = sleep.length ? (sleep.reduce((s, x) => s + x.hours, 0) / sleep.length).toFixed(1) : 'no data';
+    const weight = STATE.weight.filter(w => w.date >= cutoff);
+    const weightTrend = weight.length >= 2 ? (weight[0].weight - weight[weight.length - 1].weight).toFixed(1) + ' kg change' : 'no trend data';
+    const pain = STATE.pain.filter(p => p.date >= cutoff);
+    const avgPain = pain.length ? (pain.reduce((s, p) => s + p.level, 0) / pain.length).toFixed(1) : 'no data';
+    let medAdh = 'no data';
+    { let total = 0, adhered = 0;
+      for (let i = 0; i < Math.min(days, 60); i++) { const d = daysAgoStr(i); const meds = STATE.meds.filter(m => medActiveOnDate(m, d)); if (!meds.length) continue; total++; const log = STATE.medLog[d] || {}; if (meds.every(m => (log[m.id] || []).length >= m.times.length)) adhered++; }
+      if (total) medAdh = Math.round((adhered / total) * 100) + '%'; }
+    const journalEntries = STATE.journal.filter(j => j.date >= cutoff).slice(0, 20);
+    const journalSummary = journalEntries.map(j => `${j.date}: mood ${j.mood}/5, energy ${j.energy}/5${j.symptoms?.length ? ', symptoms: ' + j.symptoms.join(', ') : ''}`).join('\n') || 'no journal entries';
+    const goalsHit = STATE.goals.reduce((sum, g) => sum + ((g.completedWeeks || []).length), 0);
+
+    const prompt = `You are a supportive health-tracking assistant writing a ${label} progress summary for a user of a personal health app called MedVault. Use only the data below — do not invent numbers. Write 3 short sections with headers: "Progress", "Patterns Worth Noting", "Suggested Focus". Keep it warm, plain-language, under 180 words total. Do not give medical diagnoses or treatment advice — only lifestyle/tracking observations.
+
+Data (${label}):
+- Average water intake: ${avgWater} glasses/day
+- Average sleep: ${avgSleep} hours/night
+- Weight trend: ${weightTrend}
+- Average pain level: ${avgPain}/10
+- Medication adherence: ${medAdh}
+- Goals completed: ${goalsHit}
+- Journal entries:\n${journalSummary}`;
+
+    const result = await callAI(prompt);
+    grid.innerHTML = `<div class="ai-summary-item">
+      <div class="doc-cat-badge" style="margin-bottom:0.6rem;">${label}</div>
+      <div class="ai-summary-text">${escapeHtml(result).replace(/\n/g, '<br>')}</div>
+      <p class="disclaimer-text">AI-generated from your logged data for informational purposes only — not medical advice.</p>
+    </div>`;
+  } catch (err) {
+    grid.innerHTML = `<div class="empty-state">Couldn't reach the AI service (${escapeHtml(err.message || 'unknown error')}). Check the Groq API key in the AI module.</div>`;
+  }
 }
 
 // =====================================================================
@@ -3837,6 +4097,449 @@ function exportPdf(kind) {
   toast('success', 'Report ready', 'Use "Save as PDF" in the print dialog.');
 }
 function renderExportPage() { /* static grid — nothing dynamic to render yet */ }
+
+// =====================================================================
+// SHARED ID HELPER
+// =====================================================================
+function newId(prefix) { return (prefix || 'id') + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+// =====================================================================
+// SMART DOCUMENT VAULT
+// =====================================================================
+const VAULT_CATEGORIES = ['Blood Tests', 'Imaging', 'Prescriptions', 'Vaccinations', 'Referrals', 'Specialist Letters', 'Insurance', 'Other'];
+const VAULT_CAT_KEYWORDS = {
+  'Blood Tests': ['blood', 'cbc', 'hemoglobin', 'glucose', 'cholesterol', 'lipid', 'panel'],
+  'Imaging': ['mri', 'ct scan', 'x-ray', 'xray', 'ultrasound', 'scan', 'radiology'],
+  'Prescriptions': ['prescription', 'rx', 'dosage', 'pharmacy', 'refill'],
+  'Vaccinations': ['vaccine', 'vaccination', 'immunization', 'dose 1', 'dose 2', 'booster'],
+  'Referrals': ['referral', 'refer to', 'referring'],
+  'Specialist Letters': ['specialist', 'consultant', 'dear dr', 'clinic letter'],
+  'Insurance': ['insurance', 'policy', 'claim', 'coverage', 'premium'],
+};
+
+function renderVaultPage() { renderVaultList(); }
+
+function setupVaultDropzone() {
+  const zone = document.getElementById('vault-drop');
+  if (!zone || zone.dataset.wired) return;
+  zone.dataset.wired = '1';
+  ['dragenter', 'dragover'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.add('dragover'); }));
+  ['dragleave', 'drop'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.remove('dragover'); }));
+  zone.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleVaultFiles(e.dataTransfer.files); });
+}
+
+async function handleVaultFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const progressEl = document.getElementById('vault-upload-progress');
+  for (const file of files) {
+    const rowId = newId('up');
+    progressEl.insertAdjacentHTML('beforeend', `<div class="vault-upload-row" id="${rowId}"><span>${escapeHtml(file.name)}</span><div class="vbar"><i style="width:5%"></i></div><span class="up-status">Reading…</span></div>`);
+    const row = document.getElementById(rowId);
+    const setBar = (pct, status) => { if (!row) return; row.querySelector('.vbar i').style.width = pct + '%'; row.querySelector('.up-status').textContent = status; };
+    try {
+      const dataUrl = await readFileAsDataURL(file);
+      setBar(35, 'Reading…');
+      let ocrText = '';
+      if (file.type.startsWith('image/') && window.Tesseract) {
+        setBar(50, 'Running OCR…');
+        try {
+          const { data } = await Tesseract.recognize(dataUrl, 'eng', {
+            logger: m => { if (m.status === 'recognizing text') setBar(50 + Math.round(m.progress * 35), 'Running OCR… ' + Math.round(m.progress * 100) + '%'); }
+          });
+          ocrText = (data && data.text || '').trim();
+        } catch (ocrErr) { ocrText = ''; }
+      } else {
+        setBar(70, 'Filing…');
+      }
+      const category = autoCategorizeDoc(file.name, ocrText);
+      const doc = {
+        id: newId('doc'), name: file.name, category, uploadedAt: Date.now(),
+        sizeKB: Math.round(file.size / 1024), dataUrl, ocrText, aiSummary: null,
+        expiryDate: '', expiryLabel: '', versions: []
+      };
+      STATE.vault.unshift(doc);
+      saveState();
+      setBar(100, 'Done');
+      setTimeout(() => row && row.remove(), 1200);
+    } catch (err) {
+      setBar(100, 'Failed');
+      toast('error', 'Upload failed', file.name);
+    }
+  }
+  renderVaultList();
+  toast('success', 'Document vault updated', files.length + ' file(s) filed.');
+}
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+function autoCategorizeDoc(filename, ocrText) {
+  const hay = (filename + ' ' + (ocrText || '')).toLowerCase();
+  for (const cat of VAULT_CATEGORIES) {
+    const kws = VAULT_CAT_KEYWORDS[cat];
+    if (kws && kws.some(k => hay.includes(k))) return cat;
+  }
+  return 'Other';
+}
+function vaultDocIcon(cat) {
+  const map = {
+    'Blood Tests': '<path d="M12 2s6 7 6 12a6 6 0 0 1-12 0c0-5 6-12 6-12z"/>',
+    'Imaging': '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/>',
+    'Prescriptions': '<path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9z"/><path d="M9 3v6h6"/>',
+    'Vaccinations': '<path d="M18 3l3 3-9 9-4 1 1-4 9-9z"/>',
+    'Referrals': '<path d="M4 12h16M14 6l6 6-6 6"/>',
+    'Specialist Letters': '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+    'Insurance': '<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/>',
+    'Other': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>'
+  };
+  return map[cat] || map['Other'];
+}
+function renderVaultList() {
+  setupVaultDropzone();
+  const grid = document.getElementById('vault-grid');
+  const empty = document.getElementById('vault-empty');
+  if (!grid) return;
+  const q = (document.getElementById('vault-search')?.value || '').toLowerCase().trim();
+  const catFilter = document.getElementById('vault-cat-filter')?.value || '';
+  let docs = STATE.vault || [];
+  if (catFilter) docs = docs.filter(d => d.category === catFilter);
+  if (q) docs = docs.filter(d => d.name.toLowerCase().includes(q) || (d.ocrText || '').toLowerCase().includes(q) || d.category.toLowerCase().includes(q));
+  empty.style.display = docs.length ? 'none' : 'block';
+  grid.innerHTML = docs.map(d => `
+    <div class="doc-card">
+      <div class="doc-card-top">
+        <div class="doc-icon"><svg viewBox="0 0 24 24" stroke-width="1.6" fill="none" stroke="currentColor">${vaultDocIcon(d.category)}</svg></div>
+        ${d.expiryDate ? `<span class="doc-expiry-tag">${expiryStatus(d.expiryDate)}</span>` : ''}
+      </div>
+      <div class="doc-name">${escapeHtml(d.name)}</div>
+      <div class="doc-meta">${d.sizeKB} KB · ${new Date(d.uploadedAt).toLocaleDateString()}${d.versions.length ? ' · v' + (d.versions.length + 1) : ''}</div>
+      <span class="doc-cat-badge">${d.category}</span>
+      <div class="doc-actions">
+        <button onclick="openDocDetail('${d.id}')">View</button>
+        <button onclick="explainReport('${d.id}')">✨ Explain</button>
+        <button onclick="deleteDoc('${d.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+  renderVaultExpiryList();
+}
+function expiryStatus(dateStr) {
+  const days = Math.ceil((new Date(dateStr) - new Date(todayStr())) / 86400000);
+  if (days < 0) return 'Expired';
+  if (days === 0) return 'Expires today';
+  return `${days}d left`;
+}
+function renderVaultExpiryList() {
+  const el = document.getElementById('vault-expiry-list');
+  if (!el) return;
+  const withExpiry = (STATE.vault || []).filter(d => d.expiryDate).sort((a, b) => a.expiryDate.localeCompare(b.expiryDate));
+  if (!withExpiry.length) { el.innerHTML = `<div class="empty-state" style="padding:0.75rem 0;">No expiry reminders set. Open a document and set one.</div>`; return; }
+  el.innerHTML = withExpiry.map(d => `
+    <div class="vault-expiry-row">
+      <span>${escapeHtml(d.name)} ${d.expiryLabel ? '· ' + escapeHtml(d.expiryLabel) : ''}</span>
+      <span class="doc-expiry-tag">${expiryStatus(d.expiryDate)} · ${d.expiryDate}</span>
+    </div>`).join('');
+}
+function openDocDetail(id) {
+  const d = STATE.vault.find(x => x.id === id);
+  if (!d) return;
+  openModal(`
+    <div class="mv-modal-head"><h3>${escapeHtml(d.name)}</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+    <div class="doc-meta" style="margin-bottom:0.75rem;">${d.sizeKB} KB · Uploaded ${new Date(d.uploadedAt).toLocaleString()}</div>
+    <label style="font-size:0.75rem;color:var(--muted);">Category</label>
+    <select id="doc-cat-select" style="width:100%;margin:0.3rem 0 0.9rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+      ${VAULT_CATEGORIES.map(c => `<option ${c === d.category ? 'selected' : ''}>${c}</option>`).join('')}
+    </select>
+    <label style="font-size:0.75rem;color:var(--muted);">Expiry reminder (optional)</label>
+    <div style="display:flex;gap:0.5rem;margin:0.3rem 0 0.9rem;">
+      <input type="date" id="doc-expiry-date" value="${d.expiryDate || ''}" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+      <input type="text" id="doc-expiry-label" placeholder="e.g. Referral" value="${escapeHtml(d.expiryLabel || '')}" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+    </div>
+    ${d.ocrText ? `<label style="font-size:0.75rem;color:var(--muted);">OCR text</label><div class="ai-explain-box">${escapeHtml(d.ocrText).slice(0, 4000) || 'No text detected.'}</div>` : ''}
+    ${d.aiSummary ? `<label style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;display:block;">AI Explanation</label><div class="ai-explain-box">${escapeHtml(d.aiSummary).replace(/\n/g, '<br>')}</div>` : ''}
+    ${d.versions.length ? `<label style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;display:block;">Version history</label>
+      <div>${d.versions.map((v, i) => `<div class="vault-expiry-row"><span>Version ${i + 1} · ${new Date(v.uploadedAt).toLocaleDateString()}</span><button class="doc-actions" style="border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:0.4rem;padding:0.3rem 0.6rem;font-size:0.68rem;cursor:pointer;" onclick="restoreDocVersion('${d.id}','${v.id}')">Restore</button></div>`).join('')}</div>` : ''}
+    <div style="display:flex;gap:0.6rem;margin-top:1.1rem;flex-wrap:wrap;">
+      <button class="btn-welcome primary" style="flex:1;padding:0.65rem;font-size:0.8rem;" onclick="saveDocDetail('${d.id}')">Save changes</button>
+      <button class="btn-welcome secondary" style="flex:1;padding:0.65rem;font-size:0.8rem;" onclick="document.getElementById('doc-version-input-${d.id}').click()">Upload new version</button>
+      <input type="file" id="doc-version-input-${d.id}" style="display:none;" accept=".pdf,image/*" onchange="uploadDocVersion('${d.id}', this.files[0])">
+    </div>
+  `);
+}
+function saveDocDetail(id) {
+  const d = STATE.vault.find(x => x.id === id);
+  if (!d) return;
+  d.category = document.getElementById('doc-cat-select').value;
+  d.expiryDate = document.getElementById('doc-expiry-date').value;
+  d.expiryLabel = document.getElementById('doc-expiry-label').value;
+  saveState();
+  closeModal();
+  renderVaultList();
+  toast('success', 'Document updated');
+}
+async function uploadDocVersion(id, file) {
+  if (!file) return;
+  const d = STATE.vault.find(x => x.id === id);
+  if (!d) return;
+  const dataUrl = await readFileAsDataURL(file);
+  let ocrText = d.ocrText;
+  if (file.type.startsWith('image/') && window.Tesseract) {
+    try { const { data } = await Tesseract.recognize(dataUrl, 'eng'); ocrText = (data && data.text || '').trim(); } catch (e) {}
+  }
+  d.versions.unshift({ id: newId('ver'), uploadedAt: d.uploadedAt, dataUrl: d.dataUrl, ocrText: d.ocrText });
+  d.dataUrl = dataUrl; d.ocrText = ocrText; d.uploadedAt = Date.now();
+  saveState();
+  closeModal();
+  renderVaultList();
+  toast('success', 'New version uploaded');
+}
+function restoreDocVersion(docId, versionId) {
+  const d = STATE.vault.find(x => x.id === docId);
+  if (!d) return;
+  const v = d.versions.find(x => x.id === versionId);
+  if (!v) return;
+  d.versions.unshift({ id: newId('ver'), uploadedAt: d.uploadedAt, dataUrl: d.dataUrl, ocrText: d.ocrText });
+  d.dataUrl = v.dataUrl; d.ocrText = v.ocrText; d.uploadedAt = v.uploadedAt;
+  d.versions = d.versions.filter(x => x.id !== versionId);
+  saveState();
+  closeModal();
+  renderVaultList();
+  toast('success', 'Version restored');
+}
+function deleteDoc(id) {
+  openModal(`
+    <div class="mv-modal-head"><h3>Delete document?</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem;">This removes the document and its version history from your vault. This can't be undone.</p>
+    <div style="display:flex;gap:0.6rem;">
+      <button class="btn-welcome secondary" style="flex:1;padding:0.65rem;font-size:0.8rem;" onclick="closeModal()">Cancel</button>
+      <button class="btn-welcome primary" style="flex:1;padding:0.65rem;font-size:0.8rem;background:linear-gradient(135deg,var(--accent2),#c94747);" onclick="STATE.vault=STATE.vault.filter(x=>x.id!=='${id}');saveState();closeModal();renderVaultList();toast('success','Document deleted');">Delete</button>
+    </div>`);
+}
+async function explainReport(id) {
+  const d = STATE.vault.find(x => x.id === id);
+  if (!d) return;
+  openModal(`<div class="mv-modal-head"><h3>✨ AI Report Explanation</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+    <div id="explain-body"><div class="empty-state">Reading and explaining "${escapeHtml(d.name)}"…</div></div>`);
+  try {
+    const text = (d.ocrText || '').trim();
+    const basis = text ? `Document text (from OCR):\n${text.slice(0, 6000)}` : `No text could be extracted from this file (it may be a scanned PDF or low-quality image). Explain based only on the filename and category, and clearly say detailed extraction wasn't possible.`;
+    const prompt = `You are a medical-document explainer inside a personal health app. A user uploaded a document named "${d.name}" categorised as "${d.category}". Explain it in plain English for a layperson. Structure your answer with these headers: "Plain-English Explanation", "Key Findings", "Medical Terms Explained", "Questions to Ask Your Doctor". Be concise (under 250 words). Never state a diagnosis or tell the user what treatment to take — only explain what the document appears to say.\n\n${basis}`;
+    const result = await callAI(prompt);
+    d.aiSummary = result;
+    saveState();
+    document.getElementById('explain-body').innerHTML = `<div class="ai-explain-box" style="max-height:420px;">${escapeHtml(result).replace(/\n/g, '<br>')}</div><p class="disclaimer-text">This AI explanation is informational only and is not medical advice. Always confirm findings with a qualified healthcare professional.</p>`;
+  } catch (err) {
+    document.getElementById('explain-body').innerHTML = `<div class="empty-state">Couldn't reach the AI service (${escapeHtml(err.message || 'unknown error')}).</div>`;
+  }
+}
+
+// =====================================================================
+// CALENDAR
+// =====================================================================
+const CAL_COLORS = ['#00d2b4', '#ff6b6b', '#a78bfa', '#fbbf24', '#38bdf8', '#f472b6'];
+const CAL_TYPE_ICONS = { appointment: '🩺', medication: '💊', exercise: '🏃', sleep: '🌙', water: '💧', vaccination: '💉', event: '📌', custom: '✨' };
+let calState = { year: new Date().getFullYear(), month: new Date().getMonth(), selected: todayStr() };
+
+function calShiftMonth(delta) {
+  calState.month += delta;
+  if (calState.month < 0) { calState.month = 11; calState.year--; }
+  if (calState.month > 11) { calState.month = 0; calState.year++; }
+  renderCalGrid();
+}
+function renderCalendarPage() { renderCalGrid(); renderCalDayList(calState.selected); }
+function expandRecurringEvents(rangeStartStr, rangeEndStr) {
+  const out = [];
+  (STATE.events || []).forEach(ev => {
+    if (!ev.recurring || ev.recurring === 'none') { if (ev.date >= rangeStartStr && ev.date <= rangeEndStr) out.push(Object.assign({}, ev, { occursOn: ev.date })); return; }
+    let cur = new Date(ev.date + 'T00:00:00');
+    const rangeEnd = new Date(rangeEndStr + 'T00:00:00');
+    const until = ev.recurUntil ? new Date(ev.recurUntil + 'T00:00:00') : rangeEnd;
+    let guard = 0;
+    while (cur <= rangeEnd && cur <= until && guard < 400) {
+      const ds = cur.toISOString().slice(0, 10);
+      if (ds >= rangeStartStr) out.push(Object.assign({}, ev, { occursOn: ds }));
+      if (ev.recurring === 'daily') cur.setDate(cur.getDate() + 1);
+      else if (ev.recurring === 'weekly') cur.setDate(cur.getDate() + 7);
+      else if (ev.recurring === 'monthly') cur.setMonth(cur.getMonth() + 1);
+      else break;
+      guard++;
+    }
+  });
+  return out;
+}
+function renderCalGrid() {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-month-label');
+  if (!grid) return;
+  const y = calState.year, m = calState.month;
+  label.textContent = new Date(y, m, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const firstDow = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrev = new Date(y, m, 0).getDate();
+  const cells = [];
+  for (let i = firstDow - 1; i >= 0; i--) cells.push({ d: daysInPrev - i, other: true, dateStr: null });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ d, other: false, dateStr: `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}` });
+  while (cells.length % 7 !== 0) { const nd = cells.length - (firstDow + daysInMonth) + 1; cells.push({ d: nd, other: true, dateStr: null }); }
+  const rangeStart = cells.find(c => c.dateStr)?.dateStr || todayStr();
+  const rangeEnd = [...cells].reverse().find(c => c.dateStr)?.dateStr || todayStr();
+  const expanded = expandRecurringEvents(daysAgoStr(31), addDaysStr(rangeEnd, 31));
+  const today = todayStr();
+  grid.innerHTML = cells.map(c => {
+    if (!c.dateStr) return `<div class="cal-cell other-month"><span class="cal-cell-num">${c.d}</span></div>`;
+    const evs = expanded.filter(e => e.occursOn === c.dateStr);
+    const classes = ['cal-cell'];
+    if (c.dateStr === today) classes.push('today');
+    if (c.dateStr === calState.selected) classes.push('selected');
+    return `<div class="${classes.join(' ')}" onclick="calSelectDay('${c.dateStr}')">
+      <span class="cal-cell-num">${c.d}</span>
+      <div class="cal-dot-row">${evs.slice(0, 4).map(e => `<span class="cal-dot" style="background:${e.color || '#00d2b4'}"></span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+function addDaysStr(dateStr, n) { const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function calSelectDay(dateStr) { calState.selected = dateStr; renderCalGrid(); renderCalDayList(dateStr); }
+function renderCalDayList(dateStr) {
+  const heading = document.getElementById('cal-day-heading');
+  const list = document.getElementById('cal-day-list');
+  if (!list) return;
+  heading.textContent = (dateStr === todayStr() ? "Today's events — " : '') + new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const evs = expandRecurringEvents(dateStr, dateStr).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+  if (!evs.length) { list.innerHTML = `<div class="empty-state">No events on this day. Tap "+ New Event" to add one.</div>`; return; }
+  list.innerHTML = evs.map(e => `
+    <div class="cal-event-item">
+      <span class="cal-event-dot" style="background:${e.color || '#00d2b4'}"></span>
+      <div class="cal-event-body"><strong>${CAL_TYPE_ICONS[e.type] || '📌'} ${escapeHtml(e.title)}</strong><span>${e.time || 'All day'}${e.notes ? ' · ' + escapeHtml(e.notes) : ''}${e.recurring && e.recurring !== 'none' ? ' · repeats ' + e.recurring : ''}</span></div>
+      <div class="cal-event-actions">
+        <button onclick="openEventModal('${e.id}')" title="Edit"><svg viewBox="0 0 24 24" stroke-width="2" width="12" height="12" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button onclick="deleteEvent('${e.id}')" title="Delete">✕</button>
+      </div>
+    </div>`).join('');
+}
+function openEventModal(id) {
+  const ev = id ? STATE.events.find(x => x.id === id) : null;
+  const color = ev ? ev.color : CAL_COLORS[0];
+  openModal(`
+    <div class="mv-modal-head"><h3>${ev ? 'Edit' : 'New'} Event</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></div></div>
+    <label style="font-size:0.75rem;color:var(--muted);">Title</label>
+    <input type="text" id="ev-title" value="${ev ? escapeHtml(ev.title) : ''}" placeholder="e.g. Cardiology appointment" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+    <div style="display:flex;gap:0.5rem;">
+      <div style="flex:1;"><label style="font-size:0.75rem;color:var(--muted);">Date</label><input type="date" id="ev-date" value="${ev ? ev.date : calState.selected}" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);"></div>
+      <div style="flex:1;"><label style="font-size:0.75rem;color:var(--muted);">Time</label><input type="time" id="ev-time" value="${ev ? (ev.time || '') : ''}" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);"></div>
+    </div>
+    <label style="font-size:0.75rem;color:var(--muted);">Type</label>
+    <select id="ev-type" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+      ${Object.keys(CAL_TYPE_ICONS).map(t => `<option value="${t}" ${ev && ev.type === t ? 'selected' : ''}>${CAL_TYPE_ICONS[t]} ${t[0].toUpperCase() + t.slice(1)}</option>`).join('')}
+    </select>
+    <label style="font-size:0.75rem;color:var(--muted);">Colour</label>
+    <div style="display:flex;gap:0.5rem;margin:0.4rem 0 0.8rem;" id="ev-color-row">
+      ${CAL_COLORS.map(c => `<span class="cal-color-swatch ${c === color ? 'selected' : ''}" data-color="${c}" style="background:${c}" onclick="document.querySelectorAll('.cal-color-swatch').forEach(s=>s.classList.remove('selected'));this.classList.add('selected')"></span>`).join('')}
+    </div>
+    <label style="font-size:0.75rem;color:var(--muted);">Repeats</label>
+    <select id="ev-recur" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);">
+      <option value="none" ${!ev || ev.recurring === 'none' ? 'selected' : ''}>Doesn't repeat</option>
+      <option value="daily" ${ev && ev.recurring === 'daily' ? 'selected' : ''}>Daily</option>
+      <option value="weekly" ${ev && ev.recurring === 'weekly' ? 'selected' : ''}>Weekly</option>
+      <option value="monthly" ${ev && ev.recurring === 'monthly' ? 'selected' : ''}>Monthly</option>
+    </select>
+    <label style="font-size:0.75rem;color:var(--muted);">Notes</label>
+    <textarea id="ev-notes" rows="2" style="width:100%;margin:0.3rem 0 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.5rem;padding:0.55rem;color:var(--text);font-family:inherit;">${ev ? escapeHtml(ev.notes || '') : ''}</textarea>
+    <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;margin-bottom:1rem;"><input type="checkbox" id="ev-notify" ${ev && ev.notify ? 'checked' : ''}> Notify me on the day</label>
+    <div style="display:flex;gap:0.6rem;">
+      ${ev ? `<button class="btn-welcome secondary" style="flex:1;padding:0.65rem;font-size:0.8rem;" onclick="deleteEvent('${ev.id}')">Delete</button>` : ''}
+      <button class="btn-welcome primary" style="flex:2;padding:0.65rem;font-size:0.8rem;" onclick="saveEventFromModal('${ev ? ev.id : ''}')">Save Event</button>
+    </div>`);
+}
+function saveEventFromModal(id) {
+  const title = document.getElementById('ev-title').value.trim();
+  if (!title) { toast('warn', 'Title required'); return; }
+  const swatch = document.querySelector('.cal-color-swatch.selected');
+  const payload = {
+    title, date: document.getElementById('ev-date').value || todayStr(),
+    time: document.getElementById('ev-time').value, type: document.getElementById('ev-type').value,
+    color: swatch ? swatch.dataset.color : CAL_COLORS[0], recurring: document.getElementById('ev-recur').value,
+    notes: document.getElementById('ev-notes').value.trim(), notify: document.getElementById('ev-notify').checked
+  };
+  if (id) {
+    const ev = STATE.events.find(x => x.id === id);
+    Object.assign(ev, payload);
+  } else {
+    STATE.events.push(Object.assign({ id: newId('ev') }, payload));
+  }
+  saveState();
+  closeModal();
+  renderCalGrid();
+  renderCalDayList(calState.selected);
+  toast('success', 'Event saved');
+}
+function deleteEvent(id) {
+  STATE.events = STATE.events.filter(x => x.id !== id);
+  saveState();
+  closeModal();
+  renderCalGrid();
+  renderCalDayList(calState.selected);
+  toast('success', 'Event deleted');
+}
+
+// =====================================================================
+// ANALYTICS
+// =====================================================================
+function computeDailyHealthScore(dateStr) {
+  let score = 0, parts = 0;
+  const water = STATE.waterLog[dateStr];
+  if (water !== undefined) { score += Math.min(100, (water / (STATE.waterGoal || 8)) * 100); parts++; }
+  const sleepEntry = STATE.sleep.find(s => s.date === dateStr);
+  if (sleepEntry) { score += Math.min(100, (sleepEntry.hours / 8) * 100); parts++; }
+  const painEntry = STATE.pain.find(p => p.date === dateStr);
+  if (painEntry) { score += Math.max(0, 100 - painEntry.level * 10); parts++; }
+  const meds = STATE.meds.filter(m => medActiveOnDate(m, dateStr));
+  if (meds.length) { const log = STATE.medLog[dateStr] || {}; const taken = meds.reduce((s, m) => s + (log[m.id] || []).length, 0); const total = meds.reduce((s, m) => s + m.times.length, 0); score += total ? (taken / total) * 100 : 0; parts++; }
+  return parts ? Math.round(score / parts) : null;
+}
+function renderAnalyticsPage() {
+  const statRow = document.getElementById('analytics-stat-row');
+  const scores = [];
+  for (let i = 13; i >= 0; i--) { const d = daysAgoStr(i); const s = computeDailyHealthScore(d); scores.push({ label: d.slice(5), value: s === null ? 0 : s }); }
+  const validScores = scores.filter(s => s.value > 0);
+  const avgScore = validScores.length ? Math.round(validScores.reduce((s, x) => s + x.value, 0) / validScores.length) : 0;
+  statRow.innerHTML = `
+    <div class="an-stat"><div class="an-num">${avgScore}</div><div class="an-label">Avg Health Score (14d)</div></div>
+    <div class="an-stat"><div class="an-num">${STATE.dailyStreak || 0}</div><div class="an-label">Current Daily Streak</div></div>
+    <div class="an-stat"><div class="an-num">${STATE.longestStreak || 0}</div><div class="an-label">Longest Streak</div></div>
+    <div class="an-stat"><div class="an-num">${(STATE.unlocked || []).length}</div><div class="an-label">Achievements Unlocked</div></div>
+    <div class="an-stat"><div class="an-num">Lv ${STATE.level}</div><div class="an-label">${STATE.xp} XP this level</div></div>`;
+  renderBarChart('an-healthscore-chart', scores, 100);
+
+  // Adherence ring (conic-gradient)
+  let total = 0, adhered = 0;
+  for (let i = 0; i < 30; i++) { const d = daysAgoStr(i); const meds = STATE.meds.filter(m => medActiveOnDate(m, d)); if (!meds.length) continue; total++; const log = STATE.medLog[d] || {}; if (meds.every(m => (log[m.id] || []).length >= m.times.length)) adhered++; }
+  const pct = total ? Math.round((adhered / total) * 100) : 0;
+  document.getElementById('an-adherence-ring').innerHTML = `<div class="an-ring-wrap">
+    <div style="width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--accent) ${pct * 3.6}deg, var(--surface2) 0deg);display:flex;align-items:center;justify-content:center;">
+      <div style="width:82px;height:82px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.15rem;">${pct}%</div>
+    </div>
+    <span style="font-size:0.72rem;color:var(--muted);">last 30 days</span></div>`;
+
+  renderBarChart('an-water-chart', Object.keys(STATE.waterLog).sort().slice(-7).map(d => ({ label: d.slice(5), value: STATE.waterLog[d] })), STATE.waterGoal || 8);
+  renderBarChart('an-sleep-chart', STATE.sleep.slice(0, 7).reverse().map(s => ({ label: s.date.slice(5), value: s.hours })), 12);
+  renderBarChart('an-weight-chart', STATE.weight.slice(0, 7).reverse().map(w => ({ label: w.date.slice(5), value: w.weight })), null);
+  renderBarChart('an-pain-chart', STATE.pain.slice(0, 7).reverse().map(p => ({ label: p.date.slice(5), value: p.level })), 10);
+
+  // Streak history — approximate from daily health score presence over 21 days
+  const streakBars = [];
+  for (let i = 20; i >= 0; i--) { const d = daysAgoStr(i); const s = computeDailyHealthScore(d); streakBars.push({ label: d.slice(8), value: s !== null ? 1 : 0 }); }
+  document.getElementById('an-streak-history').innerHTML = `<div class="bar-chart" style="height:40px;">${streakBars.map(b => `<div class="bar-col"><div class="bar-fill" style="height:${b.value ? 100 : 6}%;background:${b.value ? 'var(--accent)' : 'var(--surface2)'};" title="${b.label}"></div></div>`).join('')}</div><p style="font-size:0.7rem;color:var(--muted);margin-top:0.5rem;">Filled = day logged · last 21 days</p>`;
+
+  // Goals & achievement progress
+  document.getElementById('an-goals-progress').innerHTML = (STATE.goals || []).map(g => {
+    const done = (g.completedWeeks || []).length;
+    const pctG = Math.min(100, done * 20);
+    return `<div class="goal-progress-row"><div class="gp-top"><span>${escapeHtml(g.title)}</span><span>${done} weeks</span></div><div class="gp-bar"><i style="width:${pctG}%"></i></div></div>`;
+  }).join('') || `<div class="empty-state">No goals yet — add one from the Achievements page.</div>`;
+}
 
 // =====================================================================
 // AI MODULE (Groq) — swap the key below, everything else routes through here
