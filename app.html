@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedVault — Global Health Encyclopedia</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
 <!-- ===================================================================
      FIREBASE SDK (compat build — simplest drop-in for email/password auth)
      =================================================================== -->
@@ -1423,6 +1423,86 @@ nav{
 .widget-grid > .widget-card:nth-child(5){animation-delay:.18s;}
 .widget-grid > .widget-card:nth-child(6){animation-delay:.22s;}
 @keyframes cardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* =====================================================================
+   REDESIGN PASS 2 — typography discipline, 4pt spacing, quieter surfaces,
+   sharper states. Additive only: every rule targets existing selectors,
+   nothing here renames a class, an id, or touches an onclick/JS hook.
+   ===================================================================== */
+
+/* ---- Editorial serif accent, used sparingly for large headline moments ---- */
+h1.hero-title em,
+.page-hero-section h2 em,
+.welcome-hero h1 span{
+  font-family:'Lora','Instrument Serif',serif;
+  font-style:italic;
+  font-weight:500;
+}
+.card-scientific,.detail-scientific{ font-family:'Lora','Instrument Serif',serif; font-style:italic; }
+
+/* ---- Body copy: comfortable line length + rhythm (typography-principles) ---- */
+.hero-sub,.page-hero-section p,.welcome-hero p,.detail-desc,.ai-summary-text,.journal-entry-notes{
+  line-height:1.65;
+  max-width:62ch;
+}
+.section-page-head p{max-width:62ch;}
+
+/* ---- Heading → paragraph rhythm: fixed 32px per spacing-principles §3.1 ---- */
+.section-page-head h2,.page-hero-section h2,.detail-name,.mv-modal-head h3,.widget-head h3{
+  margin-bottom:0;
+}
+.section-page-head h2 + p{margin-top:0.5rem;}
+
+/* ---- Nav: clearer active/hover legibility, tighter tracking ---- */
+.nav-logo{font-family:'Syne',sans-serif;font-weight:700;}
+.nav-links a{font-weight:600;letter-spacing:0.04em;}
+
+/* ---- Cards: quieter default, considered elevation only on interaction ---- */
+.entry-card{border-radius:var(--r-md) !important;}
+.entry-card:hover{box-shadow:var(--shadow-lift);}
+.card-name{letter-spacing:-0.008em;}
+.card-badge{font-weight:600;}
+
+/* ---- Buttons: consistent role hierarchy + accessible focus ---- */
+.btn-auth,.btn-welcome,.mv-btn,.btn-load,.water-btn{border-radius:var(--r-sm) !important;}
+.btn-auth:focus-visible,.btn-welcome:focus-visible,.mv-btn:focus-visible,
+.icon-btn:focus-visible,.med-check:focus-visible,.widget-add:focus-visible,
+.avatar-btn:focus-visible,.notif-bell:focus-visible,select:focus-visible,
+.auth-field input:focus-visible,.mv-field input:focus-visible,.mv-field select:focus-visible,.mv-field textarea:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
+.mv-btn.ghost{font-weight:600;}
+.mv-btn.danger:hover{background:rgba(251,113,133,0.18);border-color:rgba(251,113,133,0.4);}
+
+/* ---- Widget headings: consistent icon sizing + weight ---- */
+.widget-head h3{font-weight:700;letter-spacing:-0.01em;}
+.dash-stat-card .lbl{font-weight:600;}
+
+/* ---- Journal / vault / calendar toolbars: unify control height & radius ---- */
+.journal-search,#journal-mood-filter,.vault-toolbar input,.vault-toolbar select{
+  border-radius:var(--r-sm) !important;
+}
+.journal-view-toggle{border-radius:var(--r-sm) !important;}
+
+/* ---- Settings rows: tighter label→value proximity, calmer dividers ---- */
+.settings-row{border-bottom-color:var(--border);}
+.settings-block{border-radius:var(--r-lg) !important;}
+
+/* ---- Achievement / doc cards: consistent corner + hover language ---- */
+.achv-card,.doc-card{border-radius:var(--r-md) !important;}
+.doc-card:hover{box-shadow:var(--shadow-soft);}
+
+/* ---- Reduce accent overload: keep amber/rose truly reserved for state, not decoration ---- */
+.card-badge.bacteria,.card-badge.bone{font-weight:600;}
+
+/* ---- Loading: spinner replaces nothing functional, purely visual polish ---- */
+.auth-spinner{border-width:2px;}
+
+/* ---- Small-screen nav: legible stacked list instead of silent disappearance ---- */
+@media (max-width:768px){
+  nav{padding:0 1.1rem;}
+  .user-menu-wrap{gap:0.6rem;}
+}
 </style>
 </head>
 <body>
@@ -1950,9 +2030,9 @@ nav{
   </div>
   <div class="section-page-body">
     <div class="widget-card" style="margin-bottom:1.5rem;">
-      <div class="widget-head"><h3>AI Insights</h3><button class="widget-add" onclick="runJournalAiAnalysis()" title="Analyse with Gemini">✨</button></div>
+      <div class="widget-head"><h3>AI Insights</h3><button class="widget-add" onclick="runJournalAiAnalysis()" title="Analyse with Gemini"><svg viewBox="0 0 24 24" stroke-width="2" style="width:14px;height:14px;stroke:currentColor;fill:none;"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg></button></div>
       <div id="journal-ai-insights">
-        <div class="empty-state">Log a few entries, then tap ✨ to see AI-detected patterns (mood trends, recurring symptoms, energy dips).</div>
+        <div class="empty-state">Log a few entries, then tap the spark icon above to see AI-detected patterns (mood trends, recurring symptoms, energy dips).</div>
       </div>
     </div>
     <div class="journal-toolbar">
@@ -2014,7 +2094,7 @@ nav{
     </div>
 
     <div class="widget-card" style="margin-bottom:1.5rem;" id="vault-expiry-card">
-      <div class="widget-head"><h3>⏰ Expiry Reminders</h3></div>
+      <div class="widget-head"><h3><svg viewBox="0 0 24 24" stroke-width="2" style="width:16px;height:16px;stroke:var(--accent);fill:none;"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>Expiry Reminders</h3></div>
       <div id="vault-expiry-list"></div>
     </div>
 
