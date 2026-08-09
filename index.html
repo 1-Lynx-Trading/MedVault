@@ -4733,6 +4733,15 @@ async function callAI(prompt) {
 // START
 // =====================================================================
 init();
+
+// Deep-link into the auth flow when arriving from the landing page,
+// e.g. index.html?auth=signup or index.html?auth=login
+(function () {
+  const authParam = new URLSearchParams(window.location.search).get('auth');
+  if (authParam === 'login' || authParam === 'signup') {
+    authShow(authParam);
+  }
+})();
 tryRestoreSession();
 setInterval(checkReminders, 30000);
 </script>
