@@ -1,0 +1,4457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedVault — Your health, organized.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            const revealEls = document.querySelectorAll('.reveal');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('revealed');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+                revealEls.forEach(el => observer.observe(el));
+            } else {
+                // Fallback for older browsers: just show everything
+                revealEls.forEach(el => el.classList.add('revealed'));
+            }
+        });
+    </script>
+    <style>
+        :root {
+            --primary: #0a1628;
+            --primary-light: #132038;
+            --secondary: #f8fafc;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --blue-50: #eff6ff;
+            --blue-100: #dbeafe;
+            --blue-200: #bfdbfe;
+            --blue-300: #93c5fd;
+            --blue-400: #60a5fa;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --blue-700: #1d4ed8;
+            --teal-50: #f0fdfa;
+            --teal-100: #ccfbf1;
+            --teal-200: #99f6e4;
+            --teal-300: #5eead4;
+            --teal-400: #2dd4bf;
+            --teal-500: #14b8a6;
+            --teal-600: #0d9488;
+            --green-50: #f0fdf4;
+            --green-100: #dcfce7;
+            --green-200: #bbf7d0;
+            --green-300: #86efac;
+            --green-400: #4ade80;
+            --green-500: #22c55e;
+            --green-600: #16a34a;
+            --cyan-50: #ecfeff;
+            --cyan-100: #cffafe;
+            --cyan-200: #a5f3fc;
+            --cyan-300: #67e8f9;
+            --cyan-400: #22d3ee;
+            --cyan-500: #06b6d4;
+            --violet-50: #f5f3ff;
+            --violet-100: #ede9fe;
+            --violet-200: #ddd6fe;
+            --violet-300: #c4b5fd;
+            --violet-400: #a78bfa;
+            --violet-500: #8b5cf6;
+            --mint-50: #f0fdfa;
+            --mint-100: #ccfbf1;
+            --mint-200: #99f6e4;
+            --mint-300: #5eead4;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-2xl: 2rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: var(--gray-800);
+            background-color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            border-bottom: 1px solid transparent;
+        }
+
+        .nav.scrolled {
+            border-bottom-color: var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
+            border-radius: var(--radius);
+            margin-right: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--gray-900);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -0.25rem;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--blue-500);
+            transition: width 0.2s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            outline: none;
+        }
+
+        .btn-ghost {
+            color: var(--gray-700);
+            background-color: transparent;
+        }
+
+        .btn-ghost:hover {
+            background-color: var(--gray-100);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            color: var(--gray-800);
+            background-color: var(--white);
+            border: 1px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--gray-50);
+            border-color: var(--gray-400);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-large {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: var(--radius-md);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--gray-700);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding-top: 8rem;
+            padding-bottom: 6rem;
+            background: linear-gradient(180deg, var(--white) 0%, var(--blue-50) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: var(--blue-50);
+            border: 1px solid var(--blue-100);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--blue-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            color: var(--gray-600);
+            margin-bottom: 2.5rem;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-trust {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        /* Hero Dashboard */
+        .hero-dashboard {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            perspective: 1000px;
+        }
+
+        .dashboard-container {
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            transform: rotateX(2deg);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            background-color: var(--gray-50);
+        }
+
+        .dashboard-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dashboard-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background-color: var(--gray-300);
+        }
+
+        .dashboard-dot.red {
+            background-color: #ff5f57;
+        }
+
+        .dashboard-dot.yellow {
+            background-color: #febc2e;
+        }
+
+        .dashboard-dot.green {
+            background-color: #28c840;
+        }
+
+        .dashboard-header-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-600);
+        }
+
+        .dashboard-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            background-color: var(--gray-100);
+        }
+
+        .dashboard-card {
+            background-color: var(--white);
+            padding: 1.25rem;
+        }
+
+        .dashboard-card-title {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .health-score {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .health-score-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--teal-600);
+            line-height: 1;
+        }
+
+        .health-score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(var(--teal-500) 0deg, var(--teal-500) 313deg, var(--gray-200) 313deg, var(--gray-200) 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .health-score-circle-inner {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--teal-600);
+        }
+
+        .medication-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .medication-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .medication-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            background-color: var(--blue-50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-500);
+        }
+
+        .medication-info {
+            flex: 1;
+        }
+
+        .medication-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .medication-dose {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .medication-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .water-progress {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .water-visual {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid var(--blue-100);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .water-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 75%;
+            background: linear-gradient(180deg, var(--blue-200), var(--blue-400));
+            border-radius: 0 0 50% 50%;
+        }
+
+        .water-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--blue-600);
+            z-index: 1;
+        }
+
+        .water-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .sleep-chart {
+            height: 80px;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
+        .sleep-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--violet-300), var(--violet-400));
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            position: relative;
+        }
+
+        .sleep-bar:nth-child(1) {
+            height: 60%;
+        }
+        .sleep-bar:nth-child(2) {
+            height: 70%;
+        }
+        .sleep-bar:nth-child(3) {
+            height: 80%;
+        }
+        .sleep-bar:nth-child(4) {
+            height: 65%;
+        }
+        .sleep-bar:nth-child(5) {
+            height: 85%;
+        }
+        .sleep-bar:nth-child(6) {
+            height: 75%;
+        }
+        .sleep-bar:nth-child(7) {
+            height: 90%;
+        }
+
+        .sleep-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 0.5rem;
+        }
+
+        .weight-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .weight-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .weight-unit {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .weight-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--green-600);
+            background-color: var(--green-50);
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
+
+        .pain-scale {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .pain-point {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.625rem;
+            color: var(--gray-500);
+        }
+
+        .pain-point.active {
+            background-color: var(--green-100);
+            color: var(--green-600);
+        }
+
+        .pain-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .appointment-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .appointment-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            background-color: var(--teal-50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--teal-500);
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .appointment-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .appointment-details {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .ai-insight {
+            background: linear-gradient(135deg, var(--violet-50), var(--blue-50));
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .ai-insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-insight-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--violet-500);
+        }
+
+        .ai-insight-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--violet-600);
+        }
+
+        .ai-insight-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        /* Trust Strip */
+        .trust-strip {
+            padding: 5rem 0;
+            background-color: var(--white);
+        }
+
+        .trust-strip-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 3rem;
+        }
+
+        .trust-strip-items {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.5rem;
+        }
+
+        .trust-strip-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            border-radius: var(--radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .trust-strip-item:hover {
+            background-color: var(--gray-50);
+            transform: translateY(-4px);
+        }
+
+        .trust-strip-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .trust-strip-icon.understand {
+            background: linear-gradient(135deg, var(--violet-400), var(--violet-500));
+        }
+
+        .trust-strip-icon.manage {
+            background: linear-gradient(135deg, var(--blue-400), var(--blue-500));
+        }
+
+        .trust-strip-icon.organize {
+            background: linear-gradient(135deg, var(--teal-400), var(--teal-500));
+        }
+
+        .trust-strip-icon.track {
+            background: linear-gradient(135deg, var(--green-400), var(--green-500));
+        }
+
+        .trust-strip-icon.analyze {
+            background: linear-gradient(135deg, var(--cyan-400), var(--cyan-500));
+        }
+
+        .trust-strip-icon.protect {
+            background: linear-gradient(135deg, var(--gray-600), var(--gray-700));
+        }
+
+        .trust-strip-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        /* Health Ecosystem Section */
+        .ecosystem {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ecosystem-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.05), transparent 70%);
+        }
+
+        .ecosystem-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--blue-500);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        .ecosystem-visual {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 500px;
+        }
+
+        .ecosystem-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.3);
+            z-index: 2;
+        }
+
+        .ecosystem-item {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .ecosystem-item:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .ecosystem-item-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .ecosystem-item-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            text-align: center;
+        }
+
+        .ecosystem-connection {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gray-300), transparent);
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        /* AI Section */
+        .ai-section {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .ai-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .ai-text {
+            max-width: 500px;
+        }
+
+        .ai-visual {
+            position: relative;
+        }
+
+        .ai-chat {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .ai-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            background-color: var(--white);
+        }
+
+        .ai-chat-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet-400), var(--blue-400));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .ai-chat-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .ai-chat-status {
+            font-size: 0.75rem;
+            color: var(--green-600);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .ai-chat-status-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--green-500);
+        }
+
+        .ai-chat-messages {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ai-message {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .ai-message-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            flex-shrink: 0;
+        }
+
+        .ai-message-avatar.ai {
+            background: linear-gradient(135deg, var(--violet-400), var(--blue-400));
+            color: var(--white);
+        }
+
+        .ai-message-content {
+            flex: 1;
+        }
+
+        .ai-message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--gray-700);
+        }
+
+        .ai-message.user .ai-message-bubble {
+            background-color: var(--blue-50);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .ai-message.ai .ai-message-bubble {
+            background-color: var(--white);
+            border: 1px solid var(--gray-100);
+            border-bottom-left-radius: var(--radius-sm);
+        }
+
+        .ai-message-time {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            margin-top: 0.25rem;
+        }
+
+        .ai-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--white);
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-100);
+        }
+
+        .ai-summary-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-summary-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ai-summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+        }
+
+        .ai-summary-icon {
+            color: var(--blue-500);
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        .ai-disclaimer {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: var(--yellow-50);
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            color: var(--yellow-700);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .ai-disclaimer-icon {
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        /* Medical Vault Section */
+        .medical-vault {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .vault-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .vault-process {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto 4rem;
+        }
+
+        .vault-step {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .vault-step:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .vault-step-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: var(--blue-50);
+            color: var(--blue-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .vault-step-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .vault-step-desc {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .vault-step-arrow {
+            position: absolute;
+            right: -0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-300);
+            z-index: 1;
+        }
+
+        .vault-documents {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .vault-document {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .vault-document:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .vault-document-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            background-color: var(--gray-100);
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .vault-document-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        /* Medication Section */
+        .medication {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .medication-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .medication-visual {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .medication-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .medication-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--gray-200);
+        }
+
+        .medication-event {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .medication-event:last-child {
+            padding-bottom: 0;
+        }
+
+        .medication-event-dot {
+            position: absolute;
+            left: -1.625rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: var(--white);
+            border: 2px solid var(--gray-300);
+        }
+
+        .medication-event-dot.completed {
+            background-color: var(--green-500);
+            border-color: var(--green-500);
+        }
+
+        .medication-event-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .medication-event-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .medication-event-status {
+            font-size: 0.75rem;
+            color: var(--green-600);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .medication-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .medication-stat {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .medication-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .medication-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        /* Health Tracking Section */
+        .health-tracking {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .tracking-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .tracking-widgets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .tracking-widget {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .tracking-widget:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tracking-widget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .tracking-widget-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .tracking-widget-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tracking-widget-icon.water {
+            background-color: var(--blue-50);
+            color: var(--blue-500);
+        }
+
+        .tracking-widget-icon.sleep {
+            background-color: var(--violet-50);
+            color: var(--violet-500);
+        }
+
+        .tracking-widget-icon.weight {
+            background-color: var(--green-50);
+            color: var(--green-500);
+        }
+
+        .tracking-widget-icon.pain {
+            background-color: var(--cyan-50);
+            color: var(--cyan-500);
+        }
+
+        .tracking-widget-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .tracking-widget-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .tracking-widget-progress {
+            height: 0.5rem;
+            background-color: var(--gray-100);
+            border-radius: 9999px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .tracking-widget-progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 1s ease;
+        }
+
+        .tracking-widget-progress-fill.water {
+            background: linear-gradient(90deg, var(--blue-400), var(--blue-500));
+            width: 75%;
+        }
+
+        .tracking-widget-progress-fill.sleep {
+            background: linear-gradient(90deg, var(--violet-400), var(--violet-500));
+            width: 85%;
+        }
+
+        .tracking-widget-progress-fill.weight {
+            background: linear-gradient(90deg, var(--green-400), var(--green-500));
+            width: 60%;
+        }
+
+        .tracking-widget-progress-fill.pain {
+            background: linear-gradient(90deg, var(--cyan-400), var(--cyan-500));
+            width: 20%;
+        }
+
+        /* Health Score Section */
+        .health-score-section {
+            padding: 8rem 0;
+            background-color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-score-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.05), transparent 70%);
+        }
+
+        .health-score-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .health-score-number-large {
+            font-size: 8rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--teal-400), var(--teal-600));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .health-score-factors {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .health-score-factor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .health-score-factor-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+        }
+
+        .health-score-factor-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .health-score-factor-value {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .health-score-disclaimer {
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Health Timeline Section */
+        .health-timeline {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .timeline-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .timeline-visual {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--gray-200);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            position: relative;
+            display: flex;
+            margin-bottom: 3rem;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item:nth-child(odd) {
+            justify-content: flex-start;
+            padding-right: calc(50% + 2rem);
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-end;
+            padding-left: calc(50% + 2rem);
+        }
+
+        .timeline-item-dot {
+            position: absolute;
+            left: 50%;
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: var(--white);
+            border: 2px solid var(--gray-300);
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .timeline-item-card {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            width: 100%;
+            text-align: left;
+        }
+
+        .timeline-item-date {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-item-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-item-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* Health Journal Section */
+        .health-journal {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .journal-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .journal-visual {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .journal-entry {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .journal-entry-date {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.75rem;
+        }
+
+        .journal-entry-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .journal-metric {
+            text-align: center;
+        }
+
+        .journal-metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .journal-metric-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .journal-entry-notes {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        .journal-ai-insight {
+            background: linear-gradient(135deg, var(--violet-50), var(--blue-50));
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .journal-ai-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .journal-ai-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--violet-500);
+        }
+
+        .journal-ai-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--violet-600);
+        }
+
+        .journal-ai-text {
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            line-height: 1.5;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .calendar-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .calendar-visual {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .calendar-month {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            background-color: var(--gray-100);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+
+        .calendar-nav-btn:hover {
+            background-color: var(--gray-200);
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 1rem 1.5rem;
+            gap: 0.25rem;
+        }
+
+        .calendar-day-header {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-500);
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .calendar-day:hover {
+            background-color: var(--gray-50);
+        }
+
+        .calendar-day.today {
+            background-color: var(--blue-500);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 0.25rem;
+            width: 0.25rem;
+            height: 0.25rem;
+            border-radius: 50%;
+            background-color: var(--blue-500);
+        }
+
+        .calendar-day.today.has-event::after {
+            background-color: var(--white);
+        }
+
+        .calendar-events {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .calendar-events-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        .calendar-event {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .calendar-event:last-child {
+            border-bottom: none;
+        }
+
+        .calendar-event-time {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            width: 4rem;
+        }
+
+        .calendar-event-color {
+            width: 0.25rem;
+            height: 2rem;
+            border-radius: 9999px;
+        }
+
+        .calendar-event-color.medication {
+            background-color: var(--blue-500);
+        }
+
+        .calendar-event-color.appointment {
+            background-color: var(--teal-500);
+        }
+
+        .calendar-event-color.exercise {
+            background-color: var(--green-500);
+        }
+
+        .calendar-event-color.vaccination {
+            background-color: var(--violet-500);
+        }
+
+        .calendar-event-info {
+            flex: 1;
+        }
+
+        .calendar-event-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .calendar-event-desc {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        /* Gamification Section */
+        .gamification {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .gamification-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .gamification-visual {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .gamification-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .gamification-stat {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .gamification-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .gamification-stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .gamification-achievements {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .gamification-achievement {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .gamification-achievement-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .gamification-achievement-icon.unlocked {
+            background-color: var(--yellow-50);
+        }
+
+        .gamification-achievement-icon.locked {
+            background-color: var(--gray-100);
+            filter: grayscale(100%);
+            opacity: 0.5;
+        }
+
+        .gamification-achievement-info {
+            flex: 1;
+        }
+
+        .gamification-achievement-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .gamification-achievement-desc {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        /* Health Education Section */
+        .health-education {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .education-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .education-categories {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto 4rem;
+        }
+
+        .education-category {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .education-category:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .education-category-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .education-category-icon.mental {
+            background-color: var(--violet-50);
+            color: var(--violet-500);
+        }
+
+        .education-category-icon.neuro {
+            background-color: var(--blue-50);
+            color: var(--blue-500);
+        }
+
+        .education-category-icon.cardio {
+            background-color: var(--red-50);
+            color: var(--red-500);
+        }
+
+        .education-category-icon.respiratory {
+            background-color: var(--cyan-50);
+            color: var(--cyan-500);
+        }
+
+        .education-category-icon.digestive {
+            background-color: var(--green-50);
+            color: var(--green-500);
+        }
+
+        .education-category-icon.skin {
+            background-color: var(--orange-50);
+            color: var(--orange-500);
+        }
+
+        .education-category-icon.infectious {
+            background-color: var(--yellow-50);
+            color: var(--yellow-500);
+        }
+
+        .education-category-icon.chronic {
+            background-color: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .education-category-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .education-category-count {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .education-resources {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .education-resource {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .education-resource:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .education-resource-image {
+            height: 12rem;
+            background-color: var(--gray-100);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .education-resource-image-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+        }
+
+        .education-resource-content {
+            padding: 1.25rem;
+        }
+
+        .education-resource-type {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--blue-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .education-resource-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .education-resource-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Personal Health Profile Section */
+        .health-profile {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .profile-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .profile-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--gray-50);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .profile-card-header {
+            background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 6rem;
+            height: 6rem;
+            border-radius: 50%;
+            background-color: var(--white);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-email {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .profile-card-body {
+            padding: 2rem;
+        }
+
+        .profile-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .profile-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .profile-info-item {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+        }
+
+        .profile-info-label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-info-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .profile-privacy {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: var(--white);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .profile-privacy-icon {
+            color: var(--green-500);
+        }
+
+        /* Security Section */
+        .security {
+            padding: 8rem 0;
+            background-color: var(--primary);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .security-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1), transparent 70%);
+        }
+
+        .security-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .security-content .section-label {
+            color: var(--blue-300);
+        }
+
+        .security-content .section-title {
+            color: var(--white);
+        }
+
+        .security-content .section-subtitle {
+            color: var(--gray-400);
+        }
+
+        .security-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .security-feature {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .security-feature:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .security-feature-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius);
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-300);
+            margin-bottom: 1rem;
+        }
+
+        .security-feature-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .security-feature-desc {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            line-height: 1.5;
+        }
+
+        /* Family Health Section */
+        .family-health {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .family-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .family-visual {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .family-member {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .family-member:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .family-member-avatar {
+            width: 5rem;
+            height: 5rem;
+            border-radius: 50%;
+            background-color: var(--white);
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            font-size: 1.5rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .family-member-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .family-member-relation {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-bottom: 1rem;
+        }
+
+        .family-member-permissions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .family-member-permission {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .family-member-permission-icon {
+            color: var(--green-500);
+        }
+
+        /* Export Section */
+        .export-section {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .export-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .export-visual {
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .export-option {
+            background-color: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .export-option:hover {
+            border-color: var(--blue-200);
+        }
+
+        .export-option.selected {
+            border-color: var(--blue-500);
+            background-color: var(--blue-50);
+        }
+
+        .export-option-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius);
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            color: var(--gray-600);
+        }
+
+        .export-option.selected .export-option-icon {
+            color: var(--blue-500);
+        }
+
+        .export-option-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .export-button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            background-color: var(--blue-500);
+            color: var(--white);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .export-button:hover {
+            background-color: var(--blue-600);
+        }
+
+        .export-preview {
+            background-color: var(--gray-50);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+
+        .export-preview-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .export-preview-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            background-color: var(--red-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--red-500);
+        }
+
+        .export-preview-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .export-preview-content {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .how-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .how-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .how-step {
+            position: relative;
+            text-align: center;
+        }
+
+        .how-step-number {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(180deg, var(--gray-200), var(--gray-100));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .how-step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .how-step-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Who Is MedVault For Section */
+        .who-for {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .who-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .who-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .who-card {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .who-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .who-card-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: var(--radius-lg);
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: var(--gray-600);
+        }
+
+        .who-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .who-card-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        /* Health News Section */
+        .health-news {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .news-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .news-articles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .news-article {
+            background-color: var(--gray-50);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .news-article:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .news-article-image {
+            height: 12rem;
+            background-color: var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-article-image-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+        }
+
+        .news-article-content {
+            padding: 1.25rem;
+        }
+
+        .news-article-category {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--blue-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-article-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .news-article-desc {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .news-article-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        /* Social Proof Section */
+        .social-proof {
+            padding: 8rem 0;
+            background-color: var(--gray-50);
+        }
+
+        .proof-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .proof-testimonials {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .proof-testimonial {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .proof-testimonial:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .proof-testimonial-stars {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            color: var(--yellow-500);
+        }
+
+        .proof-testimonial-text {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .proof-testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .proof-testimonial-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+            font-weight: 600;
+        }
+
+        .proof-testimonial-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .proof-testimonial-role {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .proof-disclaimer {
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 8rem 0;
+            background-color: var(--white);
+        }
+
+        .faq-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+
+        .faq-items {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .faq-question {
+            width: 100%;
+            padding: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-800);
+            text-align: left;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--blue-500);
+        }
+
+        .faq-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--gray-400);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-answer-content {
+            padding-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.6;
+        }
+
+        /* Final CTA Section */
+        .final-cta {
+            padding: 8rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1), transparent 70%);
+        }
+
+        .final-cta-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .final-cta-title {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+        }
+
+        .final-cta-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-300);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .final-cta-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .final-cta .btn-primary {
+            background-color: var(--white);
+            color: var(--primary);
+        }
+
+        .final-cta .btn-primary:hover {
+            background-color: var(--gray-100);
+        }
+
+        .final-cta .btn-secondary {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--white);
+            background-color: transparent;
+        }
+
+        .final-cta .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 4rem 0 2rem;
+            background-color: var(--primary);
+            color: var(--gray-400);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 280px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+
+        .footer-logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--blue-500), var(--teal-500));
+            border-radius: var(--radius);
+            margin-right: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+        }
+
+        .footer-tagline {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .footer-social-link {
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-400);
+            transition: all 0.2s ease;
+        }
+
+        .footer-social-link:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        .footer-column-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-link {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .footer-copyright {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .footer-disclaimer {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            max-width: 500px;
+            text-align: right;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 3.5rem;
+            }
+
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .dashboard-body {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .trust-strip-items {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .vault-process {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .vault-step-arrow {
+                display: none;
+            }
+
+            .vault-documents {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .tracking-widgets {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .education-categories {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .education-resources {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .security-features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .how-steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .who-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .news-articles {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .proof-testimonials {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+
+            .footer-brand {
+                grid-column: 1 / -1;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding-top: 6rem;
+                padding-bottom: 4rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .dashboard-body {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .ai-content,
+            .medication-content,
+            .journal-content,
+            .gamification-content,
+            .export-content {
+                grid-template-columns: 1fr;
+            }
+
+            .trust-strip-items {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .vault-process {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .vault-documents {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tracking-widgets {
+                grid-template-columns: 1fr;
+            }
+
+            .health-score-number-large {
+                font-size: 5rem;
+            }
+
+            .health-score-factors {
+                flex-wrap: wrap;
+                gap: 2rem;
+            }
+
+            .timeline-item:nth-child(odd),
+            .timeline-item:nth-child(even) {
+                padding-left: 3rem;
+                padding-right: 0;
+                justify-content: flex-start;
+            }
+
+            .timeline-line {
+                left: 0.75rem;
+            }
+
+            .timeline-item-dot {
+                left: 0.75rem;
+            }
+
+            .education-categories {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .education-resources {
+                grid-template-columns: 1fr;
+            }
+
+            .security-features {
+                grid-template-columns: 1fr;
+            }
+
+            .family-visual {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .how-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .who-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .news-articles {
+                grid-template-columns: 1fr;
+            }
+
+            .proof-testimonials {
+                grid-template-columns: 1fr;
+            }
+
+            .final-cta-title {
+                font-size: 2rem;
+            }
+
+            .final-cta-actions {
+                flex-direction: column;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .footer-disclaimer {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .trust-strip-items {
+                grid-template-columns: 1fr;
+            }
+
+            .vault-process {
+                grid-template-columns: 1fr;
+            }
+
+            .vault-documents {
+                grid-template-columns: 1fr;
+            }
+
+            .family-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        .animate-delay-500 { animation-delay: 0.5s; }
+
+        /* Intersection Observer Animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="container">
+            <div class="nav-content">
+                <a href="#" class="nav-logo">
+                    <div class="nav-logo-icon" style="background: none;">
+                        <img src="assets/logo.png" alt="MedVault logo" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    MedVault
+                </a>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#how-it-works" class="nav-link">How It Works</a>
+                    <a href="#ai" class="nav-link">AI</a>
+                    <a href="#education" class="nav-link">Health Library</a>
+                    <a href="#security" class="nav-link">Security</a>
+                    <a href="#about" class="nav-link">About</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="index.html?auth=login" class="btn btn-ghost">Log In</a>
+                    <a href="index.html?auth=signup" class="btn btn-primary">Get Started</a>
+                    <button class="mobile-menu-btn" id="mobile-menu-btn">
+                        <i data-lucide="menu" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-content animate-slide-up">
+                <div class="hero-badge">
+                    <i data-lucide="sparkles" style="width: 1rem; height: 1rem; margin-right: 0.25rem;"></i>
+                    Now with AI-powered insights
+                </div>
+                <h1 class="hero-title">Your health, organized.</h1>
+                <p class="hero-subtitle">MedVault brings your health information, medications, documents, tracking, insights, and wellness tools together in one intelligent platform.</p>
+                <div class="hero-actions">
+                    <a href="index.html?auth=signup" class="btn btn-primary btn-large">Get Started</a>
+                    <a href="#features" class="btn btn-secondary btn-large">Explore MedVault</a>
+                </div>
+                <p class="hero-trust">One place for your health journey.</p>
+            </div>
+
+            <div class="hero-dashboard animate-slide-up animate-delay-300">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dashboard-header-left">
+                            <div class="dashboard-dot red"></div>
+                            <div class="dashboard-dot yellow"></div>
+                            <div class="dashboard-dot green"></div>
+                        </div>
+                        <div class="dashboard-header-title">MedVault Dashboard</div>
+                        <div></div>
+                    </div>
+                    <div class="dashboard-body">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Health Score</div>
+                            <div class="health-score">
+                                <div class="health-score-number">87</div>
+                                <div class="health-score-circle">
+                                    <div class="health-score-circle-inner">87</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Today's Medications</div>
+                            <div class="medication-list">
+                                <div class="medication-item">
+                                    <div class="medication-icon">
+                                        <i data-lucide="pill" style="width: 1rem; height: 1rem;"></i>
+                                    </div>
+                                    <div class="medication-info">
+                                        <div class="medication-name">Lisinopril</div>
+                                        <div class="medication-dose">10mg</div>
+                                    </div>
+                                    <div class="medication-time">8:00 AM</div>
+                                </div>
+                                <div class="medication-item">
+                                    <div class="medication-icon">
+                                        <i data-lucide="pill" style="width: 1rem; height: 1rem;"></i>
+                                    </div>
+                                    <div class="medication-info">
+                                        <div class="medication-name">Vitamin D</div>
+                                        <div class="medication-dose">2000 IU</div>
+                                    </div>
+                                    <div class="medication-time">12:00 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Water</div>
+                            <div class="water-progress">
+                                <div class="water-visual">
+                                    <div class="water-fill"></div>
+                                    <div class="water-text">75%</div>
+                                </div>
+                                <div class="water-label">6 of 8 glasses</div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Sleep</div>
+                            <div class="sleep-chart">
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                                <div class="sleep-bar"></div>
+                            </div>
+                            <div class="sleep-label">7.5 hours avg</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Weight</div>
+                            <div class="weight-trend">
+                                <div>
+                                    <div class="weight-number">165</div>
+                                    <div class="weight-unit">lbs</div>
+                                </div>
+                                <div class="weight-change">
+                                    <i data-lucide="trending-down" style="width: 0.75rem; height: 0.75rem;"></i>
+                                    -2.5 lbs
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Pain</div>
+                            <div class="pain-scale">
+                                <div class="pain-point active">1</div>
+                                <div class="pain-point active">2</div>
+                                <div class="pain-point">3</div>
+                                <div class="pain-point">4</div>
+                                <div class="pain-point">5</div>
+                                <div class="pain-point">6</div>
+                                <div class="pain-point">7</div>
+                                <div class="pain-point">8</div>
+                                <div class="pain-point">9</div>
+                                <div class="pain-point">10</div>
+                            </div>
+                            <div class="pain-label">Low pain level today</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Upcoming Appointment</div>
+                            <div class="appointment-card">
+                                <div class="appointment-icon">
+                                    <i data-lucide="calendar" style="width: 1.25rem; height: 1.25rem;"></i>
+                                </div>
+                                <div class="appointment-info">
+                                    <div class="appointment-title">Dr. Johnson</div>
+                                    <div class="appointment-details">Tomorrow, 10:00 AM</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">AI Insight</div>
+                            <div class="ai-insight">
+                                <div class="ai-insight-header">
+                                    <div class="ai-insight-icon">
+                                        <i data-lucide="sparkles" style="width: 1rem; height: 1rem;"></i>
+                                    </div>
+                                    <div class="ai-insight-title">AI Analysis</div>
+                                </div>
+                                <div class="ai-insight-text">Your sleep quality has improved by 15% this week. This correlates with your increased water intake.</div>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-title">Health Timeline</div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                                    <i data-lucide="check-circle" style="width: 1rem; height: 1rem; color: var(--green-500);"></i>
+                                    Medication taken
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                                    <i data-lucide="file-text" style="width: 1rem; height: 1rem; color: var(--blue-500);"></i>
+                                    Lab results uploaded
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--gray-600);">
+                                    <i data-lucide="trophy" style="width: 1rem; height: 1rem; color: var(--yellow-500);"></i>
+                                    7-day streak achieved
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Strip -->
+    <section class="trust-strip" id="features">
+        <div class="container">
+            <h2 class="trust-strip-title reveal">Everything you need to understand your health.</h2>
+            <div class="trust-strip-items">
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon understand">
+                        <i data-lucide="brain" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Understand</div>
+                </div>
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon manage">
+                        <i data-lucide="pill" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Manage</div>
+                </div>
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon organize">
+                        <i data-lucide="folder-open" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Organize</div>
+                </div>
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon track">
+                        <i data-lucide="activity" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Track</div>
+                </div>
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon analyze">
+                        <i data-lucide="bar-chart-3" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Analyze</div>
+                </div>
+                <div class="trust-strip-item reveal">
+                    <div class="trust-strip-icon protect">
+                        <i data-lucide="shield-check" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="trust-strip-label">Protect</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Ecosystem Section -->
+    <section class="ecosystem" id="how-it-works">
+        <div class="ecosystem-bg"></div>
+        <div class="container">
+            <div class="ecosystem-content reveal">
+                <span class="section-label">Connected Health</span>
+                <h2 class="section-title">Everything about your health. Finally connected.</h2>
+                <p class="section-subtitle">MedVault brings together all aspects of your health information into one cohesive, intelligent ecosystem.</p>
+            </div>
+
+            <div class="ecosystem-visual reveal">
+                <div class="ecosystem-center" style="background: var(--white); box-shadow: 0 8px 30px rgba(0,0,0,0.12); padding: 1.25rem;">
+                    <img src="assets/logo.png" alt="MedVault logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                
+                <div class="ecosystem-item" style="top: 0; left: 50%; transform: translateX(-50%);">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--blue-400), var(--blue-500));">
+                        <i data-lucide="file-text" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Medical Records</div>
+                </div>
+                
+                <div class="ecosystem-item" style="top: 25%; right: 5%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--teal-400), var(--teal-500));">
+                        <i data-lucide="pill" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Medications</div>
+                </div>
+                
+                <div class="ecosystem-item" style="top: 55%; right: 10%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--green-400), var(--green-500));">
+                        <i data-lucide="calendar" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Appointments</div>
+                </div>
+                
+                <div class="ecosystem-item" style="bottom: 5%; right: 25%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--violet-400), var(--violet-500));">
+                        <i data-lucide="activity" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Health Tracking</div>
+                </div>
+                
+                <div class="ecosystem-item" style="bottom: 5%; left: 25%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--cyan-400), var(--cyan-500));">
+                        <i data-lucide="book-open" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Journal</div>
+                </div>
+                
+                <div class="ecosystem-item" style="top: 55%; left: 10%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--gray-500), var(--gray-600));">
+                        <i data-lucide="calendar-days" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Calendar</div>
+                </div>
+                
+                <div class="ecosystem-item" style="top: 25%; left: 5%;">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--blue-400), var(--violet-400));">
+                        <i data-lucide="sparkles" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">AI Insights</div>
+                </div>
+                
+                <div class="ecosystem-item" style="bottom: 40%; left: 50%; transform: translateX(-50%);">
+                    <div class="ecosystem-item-icon" style="background: linear-gradient(135deg, var(--green-400), var(--teal-400));">
+                        <i data-lucide="graduation-cap" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="ecosystem-item-label">Education</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Section -->
+    <section class="ai-section" id="ai">
+        <div class="container">
+            <div class="ai-content">
+                <div class="ai-text reveal">
+                    <span class="section-label">AI-Powered</span>
+                    <h2 class="section-title">Meet your intelligent health companion.</h2>
+                    <p class="section-subtitle" style="margin-bottom: 2rem;">Our AI helps you understand your health information, provides insights, and answers your questions in plain language.</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Simplifies complex medical reports</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Identifies patterns in your health data</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Suggests questions to ask your doctor</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Provides educational context</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="ai-visual reveal">
+                    <div class="ai-chat">
+                        <div class="ai-chat-header">
+                            <div class="ai-chat-avatar">
+                                <i data-lucide="sparkles" style="width: 1.25rem; height: 1.25rem;"></i>
+                            </div>
+                            <div>
+                                <div class="ai-chat-name">MedVault AI</div>
+                                <div class="ai-chat-status">
+                                    <div class="ai-chat-status-dot"></div>
+                                    Online
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-chat-messages">
+                            <div class="ai-message user">
+                                <div class="ai-message-avatar">
+                                    <i data-lucide="user" style="width: 1rem; height: 1rem;"></i>
+                                </div>
+                                <div class="ai-message-content">
+                                    <div class="ai-message-bubble">Can you explain this blood test report?</div>
+                                    <div class="ai-message-time">2:34 PM</div>
+                                </div>
+                            </div>
+                            <div class="ai-message ai">
+                                <div class="ai-message-avatar ai">
+                                    <i data-lucide="sparkles" style="width: 1rem; height: 1rem;"></i>
+                                </div>
+                                <div class="ai-message-content">
+                                    <div class="ai-message-bubble">I've analyzed your blood test results. Here's a simplified explanation of the key findings:</div>
+                                    <div class="ai-message-time">2:34 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-summary">
+                            <div class="ai-summary-title">Key Findings</div>
+                            <div class="ai-summary-items">
+                                <div class="ai-summary-item">
+                                    <i data-lucide="check" class="ai-summary-icon" style="width: 1rem; height: 1rem;"></i>
+                                    <span>Your cholesterol levels are within the normal range.</span>
+                                </div>
+                                <div class="ai-summary-item">
+                                    <i data-lucide="alert-circle" class="ai-summary-icon" style="width: 1rem; height: 1rem;"></i>
+                                    <span>Vitamin D is slightly below optimal. Consider discussing supplementation with your doctor.</span>
+                                </div>
+                                <div class="ai-summary-item">
+                                    <i data-lucide="info" class="ai-summary-icon" style="width: 1rem; height: 1rem;"></i>
+                                    <span>Your iron levels have improved since your last test.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-disclaimer" style="margin: 1rem;">
+                            <i data-lucide="alert-triangle" class="ai-disclaimer-icon" style="width: 1rem; height: 1rem;"></i>
+                            <span>This information is for educational purposes only and is not a medical diagnosis. Always consult with a healthcare professional for medical advice.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Medical Vault Section -->
+    <section class="medical-vault">
+        <div class="container">
+            <div class="vault-content reveal">
+                <span class="section-label">Smart Medical Vault</span>
+                <h2 class="section-title">Your medical documents, organized intelligently.</h2>
+                <p class="section-subtitle">Upload any medical document and let MedVault organize, categorize, and analyze it for you.</p>
+            </div>
+
+            <div class="vault-process reveal">
+                <div class="vault-step">
+                    <div class="vault-step-icon">
+                        <i data-lucide="upload" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-step-title">Upload</div>
+                    <div class="vault-step-desc">Add your documents</div>
+                    <div class="vault-step-arrow">
+                        <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+                    </div>
+                </div>
+                <div class="vault-step">
+                    <div class="vault-step-icon">
+                        <i data-lucide="scan" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-step-title">OCR</div>
+                    <div class="vault-step-desc">Extract text</div>
+                    <div class="vault-step-arrow">
+                        <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+                    </div>
+                </div>
+                <div class="vault-step">
+                    <div class="vault-step-icon">
+                        <i data-lucide="tag" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-step-title">Categorize</div>
+                    <div class="vault-step-desc">Sort by type</div>
+                    <div class="vault-step-arrow">
+                        <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+                    </div>
+                </div>
+                <div class="vault-step">
+                    <div class="vault-step-icon">
+                        <i data-lucide="brain" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-step-title">Analyze</div>
+                    <div class="vault-step-desc">AI processing</div>
+                    <div class="vault-step-arrow">
+                        <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+                    </div>
+                </div>
+                <div class="vault-step">
+                    <div class="vault-step-icon">
+                        <i data-lucide="lock" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-step-title">Store</div>
+                    <div class="vault-step-desc">Securely save</div>
+                </div>
+            </div>
+
+            <div class="vault-documents reveal">
+                <div class="vault-document">
+                    <div class="vault-document-icon">
+                        <i data-lucide="droplets" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-document-title">Blood Test</div>
+                </div>
+                <div class="vault-document">
+                    <div class="vault-document-icon">
+                        <i data-lucide="file-text" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-document-title">Prescription</div>
+                </div>
+                <div class="vault-document">
+                    <div class="vault-document-icon">
+                        <i data-lucide="scan" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-document-title">Scan</div>
+                </div>
+                <div class="vault-document">
+                    <div class="vault-document-icon">
+                        <i data-lucide="mail" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-document-title">Referral</div>
+                </div>
+                <div class="vault-document">
+                    <div class="vault-document-icon">
+                        <i data-lucide="file" style="width: 1.25rem; height: 1.25rem;"></i>
+                    </div>
+                    <div class="vault-document-title">Medical Letter</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section class="security" id="security">
+        <div class="security-bg"></div>
+        <div class="container">
+            <div class="security-content reveal">
+                <span class="section-label">Your Data, Protected</span>
+                <h2 class="section-title">Security you can trust.</h2>
+                <p class="section-subtitle">Your health information is some of the most sensitive data there is. We built MedVault to protect it like it's our own.</p>
+            </div>
+
+            <div class="security-features reveal">
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="lock" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">End-to-End Encryption</div>
+                    <div class="security-feature-desc">Your data is encrypted in transit and at rest, so only you can access it.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="shield-check" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">HIPAA Compliant</div>
+                    <div class="security-feature-desc">We follow strict healthcare privacy standards to keep your records safe.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="fingerprint" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Biometric Login</div>
+                    <div class="security-feature-desc">Secure access with Face ID, fingerprint, or two-factor authentication.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="user-check" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">You're In Control</div>
+                    <div class="security-feature-desc">You decide who can see your data, and you can revoke access anytime.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="server" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Secure Infrastructure</div>
+                    <div class="security-feature-desc">Hosted on audited, enterprise-grade cloud infrastructure with continuous monitoring.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="trash-2" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Delete Anytime</div>
+                    <div class="security-feature-desc">Permanently delete your account and data whenever you choose.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Medication Section -->
+    <section class="medication">
+        <div class="container">
+            <div class="medication-content">
+                <div class="medication-visual reveal">
+                    <div class="medication-timeline">
+                        <div class="medication-event">
+                            <div class="medication-event-dot completed"></div>
+                            <div class="medication-event-time">8:00 AM</div>
+                            <div class="medication-event-title">Lisinopril 10mg</div>
+                            <div class="medication-event-status">
+                                <i data-lucide="check" style="width: 0.75rem; height: 0.75rem;"></i>
+                                Taken
+                            </div>
+                        </div>
+                        <div class="medication-event">
+                            <div class="medication-event-dot completed"></div>
+                            <div class="medication-event-time">8:00 AM</div>
+                            <div class="medication-event-title">Vitamin D 2000 IU</div>
+                            <div class="medication-event-status">
+                                <i data-lucide="check" style="width: 0.75rem; height: 0.75rem;"></i>
+                                Taken
+                            </div>
+                        </div>
+                        <div class="medication-event">
+                            <div class="medication-event-dot"></div>
+                            <div class="medication-event-time">12:00 PM</div>
+                            <div class="medication-event-title">Omega-3 1000mg</div>
+                            <div class="medication-event-status" style="color: var(--gray-500);">
+                                Upcoming
+                            </div>
+                        </div>
+                        <div class="medication-event">
+                            <div class="medication-event-dot"></div>
+                            <div class="medication-event-time">8:00 PM</div>
+                            <div class="medication-event-title">Melatonin 3mg</div>
+                            <div class="medication-event-status" style="color: var(--gray-500);">
+                                Scheduled
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="medication-stats">
+                        <div class="medication-stat">
+                            <div class="medication-stat-value">7</div>
+                            <div class="medication-stat-label">Day Streak</div>
+                        </div>
+                        <div class="medication-stat">
+                            <div class="medication-stat-value">96%</div>
+                            <div class="medication-stat-label">Adherence</div>
+                        </div>
+                        <div class="medication-stat">
+                            <div class="medication-stat-value">3</div>
+                            <div class="medication-stat-label">Active Meds</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-text reveal">
+                    <span class="section-label">Medication Management</span>
+                    <h2 class="section-title">Never miss a medication again.</h2>
+                    <p class="section-subtitle" style="margin-bottom: 2rem;">MedVault helps you manage your medications with smart reminders, tracking, and adherence monitoring.</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Customizable medication schedules</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Smart reminders with notifications</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Track adherence and streaks</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Refill reminders and pharmacy integration</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Tracking Section -->
+    <section class="health-tracking">
+        <div class="container">
+            <div class="tracking-content reveal">
+                <span class="section-label">Health Tracking</span>
+                <h2 class="section-title">Track what matters most.</h2>
+                <p class="section-subtitle">Monitor your health metrics with beautiful, intuitive tracking tools that help you understand your body better.</p>
+            </div>
+
+            <div class="tracking-widgets reveal">
+                <div class="tracking-widget">
+                    <div class="tracking-widget-header">
+                        <div class="tracking-widget-title">Water</div>
+                        <div class="tracking-widget-icon water">
+                            <i data-lucide="droplets" style="width: 1rem; height: 1rem;"></i>
+                        </div>
+                    </div>
+                    <div class="tracking-widget-value">6/8</div>
+                    <div class="tracking-widget-label">glasses today</div>
+                    <div class="tracking-widget-progress">
+                        <div class="tracking-widget-progress-fill water"></div>
+                    </div>
+                </div>
+
+                <div class="tracking-widget">
+                    <div class="tracking-widget-header">
+                        <div class="tracking-widget-title">Sleep</div>
+                        <div class="tracking-widget-icon sleep">
+                            <i data-lucide="moon" style="width: 1rem; height: 1rem;"></i>
+                        </div>
+                    </div>
+                    <div class="tracking-widget-value">7.5h</div>
+                    <div class="tracking-widget-label">last night</div>
+                    <div class="tracking-widget-progress">
+                        <div class="tracking-widget-progress-fill sleep"></div>
+                    </div>
+                </div>
+
+                <div class="tracking-widget">
+                    <div class="tracking-widget-header">
+                        <div class="tracking-widget-title">Weight</div>
+                        <div class="tracking-widget-icon weight">
+                            <i data-lucide="scale" style="width: 1rem; height: 1rem;"></i>
+                        </div>
+                    </div>
+                    <div class="tracking-widget-value">165</div>
+                    <div class="tracking-widget-label">lbs (-2.5 this month)</div>
+                    <div class="tracking-widget-progress">
+                        <div class="tracking-widget-progress-fill weight"></div>
+                    </div>
+                </div>
+
+                <div class="tracking-widget">
+                    <div class="tracking-widget-header">
+                        <div class="tracking-widget-title">Pain</div>
+                        <div class="tracking-widget-icon pain">
+                            <i data-lucide="heart-pulse" style="width: 1rem; height: 1rem;"></i>
+                        </div>
+                    </div>
+                    <div class="tracking-widget-value">2/10</div>
+                    <div class="tracking-widget-label">low pain level</div>
+                    <div class="tracking-widget-progress">
+                        <div class="tracking-widget-progress-fill pain"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Score Section -->
+    <section class="health-score-section">
+        <div class="health-score-bg"></div>
+        <div class="container">
+            <div class="health-score-content reveal">
+                <span class="section-label">Health Score</span>
+                <h2 class="section-title">Your health at a glance.</h2>
+                <p class="section-subtitle" style="margin-bottom: 3rem;">The MedVault Health Score gives you a simple, comprehensive view of your overall wellness based on your tracked data.</p>
+                
+                <div class="health-score-number-large">87</div>
+                
+                <div class="health-score-factors">
+                    <div class="health-score-factor">
+                        <div class="health-score-factor-icon">
+                            <i data-lucide="moon" style="width: 1.25rem; height: 1.25rem;"></i>
+                        </div>
+                        <div class="health-score-factor-label">Sleep</div>
+                        <div class="health-score-factor-value">85%</div>
+                    </div>
+                    <div class="health-score-factor">
+                        <div class="health-score-factor-icon">
+                            <i data-lucide="droplets" style="width: 1.25rem; height: 1.25rem;"></i>
+                        </div>
+                        <div class="health-score-factor-label">Hydration</div>
+                        <div class="health-score-factor-value">75%</div>
+                    </div>
+                    <div class="health-score-factor">
+                        <div class="health-score-factor-icon">
+                            <i data-lucide="pill" style="width: 1.25rem; height: 1.25rem;"></i>
+                        </div>
+                        <div class="health-score-factor-label">Medication</div>
+                        <div class="health-score-factor-value">96%</div>
+                    </div>
+                    <div class="health-score-factor">
+                        <div class="health-score-factor-icon">
+                            <i data-lucide="activity" style="width: 1.25rem; height: 1.25rem;"></i>
+                        </div>
+                        <div class="health-score-factor-label">Activity</div>
+                        <div class="health-score-factor-value">80%</div>
+                    </div>
+                    <div class="health-score-factor">
+                        <div class="health-score-factor-icon">
+                            <i data-lucide="target" style="width: 1.25rem; height: 1.25rem;"></i>
+                        </div>
+                        <div class="health-score-factor-label">Goals</div>
+                        <div class="health-score-factor-value">90%</div>
+                    </div>
+                </div>
+
+                <div class="health-score-disclaimer">
+                    The Health Score is for informational purposes only and is not a medical diagnosis. It's based on your self-reported data and should not replace professional medical advice.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Timeline Section -->
+    <section class="health-timeline">
+        <div class="container">
+            <div class="timeline-content reveal">
+                <span class="section-label">Health Timeline</span>
+                <h2 class="section-title">Your health journey, visualized.</h2>
+                <p class="section-subtitle">See all your health events in one place, from medications to appointments to milestones.</p>
+            </div>
+
+            <div class="timeline-visual reveal">
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-item-dot"></div>
+                    <div class="timeline-item-card">
+                        <div class="timeline-item-date">Today, 8:00 AM</div>
+                        <div class="timeline-item-title">Medication Taken</div>
+                        <div class="timeline-item-desc">Lisinopril 10mg and Vitamin D 2000 IU</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-item-dot"></div>
+                    <div class="timeline-item-card">
+                        <div class="timeline-item-date">Yesterday, 2:30 PM</div>
+                        <div class="timeline-item-title">Lab Results Uploaded</div>
+                        <div class="timeline-item-desc">Blood test results from Dr. Johnson added to Medical Vault</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-item-dot"></div>
+                    <div class="timeline-item-card">
+                        <div class="timeline-item-date">3 days ago</div>
+                        <div class="timeline-item-title">Appointment Completed</div>
+                        <div class="timeline-item-desc">Annual checkup with Dr. Johnson</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-item-dot"></div>
+                    <div class="timeline-item-card">
+                        <div class="timeline-item-date">1 week ago</div>
+                        <div class="timeline-item-title">Achievement Unlocked</div>
+                        <div class="timeline-item-desc">7-day medication streak</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-item-dot"></div>
+                    <div class="timeline-item-card">
+                        <div class="timeline-item-date">2 weeks ago</div>
+                        <div class="timeline-item-title">Vaccination Recorded</div>
+                        <div class="timeline-item-desc">Flu vaccine administered at local pharmacy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Journal Section -->
+    <section class="health-journal" id="education">
+        <div class="container">
+            <div class="journal-content">
+                <div class="ai-text reveal">
+                    <span class="section-label">Health Journal</span>
+                    <h2 class="section-title">Record your daily health experience.</h2>
+                    <p class="section-subtitle" style="margin-bottom: 2rem;">Track how you feel each day with our intuitive journal. Our AI can identify patterns and provide insights over time.</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Log mood, symptoms, and energy levels</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Add notes about your day</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">AI discovers patterns in your entries</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Share insights with your healthcare provider</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="journal-visual reveal">
+                    <div class="journal-entry">
+                        <div class="journal-entry-date">Today, 9:30 AM</div>
+                        <div class="journal-entry-metrics">
+                            <div class="journal-metric">
+                                <div class="journal-metric-value">8</div>
+                                <div class="journal-metric-label">Mood</div>
+                            </div>
+                            <div class="journal-metric">
+                                <div class="journal-metric-value">2</div>
+                                <div class="journal-metric-label">Pain</div>
+                            </div>
+                            <div class="journal-metric">
+                                <div class="journal-metric-value">7</div>
+                                <div class="journal-metric-label">Energy</div>
+                            </div>
+                            <div class="journal-metric">
+                                <div class="journal-metric-value">8</div>
+                                <div class="journal-metric-label">Sleep</div>
+                            </div>
+                        </div>
+                        <div class="journal-entry-notes">
+                            Woke up feeling refreshed after 8 hours of sleep. Slight knee pain during morning walk but improved after stretching. Overall a good day.
+                        </div>
+                    </div>
+
+                    <div class="journal-ai-insight">
+                        <div class="journal-ai-header">
+                            <div class="journal-ai-icon">
+                                <i data-lucide="sparkles" style="width: 1rem; height: 1rem;"></i>
+                            </div>
+                            <div class="journal-ai-title">AI Pattern Detected</div>
+                        </div>
+                        <div class="journal-ai-text">
+                            Your journal entries show that your energy has been improving this week. This correlates with your increased water intake and consistent sleep schedule.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+        <div class="container">
+            <div class="calendar-content reveal">
+                <span class="section-label">Health Calendar</span>
+                <h2 class="section-title">Your health schedule, organized.</h2>
+                <p class="section-subtitle">View all your health-related events in one place, from medications to appointments to wellness activities.</p>
+            </div>
+
+            <div class="calendar-visual reveal">
+                <div class="calendar-header">
+                    <div class="calendar-month">January 2026</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn">
+                            <i data-lucide="chevron-left" style="width: 1rem; height: 1rem;"></i>
+                        </button>
+                        <button class="calendar-nav-btn">
+                            <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="calendar-days">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                    
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day">1</div>
+                    <div class="calendar-day">2</div>
+                    <div class="calendar-day">3</div>
+                    
+                    <div class="calendar-day">4</div>
+                    <div class="calendar-day has-event">5</div>
+                    <div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div>
+                    <div class="calendar-day has-event">8</div>
+                    <div class="calendar-day">9</div>
+                    <div class="calendar-day">10</div>
+                    
+                    <div class="calendar-day">11</div>
+                    <div class="calendar-day">12</div>
+                    <div class="calendar-day has-event">13</div>
+                    <div class="calendar-day">14</div>
+                    <div class="calendar-day today has-event">15</div>
+                    <div class="calendar-day">16</div>
+                    <div class="calendar-day">17</div>
+                    
+                    <div class="calendar-day">18</div>
+                    <div class="calendar-day">19</div>
+                    <div class="calendar-day has-event">20</div>
+                    <div class="calendar-day">21</div>
+                    <div class="calendar-day">22</div>
+                    <div class="calendar-day">23</div>
+                    <div class="calendar-day">24</div>
+                    
+                    <div class="calendar-day">25</div>
+                    <div class="calendar-day has-event">26</div>
+                    <div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    <div class="calendar-day">31</div>
+                </div>
+                <div class="calendar-events">
+                    <div class="calendar-events-title">Today's Events</div>
+                    <div class="calendar-event">
+                        <div class="calendar-event-time">8:00 AM</div>
+                        <div class="calendar-event-color medication"></div>
+                        <div class="calendar-event-info">
+                            <div class="calendar-event-title">Morning Medications</div>
+                            <div class="calendar-event-desc">Lisinopril, Vitamin D</div>
+                        </div>
+                    </div>
+                    <div class="calendar-event">
+                        <div class="calendar-event-time">10:00 AM</div>
+                        <div class="calendar-event-color appointment"></div>
+                        <div class="calendar-event-info">
+                            <div class="calendar-event-title">Dr. Johnson Appointment</div>
+                            <div class="calendar-event-desc">Annual checkup</div>
+                        </div>
+                    </div>
+                    <div class="calendar-event">
+                        <div class="calendar-event-time">5:30 PM</div>
+                        <div class="calendar-event-color exercise"></div>
+                        <div class="calendar-event-info">
+                            <div class="calendar-event-title">Evening Walk</div>
+                            <div class="calendar-event-desc">30 minutes, moderate pace</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gamification Section -->
+    <section class="gamification">
+        <div class="container">
+            <div class="gamification-content">
+                <div class="ai-text reveal">
+                    <span class="section-label">Stay Motivated</span>
+                    <h2 class="section-title">Build healthy habits with gamification.</h2>
+                    <p class="section-subtitle" style="margin-bottom: 2rem;">Earn points, unlock achievements, and maintain streaks as you build healthier habits.</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem;">
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Earn points for logging health data</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Unlock achievements as you hit milestones</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <i data-lucide="check-circle" style="width: 1.25rem; height: 1.25rem; color: var(--green-500); flex-shrink: 0; margin-top: 0.125rem;"></i>
+                            <span style="font-size: 0.9375rem; color: var(--gray-700);">Build streaks that keep you motivated</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="gamification-visual reveal">
+                    <div class="ai-chat">
+                        <div class="ai-chat-header">
+                            <div class="ai-chat-avatar">
+                                <i data-lucide="trophy" style="width: 1.25rem; height: 1.25rem;"></i>
+                            </div>
+                            <div>
+                                <div class="ai-chat-name">Your Progress</div>
+                                <div class="ai-chat-status">
+                                    <div class="ai-chat-status-dot"></div>
+                                    14 day streak
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="ecosystem" id="about">
+        <div class="ecosystem-bg"></div>
+        <div class="container">
+            <div class="ecosystem-content reveal">
+                <span class="section-label">About MedVault</span>
+                <h2 class="section-title">Built to make health information make sense.</h2>
+                <p class="section-subtitle">MedVault started with a simple frustration: health records are scattered across portals, paper files, and pharmacy printouts, and no one has time to piece it all together. We're building the connected, intelligent home for your health information, so you can spend less time hunting for answers and more time acting on them.</p>
+            </div>
+
+            <div class="security-features reveal" style="margin-top: 3rem;">
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="target" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Our Mission</div>
+                    <div class="security-feature-desc">Give every person a clear, connected view of their own health.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="users" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Who We Serve</div>
+                    <div class="security-feature-desc">Individuals and families managing everyday health and chronic conditions alike.</div>
+                </div>
+                <div class="security-feature">
+                    <div class="security-feature-icon">
+                        <i data-lucide="heart-handshake" style="width: 1.5rem; height: 1.5rem;"></i>
+                    </div>
+                    <div class="security-feature-title">Our Values</div>
+                    <div class="security-feature-desc">Privacy first, plain language always, and technology that respects your time.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="footer-logo-icon" style="background: none;">
+                            <img src="assets/logo.png" alt="MedVault logo" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        MedVault
+                    </div>
+                    <p class="footer-tagline">Your health information, finally connected.</p>
+                    <div class="footer-social">
+                        <a href="https://x.com/MedVaultOffical" class="footer-social-link" target="_blank" rel="noopener"><i data-lucide="twitter" style="width: 1rem; height: 1rem;"></i></a>
+                        <a href="https://www.instagram.com/medvaultofficial/" class="footer-social-link" target="_blank" rel="noopener"><i data-lucide="instagram" style="width: 1rem; height: 1rem;"></i></a>
+                        <a href="https://www.youtube.com/@MedVaultOfficial" class="footer-social-link" target="_blank" rel="noopener"><i data-lucide="youtube" style="width: 1rem; height: 1rem;"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <div class="footer-column-title">Product</div>
+                    <div class="footer-links">
+                        <a href="#features" class="footer-link">Features</a>
+                        <a href="#how-it-works" class="footer-link">How It Works</a>
+                        <a href="#ai" class="footer-link">AI</a>
+                        <a href="#security" class="footer-link">Security</a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <div class="footer-column-title">Company</div>
+                    <div class="footer-links">
+                        <a href="#about" class="footer-link">About</a>
+                        <a href="#education" class="footer-link">Health Library</a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <div class="footer-column-title">Legal</div>
+                    <div class="footer-links">
+                        <a href="privacy-policy.html" class="footer-link">Privacy Policy</a>
+                        <a href="terms-of-service.html" class="footer-link">Terms of Service</a>
+                        <a href="hipaa-notice.html" class="footer-link">HIPAA Notice</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copyright">&copy; 2026 MedVault. All rights reserved.</div>
+                <div class="footer-disclaimer">MedVault is not a substitute for professional medical advice, diagnosis, or treatment.</div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
