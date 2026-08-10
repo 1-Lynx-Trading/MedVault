@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedVault — Global Health Encyclopedia</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- ===================================================================
      FIREBASE SDK (compat build — simplest drop-in for email/password auth)
      =================================================================== -->
@@ -99,7 +99,8 @@
     text-decoration:none;
     color:var(--text);
   }
-  .nav-logo span { color:var(--accent); }
+  .nav-logo-mark { height:1.85rem; width:auto; display:block; }
+  .nav-logo-text { white-space:nowrap; }
   .nav-links {
     display:flex;
     gap:1.5rem;
@@ -1503,6 +1504,159 @@ h1.hero-title em,
   nav{padding:0 1.1rem;}
   .user-menu-wrap{gap:0.6rem;}
 }
+
+/* =====================================================================
+   REDESIGN PASS 3 — typography system overhaul + final visual polish.
+   Purely additive/overriding CSS. No markup, class, id, onclick, or JS
+   hook is touched anywhere in this pass — every existing feature keeps
+   working exactly as before. Font roles:
+     • Manrope  → primary UI voice: body copy, nav, buttons, forms, labels
+     • Inter    → dense data contexts: tables, settings rows, small UI text
+     • DM Mono  → numerals, stats, timestamps, codes (kept — already tabular)
+     • Lora     → editorial/serif accents: hero emphasis, scientific names,
+                   feature section headings (used sparingly, on purpose)
+     • Syne     → wordmark / nav-logo only, for brand recognizability
+   ===================================================================== */
+
+:root{
+  --font-ui:'Manrope','Plus Jakarta Sans','Inter',sans-serif;
+  --font-dense:'Inter','Manrope',sans-serif;
+  --font-display:'Manrope','Syne',sans-serif;
+  --font-serif:'Lora','Instrument Serif',serif;
+  --font-mono:'DM Mono',monospace;
+  --shadow-xs:0 1px 2px rgba(0,0,0,0.25);
+}
+
+/* ---- Base voice: body copy moves to Manrope for warmer, rounder legibility ---- */
+body{
+  font-family:var(--font-ui);
+  letter-spacing:-0.008em;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---- Display hierarchy: headings carry the product's personality ---- */
+h1,h2,h3,h4,
+.dash-greeting h1,.widget-head h3,.mv-modal-head h3,.auth-title,
+.welcome-hero h1,.section-page-head h2,.page-hero-section h2,
+.detail-name,.card-name{
+  font-family:var(--font-display);
+  font-weight:700;
+  letter-spacing:-0.022em;
+  line-height:1.15;
+}
+h1,.auth-title,.welcome-hero h1,.dash-greeting h1{font-weight:800;letter-spacing:-0.03em;}
+h2,.section-page-head h2,.page-hero-section h2{font-weight:700;letter-spacing:-0.024em;}
+h3,.widget-head h3,.mv-modal-head h3{font-weight:700;letter-spacing:-0.014em;}
+
+/* ---- Wordmark keeps its original brand face, sized with more confidence ---- */
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;letter-spacing:-0.008em;font-size:1.2rem;gap:0.6rem;}
+.nav-logo-mark{transition:transform .25s var(--ease);}
+.nav-logo:hover .nav-logo-mark{transform:scale(1.06) rotate(-2deg);}
+
+/* ---- Body/paragraph text: comfortable measure, calmer color, better rhythm ---- */
+p,.hero-sub,.page-hero-section p,.welcome-hero p,.detail-desc,.ai-summary-text,
+.journal-entry-notes,.section-page-head p,.card-desc,.doc-meta,.settings-row span:first-child{
+  font-family:var(--font-ui);
+  line-height:1.65;
+}
+
+/* ---- Editorial serif: reserved for genuine emphasis moments, not decoration ---- */
+h1.hero-title em,.page-hero-section h2 em,.welcome-hero h1 span,
+.card-scientific,.detail-scientific,.card-name em{
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-weight:500;
+  letter-spacing:-0.005em;
+}
+
+/* ---- Dense/data UI: settings, tables, toolbars read more like a precision tool ---- */
+.settings-block,.settings-row,.lb-table,.doc-card,.vault-toolbar,
+.journal-search,#journal-mood-filter{
+  font-family:var(--font-dense);
+}
+
+/* ---- Numerals: force tabular figures everywhere a number appears ---- */
+.dash-stat-card .val,.lb-stat,.bar-label,.journal-entry-date,.med-info span,
+.dash-stat-card .lbl,.card-badge,.pw-strength-label{
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---- Buttons, nav links, labels: functional UI weight + tracking ---- */
+.btn-auth,.btn-welcome,.mv-btn,.water-btn,.day-chip,.nav-links a,
+.mv-field label,.auth-field label,.journal-view-toggle button{
+  font-family:var(--font-ui);
+  font-weight:600;
+}
+.nav-links a{letter-spacing:0.01em;}
+.mv-field label,.auth-field label{
+  font-size:0.78rem;letter-spacing:0.02em;text-transform:uppercase;
+  color:var(--muted);font-weight:700;
+}
+
+/* ---- Inputs: same UI voice, roomier and calmer ---- */
+.auth-field input,.mv-field input,.mv-field select,.mv-field textarea,
+.journal-search,#journal-mood-filter,.vault-toolbar input,.vault-toolbar select{
+  font-family:var(--font-ui) !important;
+  font-size:0.92rem;
+}
+
+/* ---- Stat numbers get a touch more presence ---- */
+.dash-stat-card .val{font-size:1.9rem;font-weight:800;letter-spacing:-0.03em;}
+
+/* ---- Spacing rhythm: consistent heading→body gap per design-system convention ---- */
+h1,h2,h3{margin-bottom:0.5rem;}
+h1 + p,h2 + p,h3 + p,.section-page-head h2 + p,.page-hero-section h2 + p{margin-top:0.5rem;}
+
+/* ---- Cards: slightly larger internal breathing room, consistent radius scale ---- */
+.widget-card,.dash-stat-card,.entry-card,.doc-card,.achv-card{
+  padding:1.35rem !important;
+}
+.mv-modal{padding:1.75rem !important;}
+
+/* ---- Buttons: consistent height, comfortable click targets, calmer letterspace ---- */
+.btn-auth,.btn-welcome,.mv-btn{
+  min-height:2.75rem;
+  padding-left:1.15rem;padding-right:1.15rem;
+  letter-spacing:0.005em;
+}
+
+/* ---- Hover/press language stays consistent across every clickable surface ---- */
+a,button,.mv-btn,.btn-auth,.btn-welcome,.icon-btn,.avatar-btn,.notif-bell,
+.med-check,.widget-add,.entry-card,.doc-card,.achv-card,.day-chip{
+  cursor:pointer;
+}
+.entry-card,.doc-card,.achv-card{
+  transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s var(--ease);
+}
+.entry-card:hover,.doc-card:hover,.achv-card:hover{transform:translateY(-2px);}
+
+/* ---- Tables/lists: clearer row separation without heavy borders ---- */
+.lb-table tr,.med-item,.settings-row{
+  transition:background .18s var(--ease);
+}
+
+/* ---- Chips/badges: consistent pill treatment ---- */
+.card-badge,.draft-badge,.welcome-badge{
+  font-family:var(--font-dense);
+  font-weight:700;
+  letter-spacing:0.01em;
+}
+
+/* ---- Small caps used for meta/labels stay legible at tiny sizes ---- */
+.dash-stat-card .lbl,.bar-label{font-family:var(--font-dense);font-weight:700;letter-spacing:0.07em;}
+
+/* ---- Scrollable regions get the same thin scrollbar treatment everywhere ---- */
+.mv-modal,.lib-dropdown,.user-dropdown{scrollbar-gutter:stable;}
+
+/* ---- Responsive type scale: hero/display text steps down cleanly on mobile ---- */
+@media (max-width:768px){
+  h1,.auth-title,.welcome-hero h1,.dash-greeting h1{font-size:clamp(1.5rem,5.5vw,2.1rem);}
+  h2,.section-page-head h2,.page-hero-section h2{font-size:clamp(1.25rem,4.5vw,1.6rem);}
+  .dash-stat-card .val{font-size:1.6rem;}
+  .widget-card,.dash-stat-card,.entry-card,.doc-card,.achv-card{padding:1.1rem !important;}
+}
 </style>
 </head>
 <body>
@@ -1648,7 +1802,8 @@ h1.hero-title em,
 <!-- NAV -->
 <nav>
   <div class="nav-logo" onclick="showPage('dashboard')">
-    <span>Med</span>Vault
+    <img src="logo.png" alt="" class="nav-logo-mark" onerror="this.style.display='none'">
+    <span class="nav-logo-text">MedVault</span>
   </div>
   <ul class="nav-links dash-nav-links">
     <li><a onclick="showPage('dashboard')" class="active" id="nav-dashboard">Dashboard</a></li>
