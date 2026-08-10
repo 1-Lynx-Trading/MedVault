@@ -1111,6 +1111,113 @@ select option{background:var(--surface2);color:var(--text);}
 .vault-toolbar input,.vault-toolbar select{background:var(--surface2);border:1px solid var(--border);border-radius:0.6rem;padding:0.65rem 0.9rem;color:var(--text);font-family:inherit;font-size:0.82rem;}
 .vault-toolbar input{flex:1;min-width:220px;}
 .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;}
+
+/* ===================================================================
+   MEDICATION SEARCH (RxNorm / RxTerms / openFDA)
+   =================================================================== */
+.rx-disclaimer{display:flex;gap:0.75rem;align-items:flex-start;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:var(--r-sm);padding:0.85rem 1rem;font-size:0.78rem;color:var(--text);line-height:1.5;margin-bottom:1.5rem;}
+.rx-disclaimer svg{width:18px;height:18px;stroke:var(--accent4);flex-shrink:0;margin-top:0.1rem;}
+.rx-disclaimer strong{color:var(--accent4);}
+.rx-searchbar-wrap{position:relative;margin-bottom:0.75rem;}
+.rx-searchbar{display:flex;align-items:center;gap:0.65rem;background:var(--surface2);border:1px solid var(--border);border-radius:0.8rem;padding:0.85rem 1.1rem;transition:border-color .2s,box-shadow .2s;}
+.rx-searchbar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow);}
+.rx-searchbar svg{width:18px;height:18px;stroke:var(--muted);flex-shrink:0;}
+.rx-searchbar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:0.92rem;}
+.rx-searchbar input::placeholder{color:var(--muted);}
+.rx-search-clear{background:none;border:none;color:var(--muted);cursor:pointer;display:flex;padding:0.2rem;border-radius:50%;}
+.rx-search-clear:hover{color:var(--text);background:rgba(255,255,255,0.06);}
+.rx-search-clear svg{width:16px;height:16px;}
+.rx-autocomplete{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:0.8rem;box-shadow:0 12px 32px rgba(0,0,0,0.4);max-height:340px;overflow-y:auto;z-index:40;display:none;}
+.rx-autocomplete.open{display:block;}
+.rx-ac-item{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.7rem 1rem;cursor:pointer;font-size:0.85rem;border-bottom:1px solid var(--border);}
+.rx-ac-item:last-child{border-bottom:none;}
+.rx-ac-item:hover,.rx-ac-item.active{background:rgba(0,210,180,0.08);}
+.rx-ac-name{color:var(--text);}
+.rx-ac-name mark{background:none;color:var(--accent);font-weight:700;}
+.rx-ac-tty{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;background:var(--surface2);padding:0.15rem 0.5rem;border-radius:1rem;flex-shrink:0;}
+.rx-ac-empty,.rx-ac-loading{padding:0.9rem 1rem;font-size:0.8rem;color:var(--muted);}
+.rx-history-row{display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:1.75rem;}
+.rx-history-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+.rx-history-chips{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.rx-history-chip{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:1rem;padding:0.35rem 0.85rem;font-size:0.75rem;cursor:pointer;transition:border-color .2s;}
+.rx-history-chip:hover{border-color:var(--accent);color:var(--accent);}
+.rx-results-head{display:flex;align-items:center;justify-content:space-between;margin:0.5rem 0 1rem;flex-wrap:wrap;gap:0.5rem;}
+.rx-results-head h4{font-size:0.95rem;font-weight:700;}
+.rx-results-head span{font-size:0.75rem;color:var(--muted);}
+.rx-results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;}
+.rx-result-card{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1.1rem;backdrop-filter:blur(12px);cursor:pointer;transition:transform .2s,border-color .2s;text-align:left;display:flex;flex-direction:column;gap:0.5rem;}
+.rx-result-card:hover{border-color:rgba(0,210,180,0.35);transform:translateY(-2px);}
+.rx-result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;}
+.rx-result-name{font-weight:700;font-size:0.95rem;line-height:1.3;}
+.rx-result-tty{font-size:0.62rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.05em;background:rgba(0,210,180,0.1);padding:0.15rem 0.5rem;border-radius:1rem;flex-shrink:0;white-space:nowrap;}
+.rx-result-meta{font-size:0.76rem;color:var(--muted);line-height:1.5;}
+.rx-result-meta b{color:var(--text);font-weight:600;}
+.rx-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;}
+.rx-skel-card{height:104px;border-radius:1rem;background:linear-gradient(100deg,var(--surface2) 8%,rgba(255,255,255,0.06) 18%,var(--surface2) 33%);background-size:300% 100%;animation:rxShimmer 1.4s ease infinite;border:1px solid var(--border);}
+@keyframes rxShimmer{0%{background-position:100% 0;}100%{background-position:-100% 0;}}
+.rx-detail-modal{max-width:840px;width:96vw;max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden;}
+.rx-detail-head{padding:1.5rem 1.75rem 1.1rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rx-detail-head-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+.rx-detail-title{font-size:1.3rem;font-weight:800;line-height:1.25;}
+.rx-detail-sub{font-size:0.82rem;color:var(--muted);margin-top:0.3rem;}
+.rx-detail-badges{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem;}
+.rx-badge{font-size:0.68rem;padding:0.28rem 0.65rem;border-radius:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);}
+.rx-badge.source{color:var(--accent);border-color:rgba(0,210,180,0.3);}
+.rx-badge.warn{color:var(--accent4);border-color:rgba(251,191,36,0.35);background:rgba(251,191,36,0.08);}
+.rx-badge.boxed{color:#fff;background:rgba(255,107,107,0.18);border-color:rgba(255,107,107,0.4);}
+.rx-detail-actions{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1rem;}
+.rx-tabs{display:flex;gap:0.3rem;overflow-x:auto;padding:0 1.75rem;border-bottom:1px solid var(--border);flex-shrink:0;scrollbar-width:thin;}
+.rx-tab{background:none;border:none;color:var(--muted);font-family:inherit;font-size:0.78rem;font-weight:600;padding:0.8rem 0.75rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.rx-tab:hover{color:var(--text);}
+.rx-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.rx-tab-body{padding:1.5rem 1.75rem;overflow-y:auto;flex:1;}
+.rx-tab-panel{display:none;animation:cardIn .3s var(--ease) both;}
+.rx-tab-panel.active{display:block;}
+.rx-section{margin-bottom:1.5rem;}
+.rx-section:last-child{margin-bottom:0;}
+.rx-section h5{font-size:0.85rem;font-weight:700;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.4rem;}
+.rx-section-source{font-size:0.65rem;color:var(--muted);font-weight:400;text-transform:none;}
+.rx-section p{font-size:0.85rem;line-height:1.7;color:var(--text);white-space:pre-line;}
+.rx-unavailable{font-size:0.8rem;color:var(--muted);font-style:italic;padding:0.6rem 0;}
+.rx-kv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;}
+.rx-kv{background:var(--surface2);border:1px solid var(--border);border-radius:0.6rem;padding:0.65rem 0.8rem;}
+.rx-kv label{font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:0.2rem;}
+.rx-kv span{font-size:0.85rem;font-weight:600;}
+.rx-boxed-warning{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.35);border-radius:0.7rem;padding:0.9rem 1rem;margin-bottom:1rem;}
+.rx-boxed-warning h5{color:var(--accent2);}
+.rx-accordion-item{border:1px solid var(--border);border-radius:0.7rem;margin-bottom:0.6rem;overflow:hidden;}
+.rx-accordion-head{display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:var(--surface2);font-size:0.82rem;font-weight:600;}
+.rx-accordion-head svg{width:15px;height:15px;stroke:var(--muted);transition:transform .2s;flex-shrink:0;}
+.rx-accordion-item.open .rx-accordion-head svg{transform:rotate(180deg);}
+.rx-accordion-body{max-height:0;overflow:hidden;transition:max-height .25s var(--ease);}
+.rx-accordion-item.open .rx-accordion-body{max-height:2000px;}
+.rx-accordion-body-inner{padding:0.9rem 1rem;font-size:0.82rem;line-height:1.65;color:var(--text);white-space:pre-line;}
+.rx-label-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:0.55rem;padding:0.6rem 0.85rem;color:var(--text);font-family:inherit;font-size:0.8rem;margin-bottom:0.9rem;}
+.rx-ai-box{background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.25);border-radius:0.7rem;padding:0.85rem 1rem;margin-top:0.75rem;}
+.rx-ai-box .rx-ai-label{font-size:0.68rem;color:var(--accent3);font-weight:700;text-transform:uppercase;letter-spacing:0.04em;display:flex;align-items:center;gap:0.35rem;margin-bottom:0.5rem;}
+.rx-ai-box p{font-size:0.82rem;line-height:1.6;}
+.rx-ai-btn{background:none;border:1px solid rgba(167,139,250,0.35);color:var(--accent3);font-family:inherit;font-size:0.72rem;font-weight:600;padding:0.35rem 0.7rem;border-radius:0.5rem;cursor:pointer;display:inline-flex;align-items:center;gap:0.3rem;}
+.rx-ai-btn:hover{background:rgba(167,139,250,0.12);}
+.rx-ai-btn svg{width:13px;height:13px;}
+.rx-detail-footer{padding:1rem 1.75rem;border-top:1px solid var(--border);flex-shrink:0;font-size:0.7rem;color:var(--muted);line-height:1.6;}
+.rx-source-links{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.4rem;}
+.rx-source-links a{color:var(--accent);text-decoration:none;font-weight:600;}
+.rx-source-links a:hover{text-decoration:underline;}
+.rx-prefill-note{display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--accent);background:rgba(0,210,180,0.08);border:1px solid rgba(0,210,180,0.25);border-radius:0.5rem;padding:0.55rem 0.75rem;margin-bottom:1rem;}
+@media (max-width:640px){
+  .rx-detail-modal{width:100vw;max-height:100vh;height:100vh;border-radius:0;}
+  .rx-detail-head{padding:1.1rem 1.1rem 0.9rem;}
+  .rx-tabs{padding:0 1.1rem;}
+  .rx-tab-body{padding:1.1rem;}
+  .rx-detail-footer{padding:0.9rem 1.1rem;}
+  .rx-results-grid,.rx-skeleton-grid{grid-template-columns:1fr;}
+}
+@media (prefers-reduced-motion:reduce){
+  .rx-skel-card{animation:none;}
+  .rx-accordion-body{transition:none;}
+  .rx-tab-panel{animation:none;}
+}
+
 .doc-card{background:rgba(17,24,39,0.55);border:1px solid var(--border);border-radius:1rem;padding:1.1rem;backdrop-filter:blur(12px);transition:transform .2s,border-color .2s;display:flex;flex-direction:column;gap:0.55rem;}
 .doc-card:hover{border-color:rgba(0,210,180,0.3);transform:translateY(-2px);}
 .doc-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;}
@@ -1820,6 +1927,7 @@ a,button,.mv-btn,.btn-auth,.btn-welcome,.icon-btn,.avatar-btn,.notif-bell,
       </div>
     </li>
     <li><a onclick="showPage('medications')" id="nav-medications">Medication</a></li>
+    <li><a onclick="showPage('medsearch')" id="nav-medsearch">Medication Search</a></li>
     <li><a onclick="showPage('tracking')" id="nav-tracking">Health Tracking</a></li>
     <li><a onclick="showPage('journal')" id="nav-journal">Journal</a></li>
     <li><a onclick="showPage('vault')" id="nav-vault">Vault</a></li>
@@ -2135,6 +2243,47 @@ a,button,.mv-btn,.btn-auth,.btn-welcome,.icon-btn,.avatar-btn,.notif-bell,
   <div class="section-page-body">
     <div id="med-full-list"></div>
   </div>
+</div>
+
+<!-- ======== MEDICATION SEARCH PAGE ======== -->
+<div id="page-medsearch" class="page-section">
+  <div class="section-page-head">
+    <h2>Medication <em>Search</em></h2>
+    <p>Look up virtually any medication using authoritative NLM RxNorm/RxTerms &amp; openFDA drug-label data.</p>
+  </div>
+  <div class="section-page-body">
+
+    <div class="rx-disclaimer">
+      <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <div><strong>Educational information only.</strong> This page provides official medication data for reference and is not personalized medical advice, a diagnosis, or a prescribing recommendation. Always consult a qualified healthcare professional or pharmacist before starting, stopping, or changing any medication.</div>
+    </div>
+
+    <div class="rx-searchbar-wrap">
+      <div class="rx-searchbar">
+        <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="rx-search-input" placeholder="Search by drug name, brand, ingredient… (e.g. Metformin, Tylenol, ibuprofen)"
+               autocomplete="off" role="combobox" aria-expanded="false" aria-owns="rx-autocomplete" aria-autocomplete="list"
+               oninput="rxOnInput(this.value)" onkeydown="rxOnKeydown(event)" onfocus="rxOnInput(this.value)">
+        <button class="rx-search-clear" id="rx-clear-btn" style="display:none;" onclick="rxClearSearch()" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="rx-autocomplete" id="rx-autocomplete" role="listbox"></div>
+    </div>
+
+    <div class="rx-history-row" id="rx-history-row" style="display:none;">
+      <span class="rx-history-label">Recent:</span>
+      <div class="rx-history-chips" id="rx-history-chips"></div>
+    </div>
+
+    <div id="rx-results-area"></div>
+
+  </div>
+</div>
+
+<!-- Medication detail overlay (RxNorm / RxTerms / openFDA) -->
+<div class="mv-modal-overlay" id="rx-detail-overlay" onclick="if(event.target===this) rxCloseDetail()">
+  <div class="mv-modal rx-detail-modal" id="rx-detail-modal" role="dialog" aria-modal="true" aria-labelledby="rx-detail-title"></div>
 </div>
 
 <!-- ======== HEALTH TRACKING PAGE ======== -->
@@ -2924,6 +3073,7 @@ function showPage(page) {
   // Populate app pages
   if (page === 'dashboard')    renderDashboard();
   if (page === 'medications')  renderMedFullList();
+  if (page === 'medsearch')    renderMedSearchPage();
   if (page === 'tracking')     renderTrackingPage();
   if (page === 'reports')      renderMonthlyReport();
   if (page === 'achievements') renderAchievementsPage();
@@ -3277,6 +3427,7 @@ function defaultState() {
   return {
     profile: { createdAt: Date.now() },
     meds: [], medLog: {},           // medLog[date] = { medId: [times taken] }
+    medSearchHistory: [],           // [{ rxcui, name, tty, ts }] — recent Medication Search lookups (this browser)
     waterGoal: 8, waterLog: {},     // waterLog[date] = count
     sleep: [], weight: [], pain: [],
     xp: 0, level: 1,
@@ -3410,14 +3561,16 @@ function medActiveOnDate(med, dateStr) {
   const day = new Date(dateStr + 'T00:00:00').getDay();
   return med.days.includes(day);
 }
-function openMedModal(medId) {
+function openMedModal(medId, prefill) {
   const med = medId ? STATE.meds.find(m => m.id === medId) : null;
+  const pf = prefill || {};
   const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   openModal(`
     <div class="mv-modal-head"><h3>${med ? 'Edit' : 'Add'} Medication</h3><div class="mv-modal-close" onclick="closeModal()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
-    <div class="mv-field"><label>Medication Name</label><input id="mf-name" value="${med ? med.name : ''}" placeholder="e.g. Metformin"></div>
+    ${pf.name ? `<div class="rx-prefill-note"><svg viewBox="0 0 24 24" stroke-width="2" fill="none" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Pre-filled from Medication Search — review and edit as needed, then save.</div>` : ''}
+    <div class="mv-field"><label>Medication Name</label><input id="mf-name" value="${med ? escapeHtml(med.name) : escapeHtml(pf.name || '')}" placeholder="e.g. Metformin"></div>
     <div class="mv-field-row">
-      <div class="mv-field"><label>Dosage</label><input id="mf-dosage" value="${med ? med.dosage : ''}" placeholder="e.g. 500mg"></div>
+      <div class="mv-field"><label>Dosage</label><input id="mf-dosage" value="${med ? escapeHtml(med.dosage||'') : escapeHtml(pf.dosage || '')}" placeholder="e.g. 500mg"></div>
       <div class="mv-field"><label>Reminder Time</label><input type="time" id="mf-time" value="${med && med.times[0] ? med.times[0] : '08:00'}"></div>
     </div>
     <div class="mv-field"><label>Additional Reminder Times (optional)</label><input id="mf-times2" value="${med && med.times.length > 1 ? med.times.slice(1).join(', ') : ''}" placeholder="e.g. 14:00, 20:00"></div>
@@ -4962,6 +5115,662 @@ async function callAI(prompt) {
   if (!res.ok) throw new Error(`AI request failed (${res.status})`);
   const data = await res.json();
   return data.choices?.[0]?.message?.content || 'No response.';
+}
+
+// =====================================================================
+// MEDICATION SEARCH — NLM RxNorm / RxTerms + openFDA Drug Label API
+// =====================================================================
+// SECURITY NOTE: MedVault is a static, client-side app (no backend/serverless
+// function is present in this project), so — exactly like the Groq AI_CONFIG
+// key above — this openFDA key ships inside public JS if deployed on GitHub
+// Pages. RxNorm/RxTerms need no key at all. If a backend ever becomes
+// available, move this key server-side and call openFDA through a proxy
+// instead of from the browser. Do not commit a different/rotated key here
+// without re-reading this note.
+const OPENFDA_CONFIG = {
+  apiKey: '1bXF74QxAlaJo4c72v5ctrNvWVeItORgwRTd0xei',
+  base: 'https://api.fda.gov/drug'
+};
+const RXNAV_BASE = 'https://rxnav.nlm.nih.gov/REST';
+
+const RX = {
+  cache: new Map(),          // simple TTL cache for API responses, keyed by URL
+  displayNames: null,        // official RxTerms/RxNorm display-name list, for local autocomplete
+  displayNamesLoading: null,
+  acIndex: -1,               // keyboard-highlighted autocomplete row
+  acItems: [],
+  lastQuery: '',
+  debounceTimer: null,
+  detailCache: new Map(),    // rxcui -> assembled detail object
+  currentDetailRxcui: null,
+};
+
+function rxDebounce(fn, ms) {
+  return function (...args) {
+    clearTimeout(RX.debounceTimer);
+    RX.debounceTimer = setTimeout(() => fn.apply(null, args), ms);
+  };
+}
+
+async function rxFetchJson(url, { silent } = {}) {
+  const cached = RX.cache.get(url);
+  if (cached && (Date.now() - cached.t) < 10 * 60 * 1000) return cached.v;
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    throw new Error('network');
+  }
+  if (res.status === 429) throw new Error('rate_limit');
+  if (!res.ok) throw new Error('http_' + res.status);
+  const json = await res.json();
+  RX.cache.set(url, { t: Date.now(), v: json });
+  return json;
+}
+
+// ---- Renders the (mostly static) shell of the Medication Search page ----
+function renderMedSearchPage() {
+  rxRenderHistory();
+  const input = document.getElementById('rx-search-input');
+  if (input && !RX.displayNames && !RX.displayNamesLoading) rxPreloadDisplayNames();
+  const area = document.getElementById('rx-results-area');
+  if (area && !area.dataset.inited) {
+    area.dataset.inited = '1';
+    area.innerHTML = `<div class="empty-state">Search above for a medication by generic name, brand name, or active ingredient — results come straight from the NLM RxNorm/RxTerms terminology service and openFDA drug labeling.</div>`;
+  }
+}
+
+// Official RxNorm "display names" list — the NLM-recommended dataset for
+// building a client-side autocomplete without hammering the live API on
+// every keystroke. Fetched once and cached in memory for the session.
+async function rxPreloadDisplayNames() {
+  RX.displayNamesLoading = true;
+  try {
+    const data = await rxFetchJson(`${RXNAV_BASE}/displaynames.json`);
+    RX.displayNames = (data && data.displayTermsList && data.displayTermsList.term) || [];
+  } catch (e) {
+    RX.displayNames = null; // fall back to live approximateTerm calls
+  } finally {
+    RX.displayNamesLoading = false;
+  }
+}
+
+function rxOnInput(val) {
+  document.getElementById('rx-clear-btn').style.display = val ? 'flex' : 'none';
+  RX.lastQuery = val;
+  const box = document.getElementById('rx-autocomplete');
+  if (!val || val.trim().length < 2) { box.classList.remove('open'); box.innerHTML = ''; return; }
+  rxDebouncedAutocomplete(val.trim());
+}
+const rxDebouncedAutocomplete = rxDebounce(rxRunAutocomplete, 300);
+
+async function rxRunAutocomplete(term) {
+  const box = document.getElementById('rx-autocomplete');
+  if (RX.lastQuery.trim() !== term) return;
+  box.innerHTML = `<div class="rx-ac-loading">Searching…</div>`;
+  box.classList.add('open');
+  document.getElementById('rx-search-input').setAttribute('aria-expanded', 'true');
+
+  let matches = [];
+  try {
+    if (RX.displayNames) {
+      const lower = term.toLowerCase();
+      matches = RX.displayNames
+        .filter(n => n.toLowerCase().includes(lower))
+        .sort((a, b) => {
+          const aStarts = a.toLowerCase().startsWith(lower) ? 0 : 1;
+          const bStarts = b.toLowerCase().startsWith(lower) ? 0 : 1;
+          return aStarts - bStarts || a.length - b.length;
+        })
+        .slice(0, 12)
+        .map(n => ({ name: n, tty: '' }));
+    } else {
+      // Fallback: live NLM approximate-match search (spelling-tolerant)
+      const data = await rxFetchJson(`${RXNAV_BASE}/approximateTerm.json?term=${encodeURIComponent(term)}&maxEntries=12`);
+      const cands = (data && data.approximateGroup && data.approximateGroup.candidate) || [];
+      const seen = new Set();
+      matches = cands.filter(c => c.rxcui && !seen.has(c.rxcui) && seen.add(c.rxcui))
+        .slice(0, 12)
+        .map(c => ({ name: c.candidate || term, tty: c.rxaui ? '' : '', rxcui: c.rxcui }));
+    }
+  } catch (e) {
+    if (RX.lastQuery.trim() !== term) return;
+    box.innerHTML = `<div class="rx-ac-empty">Couldn't reach RxNorm right now (${e.message === 'rate_limit' ? 'rate limited' : 'network issue'}). Press Enter to try a full search.</div>`;
+    return;
+  }
+
+  if (RX.lastQuery.trim() !== term) return; // stale response, a newer keystroke superseded this
+  RX.acItems = matches;
+  RX.acIndex = -1;
+  if (!matches.length) {
+    box.innerHTML = `<div class="rx-ac-empty">No matches. Press Enter to search anyway, or check the spelling.</div>`;
+    return;
+  }
+  const lower = term.toLowerCase();
+  box.innerHTML = matches.map((m, i) => {
+    const idx = m.name.toLowerCase().indexOf(lower);
+    const label = idx === -1 ? escapeHtml(m.name) :
+      escapeHtml(m.name.slice(0, idx)) + '<mark>' + escapeHtml(m.name.slice(idx, idx + term.length)) + '</mark>' + escapeHtml(m.name.slice(idx + term.length));
+    return `<div class="rx-ac-item" role="option" data-i="${i}" onmousedown="rxSelectAutocomplete(${i})">
+      <span class="rx-ac-name">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+function rxOnKeydown(e) {
+  const box = document.getElementById('rx-autocomplete');
+  const open = box.classList.contains('open') && RX.acItems.length;
+  if (e.key === 'ArrowDown') { e.preventDefault(); if (open) { RX.acIndex = Math.min(RX.acIndex + 1, RX.acItems.length - 1); rxHighlightAc(); } }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); if (open) { RX.acIndex = Math.max(RX.acIndex - 1, 0); rxHighlightAc(); } }
+  else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (open && RX.acIndex >= 0) rxSelectAutocomplete(RX.acIndex);
+    else rxRunSearch(document.getElementById('rx-search-input').value.trim());
+  } else if (e.key === 'Escape') {
+    box.classList.remove('open'); box.innerHTML = '';
+  }
+}
+function rxHighlightAc() {
+  document.querySelectorAll('.rx-ac-item').forEach((el, i) => el.classList.toggle('active', i === RX.acIndex));
+  const active = document.querySelector('.rx-ac-item.active');
+  if (active) active.scrollIntoView({ block: 'nearest' });
+}
+function rxSelectAutocomplete(i) {
+  const item = RX.acItems[i];
+  if (!item) return;
+  document.getElementById('rx-search-input').value = item.name;
+  document.getElementById('rx-autocomplete').classList.remove('open');
+  rxRunSearch(item.name, item.rxcui);
+}
+function rxClearSearch() {
+  const input = document.getElementById('rx-search-input');
+  input.value = ''; input.focus();
+  document.getElementById('rx-clear-btn').style.display = 'none';
+  document.getElementById('rx-autocomplete').classList.remove('open');
+}
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('rx-searchbar-wrap') || document.querySelector('.rx-searchbar-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const box = document.getElementById('rx-autocomplete');
+    if (box) box.classList.remove('open');
+  }
+});
+
+// ---- Full search (results grid) ----
+async function rxRunSearch(term, knownRxcui) {
+  if (!term) return;
+  document.getElementById('rx-autocomplete').classList.remove('open');
+  const area = document.getElementById('rx-results-area');
+  area.innerHTML = `<div class="rx-results-head"><h4>Searching for "${escapeHtml(term)}"…</h4></div>
+    <div class="rx-skeleton-grid">${'<div class="rx-skel-card"></div>'.repeat(6)}</div>`;
+
+  try {
+    let candidates = [];
+
+    // 1. Try an exact RxNorm name match first (fastest, most precise)
+    const exact = await rxFetchJson(`${RXNAV_BASE}/rxcui.json?name=${encodeURIComponent(term)}&search=2`);
+    const exactIds = (exact && exact.idGroup && exact.idGroup.rxnormId) || [];
+
+    if (exactIds.length) {
+      candidates = exactIds.map(id => ({ rxcui: id }));
+    } else {
+      // 2. Fall back to spelling-tolerant approximate match (handles brand→generic,
+      //    partial names, and minor misspellings using the official NLM algorithm)
+      const approx = await rxFetchJson(`${RXNAV_BASE}/approximateTerm.json?term=${encodeURIComponent(term)}&maxEntries=16`);
+      const cands = (approx && approx.approximateGroup && approx.approximateGroup.candidate) || [];
+      const seen = new Set();
+      candidates = cands.filter(c => c.rxcui && !seen.has(c.rxcui) && seen.add(c.rxcui)).slice(0, 12).map(c => ({ rxcui: c.rxcui }));
+    }
+
+    if (!candidates.length) {
+      area.innerHTML = `<div class="rx-results-head"><h4>No results for "${escapeHtml(term)}"</h4></div>
+        <div class="empty-state">RxNorm couldn't find a match. Double-check the spelling, try the active ingredient instead of a brand name (or vice versa), or search a shorter partial name.</div>`;
+      return;
+    }
+
+    // 3. Pull display properties for each candidate (name, term type, synonym)
+    const props = await Promise.all(candidates.map(c =>
+      rxFetchJson(`${RXNAV_BASE}/rxcui/${c.rxcui}/properties.json`).then(r => r && r.properties).catch(() => null)
+    ));
+
+    const results = props.filter(Boolean).map(p => ({
+      rxcui: p.rxcui, name: p.name, synonym: p.synonym, tty: p.tty
+    }));
+
+    // De-dupe by rxcui, prefer clinically meaningful term types first
+    const ttyRank = { SCD: 0, SBD: 1, GPCK: 2, BPCK: 3, IN: 4, PIN: 5, BN: 6 };
+    const uniq = [];
+    const seenIds = new Set();
+    results.sort((a, b) => (ttyRank[a.tty] ?? 9) - (ttyRank[b.tty] ?? 9));
+    results.forEach(r => { if (!seenIds.has(r.rxcui)) { seenIds.add(r.rxcui); uniq.push(r); } });
+
+    if (!uniq.length) {
+      area.innerHTML = `<div class="empty-state">RxNorm returned matches but no usable details. Try a different term.</div>`;
+      return;
+    }
+
+    const ttyLabels = { SCD: 'Clinical drug', SBD: 'Brand drug', GPCK: 'Generic pack', BPCK: 'Brand pack', IN: 'Ingredient', PIN: 'Precise ingredient', BN: 'Brand name', DF: 'Dose form' };
+    area.innerHTML = `
+      <div class="rx-results-head"><h4>Results for "${escapeHtml(term)}"</h4><span>${uniq.length} match${uniq.length === 1 ? '' : 'es'} · NLM RxNorm</span></div>
+      <div class="rx-results-grid">
+        ${uniq.map(r => `
+          <button class="rx-result-card" onclick="rxOpenDetail('${r.rxcui}')">
+            <div class="rx-result-top"><span class="rx-result-name">${escapeHtml(r.name)}</span>${r.tty ? `<span class="rx-result-tty">${escapeHtml(ttyLabels[r.tty] || r.tty)}</span>` : ''}</div>
+            <div class="rx-result-meta">${r.synonym ? `<b>Also known as:</b> ${escapeHtml(r.synonym)}` : 'Tap for full medication details'}</div>
+          </button>
+        `).join('')}
+      </div>`;
+  } catch (e) {
+    area.innerHTML = `<div class="rx-results-head"><h4>Search failed</h4></div>
+      <div class="empty-state">${e.message === 'rate_limit' ? 'RxNorm is temporarily rate-limiting requests. Please wait a moment and try again.' : 'Couldn\'t reach the RxNorm service. Check your connection and try again.'}</div>`;
+  }
+}
+
+// ---- Medication detail (RxNorm + RxTerms + openFDA), tabbed ----
+async function rxOpenDetail(rxcui) {
+  RX.currentDetailRxcui = rxcui;
+  const overlay = document.getElementById('rx-detail-overlay');
+  const modal = document.getElementById('rx-detail-modal');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  modal.innerHTML = `<div class="rx-detail-head"><div class="rx-detail-title">Loading medication…</div></div>
+    <div class="rx-tab-body"><div class="rx-skeleton-grid"><div class="rx-skel-card" style="height:60px;"></div><div class="rx-skel-card" style="height:60px;"></div><div class="rx-skel-card" style="height:60px;"></div></div></div>`;
+
+  if (RX.detailCache.has(rxcui)) { rxRenderDetail(RX.detailCache.get(rxcui)); return; }
+
+  const detail = { rxcui, rxnorm: null, rxterms: null, related: null, fda: null, fdaError: null, ndc: null };
+
+  try {
+    detail.rxnorm = (await rxFetchJson(`${RXNAV_BASE}/rxcui/${rxcui}/properties.json`)).properties;
+  } catch (e) { /* RxNorm base properties should rarely fail; leave null and show unavailable state */ }
+
+  try {
+    detail.rxterms = (await rxFetchJson(`${RXNAV_BASE}/RxTerms/rxcui/${rxcui}/allinfo.json`)).rxtermsProperties;
+  } catch (e) { detail.rxterms = null; }
+
+  try {
+    const rel = await rxFetchJson(`${RXNAV_BASE}/rxcui/${rxcui}/related.json?tty=IN+PIN+BN+SCD+SBD`);
+    detail.related = (rel && rel.relatedGroup && rel.relatedGroup.conceptGroup) || [];
+  } catch (e) { detail.related = []; }
+
+  // openFDA — search by the clearest name we have; degrade gracefully if it fails
+  const nameForFda = (detail.rxterms && (detail.rxterms.fullGenericName || detail.rxterms.displayName)) || (detail.rxnorm && detail.rxnorm.name) || '';
+  if (nameForFda) {
+    try {
+      detail.fda = await rxFetchOpenFdaLabel(nameForFda);
+    } catch (e) {
+      detail.fdaError = e.message || 'unavailable';
+    }
+    try {
+      detail.ndc = await rxFetchOpenFdaNdc(nameForFda);
+    } catch (e) { /* NDC/manufacturer info simply stays unavailable */ }
+  } else {
+    detail.fdaError = 'no_name';
+  }
+
+  RX.detailCache.set(rxcui, detail);
+  if (RX.currentDetailRxcui === rxcui) rxRenderDetail(detail);
+
+  // Record in search history now that we have a display name
+  const histName = (detail.rxterms && detail.rxterms.displayName) || (detail.rxnorm && detail.rxnorm.name) || 'Medication';
+  rxAddToHistory(rxcui, histName);
+}
+
+async function rxFetchOpenFdaLabel(name) {
+  const clean = name.split(' ')[0]; // first token is usually the active ingredient/brand root
+  const queries = [
+    `openfda.generic_name:"${clean}"`,
+    `openfda.brand_name:"${clean}"`,
+    `openfda.substance_name:"${clean}"`,
+  ];
+  for (const q of queries) {
+    try {
+      const url = `${OPENFDA_CONFIG.base}/label.json?search=${encodeURIComponent(q)}&limit=1&api_key=${OPENFDA_CONFIG.apiKey}`;
+      const data = await rxFetchJson(url);
+      if (data && data.results && data.results.length) return data.results[0];
+    } catch (e) {
+      if (String(e.message).includes('404')) continue; // no match for this field, try next
+      throw e; // real failure (network / rate limit) — surface it
+    }
+  }
+  return null; // no openFDA label found for any of the queried fields — not an error, just unavailable
+}
+async function rxFetchOpenFdaNdc(name) {
+  const clean = name.split(' ')[0];
+  try {
+    const url = `${OPENFDA_CONFIG.base}/ndc.json?search=generic_name:"${encodeURIComponent(clean)}"&limit=5&api_key=${OPENFDA_CONFIG.apiKey}`;
+    const data = await rxFetchJson(url);
+    return (data && data.results) || null;
+  } catch (e) { return null; }
+}
+
+function rxField(v) { return (v && String(v).trim()) ? escapeHtml(String(v).trim()) : null; }
+function rxJoinFdaText(arr) { return Array.isArray(arr) ? arr.join('\n\n') : null; }
+
+function rxRenderDetail(d) {
+  const modal = document.getElementById('rx-detail-modal');
+  const rn = d.rxnorm || {};
+  const rt = d.rxterms || {};
+  const fda = d.fda || null;
+  const of = (fda && fda.openfda) || {};
+
+  const displayName = rt.displayName || rn.name || 'Unknown medication';
+  const generic = rt.fullGenericName || (Array.isArray(of.generic_name) && of.generic_name[0]) || null;
+  const brandNames = rt.brandNames || (Array.isArray(of.brand_name) ? of.brand_name.join(', ') : null);
+  const strength = rt.strength || null;
+  const form = rt.rxnormDoseForm || rt.doseFormName || (Array.isArray(of.dosage_form) && of.dosage_form[0]) || null;
+  const route = rt.route || (Array.isArray(of.route) && of.route[0]) || null;
+  const manufacturer = (Array.isArray(of.manufacturer_name) && of.manufacturer_name[0]) || (d.ndc && d.ndc[0] && d.ndc[0].labeler_name) || null;
+  const hasBoxedWarning = fda && Array.isArray(fda.boxed_warning) && fda.boxed_warning.length;
+
+  modal.innerHTML = `
+    <div class="rx-detail-head">
+      <div class="rx-detail-head-top">
+        <div>
+          <div class="rx-detail-title" id="rx-detail-title">${escapeHtml(displayName)}</div>
+          <div class="rx-detail-sub">${generic ? 'Generic: ' + escapeHtml(generic) : ''}${generic && strength ? ' · ' : ''}${strength ? escapeHtml(strength) : ''}</div>
+        </div>
+        <div class="mv-modal-close" onclick="rxCloseDetail()"><svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      </div>
+      <div class="rx-detail-badges">
+        <span class="rx-badge source">NLM RxNorm/RxTerms</span>
+        ${fda ? `<span class="rx-badge source">openFDA label</span>` : `<span class="rx-badge warn">openFDA info unavailable</span>`}
+        ${hasBoxedWarning ? `<span class="rx-badge boxed">⚠ Boxed warning</span>` : ''}
+      </div>
+      <div class="rx-detail-actions">
+        <button class="mv-btn primary" style="flex:none;padding:0.55rem 1rem;font-size:0.78rem;" onclick="rxAddToMyMeds('${d.rxcui}')">+ Add to My Medications</button>
+        <button class="mv-btn" style="flex:none;padding:0.55rem 1rem;font-size:0.78rem;background:var(--surface2);color:var(--text);" onclick="rxCopyDetail('${d.rxcui}')">Copy summary</button>
+      </div>
+    </div>
+    <div class="rx-tabs" id="rx-tabs" role="tablist"></div>
+    <div class="rx-tab-body" id="rx-tab-body"></div>
+    <div class="rx-detail-footer">
+      Compiled from the NLM RxNorm &amp; RxTerms standardized terminology services and the openFDA drug label API. This is official reference data, not a personalized recommendation — always confirm with your pharmacist or prescriber, and read the full label for complete details.
+      <div class="rx-source-links">
+        <a href="https://mor.nlm.nih.gov/RxNav/search?searchBy=RXCUI&searchTerm=${encodeURIComponent(d.rxcui)}" target="_blank" rel="noopener">View on RxNav (NLM) ↗</a>
+        ${fda ? `<a href="https://open.fda.gov/apis/drug/label/" target="_blank" rel="noopener">About openFDA labeling ↗</a>` : ''}
+      </div>
+    </div>`;
+
+  const sections = rxBuildTabs(d, { displayName, generic, brandNames, strength, form, route, manufacturer, hasBoxedWarning });
+  const tabsEl = document.getElementById('rx-tabs');
+  const bodyEl = document.getElementById('rx-tab-body');
+  tabsEl.innerHTML = sections.map((s, i) => `<button class="rx-tab ${i === 0 ? 'active' : ''}" role="tab" onclick="rxSwitchTab(${i})">${escapeHtml(s.label)}</button>`).join('');
+  bodyEl.innerHTML = sections.map((s, i) => `<div class="rx-tab-panel ${i === 0 ? 'active' : ''}" id="rx-panel-${i}">${s.html}</div>`).join('');
+  bodyEl.dataset.count = sections.length;
+}
+
+function rxSwitchTab(i) {
+  document.querySelectorAll('.rx-tab').forEach((el, idx) => el.classList.toggle('active', idx === i));
+  document.querySelectorAll('.rx-tab-panel').forEach((el, idx) => el.classList.toggle('active', idx === i));
+}
+
+function rxUnavailable(msg) { return `<div class="rx-unavailable">${escapeHtml(msg || 'Not available from the official data sources for this medication.')}</div>`; }
+
+function rxBuildTabs(d, meta) {
+  const fda = d.fda || {};
+  const rt = d.rxterms || {};
+  const rn = d.rxnorm || {};
+  const tabs = [];
+
+  // ---- Overview ----
+  tabs.push({ label: 'Overview', html: `
+    <div class="rx-section">
+      <h5>Medication overview <span class="rx-section-source">RxNorm / RxTerms</span></h5>
+      <div class="rx-kv-grid">
+        <div class="rx-kv"><label>Name</label><span>${rxField(meta.displayName) || '—'}</span></div>
+        <div class="rx-kv"><label>Generic name</label><span>${rxField(meta.generic) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Brand name(s)</label><span>${rxField(meta.brandNames) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Strength</label><span>${rxField(meta.strength) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Dosage form</label><span>${rxField(meta.form) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Route</label><span>${rxField(meta.route) || 'Not available'}</span></div>
+      </div>
+    </div>
+    ${meta.hasBoxedWarning ? `<div class="rx-boxed-warning"><h5>⚠ Boxed warning (FDA)</h5><p>${rxField(rxJoinFdaText(fda.boxed_warning)) || ''}</p></div>` : ''}
+    <div class="rx-section">
+      <h5>Description <span class="rx-section-source">openFDA label${d.fda ? '' : ' — unavailable'}</span></h5>
+      ${fda.description ? `<p>${rxField(rxJoinFdaText(fda.description))}</p>` : rxUnavailable(d.fdaError === 'no_name' ? 'No FDA label match could be searched for this term.' : 'openFDA did not return a general description for this medication.')}
+    </div>
+  ` });
+
+  // ---- Uses ----
+  tabs.push({ label: 'Uses', html: `
+    <div class="rx-section">
+      <h5>Indications &amp; usage <span class="rx-section-source">openFDA official label</span></h5>
+      ${fda.indications_and_usage ? `<p>${rxField(rxJoinFdaText(fda.indications_and_usage))}</p>${rxAiExplainBlock('uses', rxJoinFdaText(fda.indications_and_usage))}` : rxUnavailable()}
+    </div>
+  ` });
+
+  // ---- Warnings ----
+  const warnParts = [];
+  if (fda.warnings) warnParts.push(['General warnings', rxJoinFdaText(fda.warnings)]);
+  if (fda.warnings_and_cautions) warnParts.push(['Warnings & cautions', rxJoinFdaText(fda.warnings_and_cautions)]);
+  if (fda.contraindications) warnParts.push(['Contraindications', rxJoinFdaText(fda.contraindications)]);
+  if (fda.precautions) warnParts.push(['Precautions', rxJoinFdaText(fda.precautions)]);
+  tabs.push({ label: 'Warnings', html: `
+    <div class="rx-section">
+      <h5>Warnings &amp; contraindications <span class="rx-section-source">openFDA official label</span></h5>
+      ${warnParts.length ? rxAccordion(warnParts) : rxUnavailable()}
+    </div>
+  ` });
+
+  // ---- Safety Information ----
+  const safetyParts = [];
+  if (fda.boxed_warning) safetyParts.push(['Boxed warning', rxJoinFdaText(fda.boxed_warning)]);
+  if (fda.pregnancy) safetyParts.push(['Pregnancy', rxJoinFdaText(fda.pregnancy)]);
+  if (fda.pregnancy_or_breast_feeding) safetyParts.push(['Pregnancy / breastfeeding', rxJoinFdaText(fda.pregnancy_or_breast_feeding)]);
+  if (fda.nursing_mothers) safetyParts.push(['Nursing mothers', rxJoinFdaText(fda.nursing_mothers)]);
+  if (fda.pediatric_use) safetyParts.push(['Pediatric use', rxJoinFdaText(fda.pediatric_use)]);
+  if (fda.geriatric_use) safetyParts.push(['Geriatric use', rxJoinFdaText(fda.geriatric_use)]);
+  if (fda.overdosage) safetyParts.push(['Overdosage', rxJoinFdaText(fda.overdosage)]);
+  if (fda.storage_and_handling) safetyParts.push(['Storage', rxJoinFdaText(fda.storage_and_handling)]);
+  tabs.push({ label: 'Safety Information', html: `
+    <div class="rx-section">
+      <h5>Safety information <span class="rx-section-source">openFDA official label</span></h5>
+      ${safetyParts.length ? rxAccordion(safetyParts) : rxUnavailable()}
+    </div>
+  ` });
+
+  // ---- Side Effects ----
+  tabs.push({ label: 'Side Effects', html: `
+    <div class="rx-section">
+      <h5>Adverse reactions <span class="rx-section-source">openFDA official label</span></h5>
+      ${fda.adverse_reactions ? `<p>${rxField(rxJoinFdaText(fda.adverse_reactions))}</p>${rxAiExplainBlock('sideeffects', rxJoinFdaText(fda.adverse_reactions))}` : rxUnavailable()}
+    </div>
+  ` });
+
+  // ---- Dosage & Administration ----
+  tabs.push({ label: 'Dosage & Administration', html: `
+    <div class="rx-section">
+      <h5>Dosage &amp; administration <span class="rx-section-source">openFDA official label</span></h5>
+      ${fda.dosage_and_administration ? `<p>${rxField(rxJoinFdaText(fda.dosage_and_administration))}</p>` : rxUnavailable()}
+    </div>
+  ` });
+
+  // ---- Interactions ----
+  tabs.push({ label: 'Interactions', html: `
+    <div class="rx-section">
+      <h5>Drug interactions <span class="rx-section-source">openFDA official label</span></h5>
+      ${fda.drug_interactions ? `<p>${rxField(rxJoinFdaText(fda.drug_interactions))}</p>` : rxUnavailable('No interaction data returned by openFDA for this medication. This does not mean no interactions exist — check with your pharmacist.')}
+    </div>
+  ` });
+
+  // ---- Ingredients ----
+  const inRel = (d.related || []).find(g => g.tty === 'IN' || g.tty === 'PIN');
+  const ingredientNames = inRel && inRel.conceptProperties ? inRel.conceptProperties.map(c => c.name) : [];
+  tabs.push({ label: 'Ingredients', html: `
+    <div class="rx-section">
+      <h5>Active ingredient(s) <span class="rx-section-source">RxNorm</span></h5>
+      ${ingredientNames.length ? `<div class="rx-kv-grid">${ingredientNames.map(n => `<div class="rx-kv"><label>Ingredient</label><span>${escapeHtml(n)}</span></div>`).join('')}</div>` :
+        (meta.generic ? `<p>${rxField(meta.generic)}</p>` : rxUnavailable())}
+      ${Array.isArray(of.substance_name) ? `<h5 style="margin-top:1.1rem;">Substance name(s) <span class="rx-section-source">openFDA</span></h5><p>${escapeHtml(of.substance_name.join(', '))}</p>` : ''}
+    </div>
+  ` });
+
+  // ---- Forms & Strengths ----
+  tabs.push({ label: 'Forms & Strengths', html: `
+    <div class="rx-section">
+      <h5>Forms &amp; strengths <span class="rx-section-source">RxTerms</span></h5>
+      <div class="rx-kv-grid">
+        <div class="rx-kv"><label>Dose form</label><span>${rxField(meta.form) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Strength</label><span>${rxField(meta.strength) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Route</label><span>${rxField(meta.route) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>Suffix</label><span>${rxField(rt.suffix) || 'Not available'}</span></div>
+      </div>
+    </div>
+  ` });
+
+  // ---- Identifiers ----
+  tabs.push({ label: 'Identifiers', html: `
+    <div class="rx-section">
+      <h5>Standardized identifiers <span class="rx-section-source">RxNorm</span></h5>
+      <div class="rx-kv-grid">
+        <div class="rx-kv"><label>RxCUI</label><span>${escapeHtml(d.rxcui)}</span></div>
+        <div class="rx-kv"><label>Term type (TTY)</label><span>${rxField(rn.tty) || 'Not available'}</span></div>
+        <div class="rx-kv"><label>RxNorm name</label><span>${rxField(rn.name) || 'Not available'}</span></div>
+        ${of.product_ndc ? `<div class="rx-kv"><label>NDC (openFDA)</label><span>${escapeHtml(([]).concat(of.product_ndc).slice(0,3).join(', '))}</span></div>` : ''}
+        ${of.spl_id ? `<div class="rx-kv"><label>SPL ID</label><span>${escapeHtml(([]).concat(of.spl_id)[0])}</span></div>` : ''}
+      </div>
+    </div>
+  ` });
+
+  // ---- Manufacturer ----
+  tabs.push({ label: 'Manufacturer', html: `
+    <div class="rx-section">
+      <h5>Manufacturer <span class="rx-section-source">openFDA</span></h5>
+      ${meta.manufacturer ? `<p>${rxField(meta.manufacturer)}</p>` : rxUnavailable('Manufacturer information not available from openFDA for this medication.')}
+      ${d.ndc && d.ndc.length ? `<div class="rx-kv-grid" style="margin-top:0.75rem;">${d.ndc.slice(0,4).map(n => `<div class="rx-kv"><label>${escapeHtml(n.brand_name || n.generic_name || 'Product')}</label><span>${escapeHtml(n.labeler_name || 'Unknown labeler')}</span></div>`).join('')}</div>` : ''}
+    </div>
+  ` });
+
+  // ---- Official Label (full text, searchable) ----
+  const fullLabelParts = [];
+  ['description','indications_and_usage','dosage_and_administration','contraindications','warnings','warnings_and_cautions','precautions','adverse_reactions','drug_interactions','overdosage','storage_and_handling','how_supplied','clinical_pharmacology']
+    .forEach(k => { if (fda[k]) fullLabelParts.push([rxLabelTitle(k), rxJoinFdaText(fda[k])]); });
+  tabs.push({ label: 'Official Label', html: `
+    <div class="rx-section">
+      <h5>Full official label <span class="rx-section-source">openFDA</span></h5>
+      ${fullLabelParts.length ? `
+        <input type="text" class="rx-label-search" placeholder="Search within this label…" oninput="rxFilterLabel(this.value)">
+        <div id="rx-full-label">${rxAccordion(fullLabelParts)}</div>
+      ` : rxUnavailable('No full label text was returned by openFDA for this medication.')}
+    </div>
+  ` });
+
+  return tabs;
+}
+
+function rxLabelTitle(key) {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+function rxAccordion(parts) {
+  return parts.map((p, i) => `
+    <div class="rx-accordion-item" data-accordion-title="${escapeHtml(p[0].toLowerCase())}" data-accordion-body="${escapeHtml((p[1]||'').toLowerCase())}">
+      <div class="rx-accordion-head" onclick="this.parentElement.classList.toggle('open')">
+        <span>${escapeHtml(p[0])}</span>
+        <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="rx-accordion-body"><div class="rx-accordion-body-inner">${rxField(p[1]) || 'Not available.'}</div></div>
+    </div>`).join('');
+}
+function rxFilterLabel(q) {
+  const query = q.trim().toLowerCase();
+  document.querySelectorAll('#rx-full-label .rx-accordion-item').forEach(el => {
+    const hit = !query || el.dataset.accordionTitle.includes(query) || el.dataset.accordionBody.includes(query);
+    el.style.display = hit ? '' : 'none';
+    if (hit && query) el.classList.add('open');
+  });
+}
+
+// ---- AI explanation layer (Groq) — clearly separated from official data ----
+function rxAiExplainBlock(key, sourceText) {
+  if (!sourceText) return '';
+  const safeText = escapeHtml(sourceText).replace(/'/g, '&#39;');
+  return `<div class="rx-ai-box" id="rx-ai-${key}">
+    <button class="rx-ai-btn" onclick="rxRunAiExplain('${key}', this)">
+      <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>
+      Explain in plain language (AI)
+    </button>
+    <div id="rx-ai-${key}-out"></div>
+  </div>`;
+}
+async function rxRunAiExplain(key, btnEl) {
+  const box = document.getElementById(`rx-ai-${key}`);
+  const out = document.getElementById(`rx-ai-${key}-out`);
+  const panel = btnEl.closest('.rx-section');
+  const sourceP = panel ? panel.querySelector('p') : null;
+  const sourceText = sourceP ? sourceP.textContent : '';
+  if (!sourceText) return;
+  btnEl.disabled = true;
+  out.innerHTML = `<div class="rx-ai-label">AI explanation — not official</div><div class="empty-state" style="padding:0.5rem 0;">Generating a plain-language summary…</div>`;
+  try {
+    const prompt = `You are helping a patient understand OFFICIAL FDA drug label text. Rewrite the following text in clear, simple, plain language. Do NOT add any new medical facts, dosages, or claims that are not present in the text. Do NOT recommend the medication for the reader personally. Keep it under 120 words.\n\nOfficial text:\n"""${sourceText}"""`;
+    const explanation = await callAI(prompt);
+    out.innerHTML = `<div class="rx-ai-label">
+      <svg viewBox="0 0 24 24" stroke-width="2" fill="none" style="width:12px;height:12px;"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg>
+      AI explanation — not official medication information
+    </div><p>${escapeHtml(explanation)}</p>`;
+  } catch (e) {
+    out.innerHTML = `<div class="rx-ai-label">AI explanation — not official</div><div class="empty-state" style="padding:0.5rem 0;">Couldn't generate an explanation right now. The official text above is still accurate and complete.</div>`;
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
+function rxCloseDetail() {
+  document.getElementById('rx-detail-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  RX.currentDetailRxcui = null;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') rxCloseDetail(); });
+
+// ---- Add to My Medications (reuses the existing medication tracker — no
+// automatic add, this only opens the pre-filled modal for the user to confirm) ----
+function rxAddToMyMeds(rxcui) {
+  const d = RX.detailCache.get(rxcui);
+  if (!d) return;
+  const name = (d.rxterms && d.rxterms.displayName) || (d.rxnorm && d.rxnorm.name) || 'Medication';
+  const dosage = (d.rxterms && d.rxterms.strength) || '';
+  rxCloseDetail();
+  openMedModal(null, { name, dosage });
+}
+
+function rxCopyDetail(rxcui) {
+  const d = RX.detailCache.get(rxcui);
+  if (!d) return;
+  const rt = d.rxterms || {};
+  const rn = d.rxnorm || {};
+  const lines = [
+    `Medication: ${rt.displayName || rn.name || ''}`,
+    rt.fullGenericName ? `Generic: ${rt.fullGenericName}` : '',
+    rt.strength ? `Strength: ${rt.strength}` : '',
+    rt.rxnormDoseForm ? `Form: ${rt.rxnormDoseForm}` : '',
+    `RxCUI: ${d.rxcui}`,
+    `Source: RxNorm/RxTerms (NLM) ${d.fda ? '+ openFDA drug label' : ''}`
+  ].filter(Boolean).join('\n');
+  navigator.clipboard?.writeText(lines).then(
+    () => toast('success', 'Copied', 'Medication summary copied to clipboard.'),
+    () => toast('warn', 'Copy failed', 'Your browser blocked clipboard access.')
+  );
+}
+
+// ---- Search history (per authenticated session, stored with the rest of STATE) ----
+function rxAddToHistory(rxcui, name) {
+  if (!STATE.medSearchHistory) STATE.medSearchHistory = [];
+  STATE.medSearchHistory = STATE.medSearchHistory.filter(h => h.rxcui !== rxcui);
+  STATE.medSearchHistory.unshift({ rxcui, name, ts: Date.now() });
+  STATE.medSearchHistory = STATE.medSearchHistory.slice(0, 12);
+  saveState();
+  rxRenderHistory();
+}
+function rxRenderHistory() {
+  const row = document.getElementById('rx-history-row');
+  const wrap = document.getElementById('rx-history-chips');
+  if (!row || !wrap) return;
+  const hist = (STATE.medSearchHistory || []);
+  if (!hist.length) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  wrap.innerHTML = hist.map(h => `<button class="rx-history-chip" onclick="rxOpenDetail('${h.rxcui}')">${escapeHtml(h.name)}</button>`).join('');
 }
 
 // =====================================================================
