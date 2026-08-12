@@ -1871,9 +1871,359 @@ textarea:focus-visible,.mv-btn:focus-visible,.cat-pill:focus-visible,
 .card-badge.success,.status-good,.badge-success{color:var(--mv-success) !important;}
 .card-badge.warning,.status-warn,.badge-warning{color:var(--mv-warning) !important;}
 .card-badge.error,.status-bad,.badge-error{color:var(--mv-error) !important;}
+
+/* =====================================================================
+   MEDVAULT — LUXURY HEALTHCARE FINAL DESIGN PASS
+   Cinematic precision inspired by luxury-automotive presentation,
+   reinterpreted for a trustworthy, clinical healthcare product.
+   Every rule below only restyles existing selectors/markup — no IDs,
+   classes, onclick handlers, or JS hooks are added, removed or renamed.
+   ===================================================================== */
+
+:root{
+  /* ---- Final brand palette: deep clinical navy + precision blue + emerald vitals ---- */
+  --bg:#05070b;
+  --surface:#0d121b;
+  --surface2:#121826;
+  --surface3:#1a2334;
+  --border:rgba(148,178,255,0.12);
+  --border-strong:rgba(148,178,255,0.24);
+  --accent:#3b82f6;
+  --accent-soft:rgba(59,130,246,0.14);
+  --accent2:#f87171;
+  --accent3:#10b981;
+  --accent4:#f59e0b;
+  --text:#eef2f8;
+  --muted:#8996ac;
+  --glow:rgba(59,130,246,0.18);
+  --r-sm:0.5rem;
+  --r-md:0.85rem;
+  --r-lg:1.25rem;
+  --shadow-soft:0 1px 2px rgba(0,0,0,0.35), 0 12px 32px -12px rgba(0,0,0,0.6);
+  --shadow-lift:0 1px 2px rgba(0,0,0,0.4), 0 28px 56px -18px rgba(0,0,0,0.7);
+  --ease:cubic-bezier(0.16,1,0.3,1);
+
+  --mv-blue:#3b82f6;
+  --mv-blue-light:#93c5fd;
+  --mv-teal:#0ea5a5;
+  --mv-emerald:#10b981;
+  --mv-navy:#0d121b;
+  --mv-black:#05070b;
+  --mv-success:#10b981;
+  --mv-warning:#f59e0b;
+  --mv-error:#f87171;
+
+  --mv-ease-out:cubic-bezier(0.16,1,0.3,1);
+  --mv-ease-in-out:cubic-bezier(0.65,0,0.35,1);
+  --mv-dur-fast:150ms;
+  --mv-dur-base:240ms;
+  --mv-dur-slow:460ms;
+
+  --mv-shadow-sm:0 2px 10px -2px rgba(59,130,246,0.16), 0 1px 2px rgba(0,0,0,0.4);
+  --mv-shadow-md:0 16px 40px -10px rgba(59,130,246,0.20), 0 2px 8px rgba(0,0,0,0.4);
+  --mv-shadow-lg:0 32px 72px -16px rgba(59,130,246,0.24), 0 6px 20px rgba(0,0,0,0.45);
+  --mv-glow-emerald:0 0 0 1px rgba(16,185,129,0.22), 0 10px 28px -8px rgba(16,185,129,0.24);
+
+  --font-ui:'Manrope','Plus Jakarta Sans','Inter',sans-serif;
+  --font-dense:'Inter','Manrope',sans-serif;
+  --font-display:'Manrope','Syne',sans-serif;
+  --font-serif:'Instrument Serif','Lora',serif;
+  --font-mono:'DM Mono',monospace;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---- §1 Foundations: motion, scrolling, scrollbar ---- */
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
+  *,*::before,*::after{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important;}
+  .mv-reveal{opacity:1 !important;transform:none !important;}
+}
+*{scrollbar-width:thin;scrollbar-color:#28344a var(--mv-navy);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--mv-navy);}
+::-webkit-scrollbar-thumb{background:#28344a;border-radius:8px;border:2px solid var(--mv-navy);background-clip:padding-box;}
+::-webkit-scrollbar-thumb:hover{background:var(--mv-blue-light);}
+
+body::before{
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(59,130,246,0.11) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(16,185,129,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(14,165,165,0.05) 0%, transparent 60%);
+}
+body::after{background-size:64px 64px;opacity:0.7;}
+
+body{font-family:var(--font-ui);letter-spacing:-0.008em;}
+
+/* ---- §2 Typography scale: cinematic hierarchy ---- */
+.hero-title{
+  font-family:var(--font-display);
+  font-size:clamp(2.6rem,6vw,4.75rem);
+  font-weight:800;
+  letter-spacing:-0.03em;
+  line-height:1.02;
+  background:linear-gradient(180deg,#ffffff 0%,#c7d6f5 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-title em{
+  font-style:normal;
+  display:block;
+  font-family:var(--font-serif);
+  font-size:0.42em;
+  font-weight:500;
+  letter-spacing:-0.01em;
+  background:linear-gradient(90deg,var(--mv-blue-light),var(--mv-emerald));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  margin-top:0.35em;
+}
+.hero-eyebrow{
+  font-family:var(--font-mono);
+  font-size:0.72rem;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--mv-blue-light);
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.4rem 0.9rem;
+  border:1px solid var(--border-strong);
+  border-radius:99px;
+  background:rgba(59,130,246,0.08);
+  margin-bottom:1.5rem;
+}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mv-emerald);box-shadow:0 0 0 3px rgba(16,185,129,0.25);}
+.hero-sub{
+  font-size:clamp(1rem,1.6vw,1.2rem);
+  line-height:1.6;
+  color:var(--muted);
+  max-width:42rem;
+}
+.section-title{font-family:var(--font-display);letter-spacing:-0.02em;font-weight:700;}
+h1,h2,h3{text-wrap:balance;}
+p{text-wrap:pretty;}
+
+/* ---- §3 Navigation: premium floating system ---- */
+nav{
+  background:rgba(5,7,11,0.72);
+  backdrop-filter:blur(22px) saturate(140%);
+  -webkit-backdrop-filter:blur(22px) saturate(140%);
+  border-bottom:1px solid var(--border);
+  transition:height var(--mv-dur-base) var(--mv-ease-out),
+             box-shadow var(--mv-dur-base) var(--mv-ease-out),
+             background-color var(--mv-dur-base) var(--mv-ease-out);
+}
+nav.mv-nav-scrolled{
+  height:52px;
+  box-shadow:0 8px 32px -12px rgba(0,0,0,0.55);
+  background:rgba(6,9,14,0.88);
+}
+.nav-logo{transition:opacity var(--mv-dur-fast) var(--mv-ease-out);}
+.nav-logo:hover{opacity:0.82;}
+.nav-links a{
+  position:relative;
+  transition:color var(--mv-dur-base) var(--mv-ease-out);
+}
+.nav-links a::after{
+  content:'';
+  position:absolute;left:0;right:100%;bottom:-6px;
+  height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--mv-blue),var(--mv-emerald));
+  transition:right var(--mv-dur-base) var(--mv-ease-out);
+}
+.nav-links a:hover::after,.nav-links a.active::after{right:0;}
+.nav-links a.active{color:#fff;}
+
+/* Mobile: keep nav usable without inventing new toggle behavior */
+@media (max-width:900px){
+  nav .nav-links{display:flex !important;overflow-x:auto;gap:1rem;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-right:0.5rem;mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent);}
+  nav .nav-links::-webkit-scrollbar{display:none;}
+  nav .nav-links li{flex:0 0 auto;}
+}
+
+/* ---- §4 Buttons: consistent premium interaction ---- */
+.btn-auth,.btn-welcome,.mv-btn,button{
+  transition:transform var(--mv-dur-fast) var(--mv-ease-out),
+             box-shadow var(--mv-dur-base) var(--mv-ease-out),
+             background-color var(--mv-dur-base) var(--mv-ease-out),
+             border-color var(--mv-dur-base) var(--mv-ease-out),
+             filter var(--mv-dur-base) var(--mv-ease-out);
+}
+.btn-auth:hover,.btn-welcome:hover,.mv-btn.primary:hover,.mv-btn:hover,
+button:not(:disabled):hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+.btn-auth:active,.btn-welcome:active,.mv-btn:active,button:not(:disabled):active{
+  transform:translateY(0) scale(0.97);
+}
+.btn-auth{box-shadow:var(--mv-shadow-sm);}
+.btn-auth:hover{box-shadow:var(--mv-shadow-md);}
+button:disabled{opacity:0.55;cursor:not-allowed;transform:none !important;}
+
+/* ---- §5 Card system: differentiate roles by surface, not by sameness ---- */
+.widget-card,.dash-stat-card,.entry-card,.doc-card,.achv-card,.card,.med-item,
+.journal-entry-card,.goal-item{
+  transition:transform var(--mv-dur-base) var(--mv-ease-out),
+             box-shadow var(--mv-dur-base) var(--mv-ease-out),
+             border-color var(--mv-dur-base) var(--mv-ease-out);
+}
+.widget-card:hover,.dash-stat-card:hover,.doc-card:hover,.achv-card:hover,
+.journal-entry-card:hover{
+  transform:translateY(-2px);
+  box-shadow:var(--mv-shadow-md);
+  border-color:var(--border-strong);
+}
+.entry-card{position:relative;overflow:hidden;}
+.entry-card:hover{
+  transform:translateY(-3px);
+  box-shadow:var(--mv-shadow-lg);
+  border-color:rgba(59,130,246,0.35);
+}
+.entry-card::before{
+  content:'';position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--mv-blue),var(--mv-emerald));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform var(--mv-dur-slow) var(--mv-ease-out);
+}
+.entry-card:hover::before{transform:scaleX(1);}
+
+/* Dash stat cards read as "data cards" — tinted numerals, quiet borders */
+.dash-stat-card .stat-num,.stat-num{
+  font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-0.02em;
+}
+
+/* Achievement cards get a subtle premium/dark treatment with gentle glow */
+.achv-card{background:linear-gradient(180deg,var(--surface2),var(--surface));}
+.achv-card:hover{box-shadow:var(--mv-glow-emerald);}
+
+/* ---- §6 Forms & inputs ---- */
+input,select,textarea{
+  transition:border-color var(--mv-dur-base) var(--mv-ease-out),
+             box-shadow var(--mv-dur-base) var(--mv-ease-out),
+             background-color var(--mv-dur-base) var(--mv-ease-out);
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--mv-blue) !important;
+  box-shadow:0 0 0 3px rgba(59,130,246,0.16);
+  outline:none;
+}
+.auth-field.err input{border-color:var(--mv-error) !important;}
+.auth-card{box-shadow:var(--mv-shadow-lg);}
+
+/* ---- §7 Focus & accessibility ---- */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible,.mv-btn:focus-visible,.cat-pill:focus-visible,
+.alpha-btn:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--mv-blue-light);
+  outline-offset:2px;
+  border-radius:4px;
+}
+.skip-link{
+  position:fixed;top:-48px;left:1rem;z-index:9999;
+  background:var(--mv-blue);color:#fff;padding:0.6rem 1rem;border-radius:0.5rem;
+  font-size:0.85rem;font-weight:600;
+  transition:top var(--mv-dur-base) var(--mv-ease-out);
+}
+.skip-link:focus{top:1rem;}
+
+/* ---- §8 Scroll-reveal (wired via small JS observer, safe no-op otherwise) ---- */
+.mv-reveal{opacity:0;transform:translateY(18px);transition:opacity var(--mv-dur-slow) var(--mv-ease-out),transform var(--mv-dur-slow) var(--mv-ease-out);}
+.mv-reveal.mv-in-view{opacity:1;transform:translateY(0);}
+.mv-reveal-stagger .mv-reveal:nth-child(1){transition-delay:0ms;}
+.mv-reveal-stagger .mv-reveal:nth-child(2){transition-delay:60ms;}
+.mv-reveal-stagger .mv-reveal:nth-child(3){transition-delay:120ms;}
+.mv-reveal-stagger .mv-reveal:nth-child(4){transition-delay:180ms;}
+.mv-reveal-stagger .mv-reveal:nth-child(5){transition-delay:240ms;}
+.mv-reveal-stagger .mv-reveal:nth-child(6){transition-delay:300ms;}
+
+/* ---- §9 Scroll progress indicator ---- */
+#mv-scroll-progress{
+  position:fixed;top:0;left:0;height:2px;width:0%;z-index:6000;
+  background:linear-gradient(90deg,var(--mv-blue),var(--mv-emerald));
+  transition:width 80ms linear;
+  pointer-events:none;
+}
+
+/* ---- §10 Custom cursor (desktop only, subtle, never blocks usability) ---- */
+@media (hover:hover) and (pointer:fine){
+  #mv-cursor-dot{
+    position:fixed;top:0;left:0;width:8px;height:8px;border-radius:50%;
+    background:var(--mv-blue-light);pointer-events:none;z-index:9998;
+    transform:translate(-50%,-50%);transition:width 150ms var(--ease),height 150ms var(--ease),opacity 150ms var(--ease);
+    opacity:0.85;mix-blend-mode:screen;
+  }
+  #mv-cursor-dot.mv-cursor-active{width:26px;height:26px;opacity:0.55;}
+}
+@media (hover:none),(pointer:coarse){
+  #mv-cursor-dot{display:none;}
+}
+
+/* ---- §11 Badges / severity — keep semantic mapping, refine surface ---- */
+.card-badge,.sev-dot,.journal-mood-badge,.doc-cat-badge,.level-badge{
+  font-family:var(--font-mono);
+  letter-spacing:0.02em;
+}
+.card-badge.success,.status-good,.badge-success{color:var(--mv-success) !important;}
+.card-badge.warning,.status-warn,.badge-warning{color:var(--mv-warning) !important;}
+.card-badge.error,.status-bad,.badge-error{color:var(--mv-error) !important;}
+
+/* ---- §12 Empty / loading states ---- */
+.empty-state{
+  border:1px dashed var(--border-strong);
+  border-radius:var(--r-lg);
+  background:radial-gradient(ellipse at top, rgba(59,130,246,0.06), transparent 70%);
+}
+.rx-skel-card{
+  background:linear-gradient(100deg,var(--surface) 30%,var(--surface2) 45%,var(--surface) 60%);
+  background-size:200% 100%;
+  animation:mv-skeleton 1.4s ease-in-out infinite;
+}
+@keyframes mv-skeleton{0%{background-position:120% 0;}100%{background-position:-20% 0;}}
+
+/* ---- §13 Tables / leaderboard ---- */
+.lb-row{transition:background-color var(--mv-dur-base) var(--mv-ease-out);}
+.lb-row:hover{background:rgba(59,130,246,0.06);}
+
+/* ---- §14 Dropdowns / popovers: scale from trigger ---- */
+.lib-dropdown,.user-dropdown{
+  transform-origin:top right;
+  animation:mv-pop-in var(--mv-dur-base) var(--mv-ease-out);
+}
+@keyframes mv-pop-in{from{opacity:0;transform:scale(0.96) translateY(-4px);}to{opacity:1;transform:scale(1) translateY(0);}}
+
+/* ---- §15 Hero ambient depth ---- */
+#hero{position:relative;}
+.hero-stats{position:relative;}
+.hero-stats .stat{
+  transition:transform var(--mv-dur-base) var(--mv-ease-out);
+}
+.hero-stats .stat:hover{transform:translateY(-2px);}
+
+/* ---- §16 Section rhythm: consistent breathing room ---- */
+.page-hero-section,.dash-wrap,.section-page-body{
+  animation:mv-fade-up 560ms var(--mv-ease-out) both;
+}
+@keyframes mv-fade-up{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ---- §17 Modal / detail overlay: cinematic entrance ---- */
+#detail-overlay.open .detail-hero,#modal-root .mv-modal-inner{
+  animation:mv-modal-in var(--mv-dur-base) var(--mv-ease-out);
+}
+@keyframes mv-modal-in{from{opacity:0;transform:scale(0.97);}to{opacity:1;transform:scale(1);}}
+
+/* ---- §18 Responsive polish ---- */
+@media (max-width:480px){
+  .hero-title{font-size:clamp(2.1rem,10vw,2.8rem);}
+  .hero-eyebrow{font-size:0.65rem;padding:0.35rem 0.7rem;}
+}
+
 </style>
 </head>
 <body>
+
+<a href="#page-home" class="skip-link">Skip to content</a>
+<div id="mv-scroll-progress"></div>
+<div id="mv-cursor-dot"></div>
 
 <!-- =====================================================================
      TOASTS + MODAL ROOT (available everywhere)
@@ -5895,6 +6245,106 @@ init();
 })();
 tryRestoreSession();
 setInterval(checkReminders, 30000);
+
+// =====================================================================
+// PREMIUM DESIGN PASS — presentation-only enhancements.
+// Purely additive: does not read/write STATE, does not call any
+// existing app function, does not alter any element's id/class logic
+// used elsewhere. Safe to remove without affecting functionality.
+// =====================================================================
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---- Scroll progress bar ----
+  var mvProgressEl = document.getElementById('mv-scroll-progress');
+  function mvUpdateProgress() {
+    if (!mvProgressEl) return;
+    var h = document.documentElement;
+    var scrollable = h.scrollHeight - h.clientHeight;
+    var pct = scrollable > 0 ? (h.scrollTop / scrollable) * 100 : 0;
+    mvProgressEl.style.width = pct + '%';
+  }
+
+  // ---- Navbar scroll-shrink ----
+  var mvNav = document.querySelector('nav');
+  function mvUpdateNav() {
+    if (!mvNav) return;
+    if (window.scrollY > 24) mvNav.classList.add('mv-nav-scrolled');
+    else mvNav.classList.remove('mv-nav-scrolled');
+  }
+
+  var mvTicking = false;
+  window.addEventListener('scroll', function () {
+    if (mvTicking) return;
+    mvTicking = true;
+    requestAnimationFrame(function () {
+      mvUpdateProgress();
+      mvUpdateNav();
+      mvTicking = false;
+    });
+  }, { passive: true });
+  mvUpdateProgress();
+  mvUpdateNav();
+
+  // ---- Scroll-reveal: tag cards/sections for a subtle entrance the
+  // first time they scroll into view. Re-runs after every page switch
+  // and after dynamic re-renders via a light MutationObserver. ----
+  var mvRevealSelector = [
+    '.entry-card', '.widget-card', '.dash-stat-card', '.achv-card',
+    '.doc-card', '.journal-entry-card', '.goal-item', '.section-header'
+  ].join(',');
+
+  var mvIO = ('IntersectionObserver' in window) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('mv-in-view');
+        mvIO.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }) : null;
+
+  function mvTagReveals(root) {
+    if (reduceMotion || !mvIO) return;
+    var scope = root || document;
+    var els = scope.querySelectorAll(mvRevealSelector);
+    els.forEach(function (el) {
+      if (el.classList.contains('mv-reveal') || el.classList.contains('mv-reveal-done')) return;
+      el.classList.add('mv-reveal');
+      mvIO.observe(el);
+    });
+  }
+  mvTagReveals();
+
+  // Re-tag whenever the app re-renders page content (dashboard, library
+  // grids, journal, etc. all rebuild via innerHTML swaps).
+  var mvMainRoot = document.getElementById('app-root');
+  if (mvMainRoot && 'MutationObserver' in window) {
+    var mvDebounce;
+    var mo = new MutationObserver(function () {
+      clearTimeout(mvDebounce);
+      mvDebounce = setTimeout(function () { mvTagReveals(); }, 120);
+    });
+    mo.observe(mvMainRoot, { childList: true, subtree: true });
+  }
+
+  // ---- Subtle custom cursor (desktop, fine-pointer only; CSS hides it
+  // elsewhere). Never intercepts clicks — pointer-events:none in CSS. ----
+  if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion) {
+    var dot = document.getElementById('mv-cursor-dot');
+    if (dot) {
+      window.addEventListener('mousemove', function (e) {
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+      }, { passive: true });
+      document.addEventListener('mouseover', function (e) {
+        if (e.target.closest('a,button,.cat-pill,.alpha-btn,[onclick]')) dot.classList.add('mv-cursor-active');
+      });
+      document.addEventListener('mouseout', function (e) {
+        if (e.target.closest('a,button,.cat-pill,.alpha-btn,[onclick]')) dot.classList.remove('mv-cursor-active');
+      });
+    }
+  }
+})();
 </script>
 </body>
 </html>
